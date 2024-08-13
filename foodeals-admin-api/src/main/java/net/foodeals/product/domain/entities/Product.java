@@ -5,9 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.product.domain.enums.ProductType;
-import net.foodeals.product.domain.valueOjects.Price;
-
-import java.util.spi.CalendarNameProvider;
+import net.foodeals.common.valueOjects.Price;
 
 @Entity
 @Table(name = "products")
@@ -31,7 +29,7 @@ public class Product extends AbstractEntity<Long> {
     private String barcode;
 
     @Column(name = "product_type")
-    private ProductType productType;
+    private ProductType type;
 
     @Embedded
     private Price price;
