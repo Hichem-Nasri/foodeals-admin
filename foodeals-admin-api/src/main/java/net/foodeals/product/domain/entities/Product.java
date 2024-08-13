@@ -35,5 +35,5 @@ public class Product extends AbstractEntity<Long> {
     private Price price;
 
     @Column(name = "product_image_type")
-    private String ProdutImagePath;
+    private String ProductImagePath;
 }

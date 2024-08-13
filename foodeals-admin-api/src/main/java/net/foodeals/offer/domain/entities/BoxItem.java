@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
+import net.foodeals.product.domain.entities.Product;
 
 @Entity
 @Table(name = "box_items")
@@ -23,4 +24,7 @@ public class BoxItem extends AbstractEntity<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Box box;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Product product;
 }
