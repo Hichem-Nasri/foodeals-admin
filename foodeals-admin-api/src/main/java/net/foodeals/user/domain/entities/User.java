@@ -33,4 +33,7 @@ public class User extends AbstractEntity<Integer> {
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Role role;
+
+    @OneToOne(mappedBy = "user")
+    private net.foodeals.entity.domain.entities.Entity entity;
 }
