@@ -20,8 +20,18 @@ public class Offer extends AbstractEntity<Long> {
 
     private OfferType type;
 
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "amount", column = @Column(name = "price_amount")),
+            @AttributeOverride(name = "currency", column = @Column(name = "price_currency"))
+    })
     private Price price;
 
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "amount", column = @Column(name = "sale_price_amount")),
+            @AttributeOverride(name = "currency", column = @Column(name = "sale_price_currency"))
+    })
     private Price salePrice;
 
     private Integer reduction;
