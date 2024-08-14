@@ -35,6 +35,6 @@ public class User extends AbstractEntity<Integer> {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Role role;
 
-    @OneToOne(mappedBy = "user")
-    private OrganizationEntity entity;
+    @OneToOne
+    private OrganizationEntity organizationEntity;
 }

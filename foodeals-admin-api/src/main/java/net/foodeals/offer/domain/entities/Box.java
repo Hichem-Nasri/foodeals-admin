@@ -13,7 +13,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class Box extends AbstractEntity<Long> {
+public class Box extends AbstractEntity<Long> implements OfferChoice {
 
     @Id
     @GeneratedValue
