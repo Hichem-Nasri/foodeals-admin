@@ -1,15 +1,13 @@
 name: Build and Test Foodeals-Admin
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
 
 jobs:
   build:
+    name: build and test
     runs-on: ubuntu-latest
 
     steps:
