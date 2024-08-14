@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.order.domain.entities.Order;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.common.valueOjects.Coordinates;
@@ -28,12 +29,6 @@ public class Address extends AbstractEntity<Long> {
     private String extraAddress;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    private Country country;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    private State state;
-
-    @ManyToOne(cascade = CascadeType.ALL)
     private City city;
 
     private String zip;
@@ -41,8 +36,8 @@ public class Address extends AbstractEntity<Long> {
     @Embedded
     private Coordinates coordinates;
 
-//    @OneToMany(mappedBy = "shippingAddress", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-//    private List<Order> orders;
+    @OneToMany(mappedBy = "shippingAddress", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Order> orders;
 
     @OneToMany(mappedBy = "address", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<OrganizationEntity> organizationEntities = new ArrayList<>();
