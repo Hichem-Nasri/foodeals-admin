@@ -12,10 +12,11 @@ import net.foodeals.user.domain.entities.User;
 import java.util.ArrayList;
 import java.util.List;
 
-@jakarta.persistence.Entity
-@Table(name = "entities")
+@Entity
+@Table(name = "organization_entities")
 
-@Getter @Setter
+@Getter
+@Setter
 public class OrganizationEntity extends AbstractEntity<Long> {
 
     @Id
@@ -42,7 +43,7 @@ public class OrganizationEntity extends AbstractEntity<Long> {
     @ManyToMany
     private List<Activity> activities = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL,orphanRemoval = true)
+    @OneToOne(mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private User user;
 
     @ManyToOne(cascade = CascadeType.ALL)

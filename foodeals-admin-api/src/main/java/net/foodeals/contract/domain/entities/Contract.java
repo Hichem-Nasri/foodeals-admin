@@ -1,13 +1,13 @@
 package net.foodeals.contract.domain.entities;
 
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.user.domain.entities.User;
+
+import java.util.List;
 
 @Entity
 @Table(name = "contracts")
@@ -23,4 +23,7 @@ public class Contract extends AbstractEntity<Long> {
     private String name;
 
     private String content;
+
+    @ManyToMany
+    private List<User> users;
 }
