@@ -27,4 +27,7 @@ public class State extends AbstractEntity<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Country country;
+
+    @OneToMany(mappedBy = "address", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Address> addresses;
 }

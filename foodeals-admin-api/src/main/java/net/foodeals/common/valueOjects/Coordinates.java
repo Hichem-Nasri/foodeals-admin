@@ -1,4 +1,4 @@
-package net.foodeals.entity.domain.valueObject;
+package net.foodeals.common.valueOjects;
 
 import jakarta.persistence.Embeddable;
 

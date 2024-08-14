@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 
 /**
  * User
@@ -35,5 +36,5 @@ public class User extends AbstractEntity<Integer> {
     private Role role;
 
     @OneToOne(mappedBy = "user")
-    private net.foodeals.entity.domain.entities.Entity entity;
+    private OrganizationEntity entity;
 }
