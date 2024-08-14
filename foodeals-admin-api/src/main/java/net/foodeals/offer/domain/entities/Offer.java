@@ -4,8 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
-import net.foodeals.offer.domain.enums.OfferType;
 import net.foodeals.common.valueOjects.Price;
+import net.foodeals.offer.domain.enums.OfferType;
+import net.foodeals.organizationEntity.domain.entities.Activity;
 
 @Entity
 @Table(name = "offers")
@@ -38,6 +39,9 @@ public class Offer extends AbstractEntity<Long> {
 
     private String barcode;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     private OpenTime openTime;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Activity activity;
 }

@@ -1,13 +1,16 @@
-package net.foodeals.entity.domain.entities;
+package net.foodeals.organizationEntity.domain.entities;
 
-import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
-import net.foodeals.entity.domain.enums.EntityType;
-import net.foodeals.entity.domain.valueObject.Coordinates;
+import net.foodeals.common.valueOjects.Coordinates;
+import net.foodeals.location.domain.entities.Address;
+import net.foodeals.organizationEntity.domain.enums.EntityType;
 import net.foodeals.user.domain.entities.User;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "sub_entities")
@@ -35,8 +38,17 @@ public class SubEntity extends AbstractEntity<Long> {
     private EntityType type;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
-    private net.foodeals.entity.domain.entities.Entity entity;
+    private OrganizationEntity organizationEntity;
+
+    @ManyToMany
+    private List<Activity> activities = new ArrayList<>();
+
+    @ManyToMany
+    private List<Solution> solutions = new ArrayList<>();
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private User user;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Address address;
 }

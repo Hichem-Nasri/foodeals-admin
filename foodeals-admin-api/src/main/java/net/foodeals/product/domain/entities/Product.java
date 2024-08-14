@@ -36,4 +36,7 @@ public class Product extends AbstractEntity<Long> {
 
     @Column(name = "product_image_type")
     private String ProductImagePath;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Category category;
 }

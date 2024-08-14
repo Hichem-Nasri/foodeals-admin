@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 
+import java.util.List;
+
 @Entity
 @Table(name = "cities")
 
@@ -22,4 +24,7 @@ public class City extends AbstractEntity<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private State state;
+
+    @OneToMany(mappedBy = "address", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Address> addresses;
 }
