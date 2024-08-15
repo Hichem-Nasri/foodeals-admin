@@ -6,19 +6,22 @@ import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.offer.domain.entities.Offer;
 import net.foodeals.product.domain.entities.ProductCategory;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "activities")
 
 @Getter
 @Setter
-public class Activity extends AbstractEntity<Long> {
+public class Activity extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     private String name;
 
@@ -33,4 +36,5 @@ public class Activity extends AbstractEntity<Long> {
 
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Offer> offers;
+
 }

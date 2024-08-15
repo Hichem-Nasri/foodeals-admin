@@ -5,19 +5,22 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.organizationEntity.domain.entities.Activity;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "product_categories")
 
 @Getter
 @Setter
-public class ProductCategory extends AbstractEntity<Long> {
+public class ProductCategory extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     private String name;
 

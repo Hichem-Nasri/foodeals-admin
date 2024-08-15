@@ -5,25 +5,28 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "coupons")
 
 @Getter
 @Setter
-public class Coupon extends AbstractEntity<Long> {
+public class Coupon extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     private String code;
 
     private Float discount;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private SubEntity subEntity;
 
     @OneToMany(mappedBy = "coupon", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

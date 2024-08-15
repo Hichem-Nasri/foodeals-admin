@@ -5,19 +5,22 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "commissions")
 
 @Getter
 @Setter
-public class Commission extends AbstractEntity<Long> {
+public class Commission extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     @Embedded
     @AttributeOverrides({
@@ -33,6 +36,6 @@ public class Commission extends AbstractEntity<Long> {
     })
     private Price card;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SolutionContract> solutionContracts;
 }

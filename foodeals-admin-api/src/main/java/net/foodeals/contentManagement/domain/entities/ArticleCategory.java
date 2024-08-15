@@ -4,20 +4,23 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "blog_categories")
 
 @Getter
 @Setter
-public class ArticleCategory extends AbstractEntity<Long> {
+public class ArticleCategory extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     private String name;
 

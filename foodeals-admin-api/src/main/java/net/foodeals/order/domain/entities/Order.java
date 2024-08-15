@@ -11,17 +11,23 @@ import net.foodeals.offer.domain.entities.Offer;
 import net.foodeals.order.domain.enums.OrderStatus;
 import net.foodeals.order.domain.enums.OrderType;
 import net.foodeals.user.domain.entities.User;
+import org.hibernate.Transaction;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
 
 @Getter
 @Setter
-public class Order extends AbstractEntity<Long> {
+public class Order extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     @Embedded
     private Price price;
@@ -47,4 +53,7 @@ public class Order extends AbstractEntity<Long> {
 
     @ManyToOne(cascade = CascadeType.ALL)
     private Coupon coupon;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transcation> transactions;
 }

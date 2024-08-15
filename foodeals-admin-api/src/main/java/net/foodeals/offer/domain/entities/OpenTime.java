@@ -7,17 +7,18 @@ import net.foodeals.common.models.AbstractEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table
 
 @Getter
 @Setter
-public class OpenTime extends AbstractEntity<Long> {
+public class OpenTime extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private UUID id;
 
     private String day;
 
@@ -25,6 +26,7 @@ public class OpenTime extends AbstractEntity<Long> {
 
     private String to;
 
-    @OneToMany(mappedBy = "openTime", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Offer> offers = new ArrayList<Offer>();
+    @ManyToOne
+    @JoinColumn(name = "offer_id", nullable = false)
+    private Offer offer;
 }

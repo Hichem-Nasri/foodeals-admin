@@ -1,9 +1,13 @@
 package net.foodeals.user.domain.entities;
 
+import java.util.List;
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
 
@@ -15,11 +19,12 @@ import java.util.List;
 
 @Getter
 @Setter
-public class Authority extends AbstractEntity<Long> {
+public class Authority extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     private String name;
 
