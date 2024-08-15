@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
+import net.foodeals.offer.domain.enums.OfferType;
 import net.foodeals.product.domain.entities.Product;
 
 @Entity
@@ -12,7 +13,7 @@ import net.foodeals.product.domain.entities.Product;
 
 @Getter
 @Setter
-public class Deal extends AbstractEntity<Long> implements OfferChoice{
+public class Deal extends AbstractEntity<Long> implements IOfferable {
 
     @Id
     @GeneratedValue
@@ -24,4 +25,9 @@ public class Deal extends AbstractEntity<Long> implements OfferChoice{
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Product product;
+
+    @Override
+    public OfferType getOfferType() {
+        return OfferType.DEAL;
+    }
 }
