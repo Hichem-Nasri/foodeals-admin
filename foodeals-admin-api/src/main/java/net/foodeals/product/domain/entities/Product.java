@@ -38,5 +38,5 @@ public class Product extends AbstractEntity<Long> {
     private String ProductImagePath;
 
     @ManyToOne(cascade = CascadeType.ALL)
-    private Category category;
+    private ProductCategory category;
 }

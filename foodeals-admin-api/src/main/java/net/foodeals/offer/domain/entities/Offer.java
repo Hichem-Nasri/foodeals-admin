@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
-import net.foodeals.offer.domain.enums.OfferType;
 import net.foodeals.offer.domain.valueObject.Offerable;
 import net.foodeals.organizationEntity.domain.entities.Activity;
 
@@ -19,9 +18,6 @@ public class Offer extends AbstractEntity<Long> {
     @Id
     @GeneratedValue
     private Long id;
-
-    @Enumerated(EnumType.STRING)
-    private OfferType type;
 
     @Embedded
     @AttributeOverrides({
@@ -51,5 +47,5 @@ public class Offer extends AbstractEntity<Long> {
     private Offerable offerable;
 
     @Transient
-    private IOfferable offerChoice;
+    private OfferChoice offerChoice;
 }

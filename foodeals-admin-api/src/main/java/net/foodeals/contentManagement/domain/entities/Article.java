@@ -28,6 +28,6 @@ public class Article extends AbstractEntity<Long> {
     private String thumbnailPath;
 
     @ManyToMany
-    private List<BlogCategory> categories;
+    private List<ArticleCategory> categories;
 
 }

@@ -14,17 +14,17 @@ import java.util.List;
 
 @Getter
 @Setter
-public class Box extends AbstractEntity<Long> implements IOfferable {
+public class Box extends AbstractEntity<Long> implements OfferChoice {
 
     @Id
     @GeneratedValue
     private Long id;
 
-    @OneToMany(mappedBy = "box", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<BoxItem> boxItems;
-
     @Enumerated(EnumType.STRING)
     private BoxType type;
+
+    @OneToMany(mappedBy = "box", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<BoxItem> boxItems;
 
     @Override
     public OfferType getOfferType() {

@@ -25,6 +25,4 @@ public class SolutionContract extends AbstractEntity<Long> {
 
     @ManyToOne(cascade = CascadeType.ALL)
     private Commission commission;
-
-
 }

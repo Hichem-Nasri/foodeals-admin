@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.offer.domain.entities.Offer;
-import net.foodeals.product.domain.entities.Category;
+import net.foodeals.product.domain.entities.ProductCategory;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ public class Activity extends AbstractEntity<Long> {
     private String name;
 
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Category> categories;
+    private List<ProductCategory> categories;
 
     @ManyToMany(mappedBy = "activities",fetch = FetchType.LAZY)
     private List<SubEntity> subEntities;

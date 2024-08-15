@@ -13,7 +13,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class BlogCategory extends AbstractEntity<Long> {
+public class ArticleCategory extends AbstractEntity<Long> {
 
     @Id
     @GeneratedValue
