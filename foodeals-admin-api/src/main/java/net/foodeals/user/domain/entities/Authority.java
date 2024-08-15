@@ -1,12 +1,11 @@
 package net.foodeals.user.domain.entities;
 
-import java.util.List;
-
 import jakarta.persistence.*;
-
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
+
+import java.util.List;
 
 /**
  * Permission
@@ -16,7 +15,7 @@ import net.foodeals.common.models.AbstractEntity;
 
 @Getter
 @Setter
-public class Permission extends AbstractEntity<Long> {
+public class Authority extends AbstractEntity<Long> {
 
     @Id
     @GeneratedValue

@@ -5,6 +5,12 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.user.domain.valueObjects.Name;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
 
 /**
  * User
@@ -14,13 +20,14 @@ import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 
 @Getter
 @Setter
-public class User extends AbstractEntity<Integer> {
+public class User extends AbstractEntity<Integer> implements UserDetails {
 
     @Id
     @GeneratedValue
     private Integer id;
 
-    private String name;
+    @Embedded
+    private Name name;
 
     @Column(unique = true)
     private String email;
@@ -37,4 +44,28 @@ public class User extends AbstractEntity<Integer> {
 
     @OneToOne
     private OrganizationEntity organizationEntity;
+
+    /**
+     * Returns the authorities granted to the user. Cannot return <code>null</code>.
+     *
+     * @return the authorities, sorted by natural key (never <code>null</code>)
+     */
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return role.getAuthorities()
+                .stream()
+                .map(authority -> new SimpleGrantedAuthority(authority.getName()))
+                .toList();
+    }
+
+    /**
+     * Returns the username used to authenticate the user. Cannot return
+     * <code>null</code>.
+     *
+     * @return the username (never <code>null</code>)
+     */
+    @Override
+    public String getUsername() {
+        return String.format("%s %s", name.firstName(), name.lastName());
+    }
 }
