@@ -1,0 +1,86 @@
+package net.foodeals.authentication.application.services.impl;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import lombok.Getter;
+import net.foodeals.authentication.application.services.JwtService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Date;
+import java.util.Map;
+import java.util.function.Function;
+
+public class JwtServiceImpl implements JwtService {
+
+    private final String secretKey;
+
+    @Getter
+    private final Long expirationTime;
+
+    public JwtServiceImpl(
+            @Value("${app.security.jwt.secret-key}") String secretKey,
+            @Value("${app.security.jwt.expiration}") Long expirationTime) {
+        this.secretKey = secretKey;
+        this.expirationTime = expirationTime;
+    }
+
+    public String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    public <T> T extractClaim(final String token, final Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    public String generateToken(final UserDetails userDetails) {
+        return generateToken(userDetails, Map.of());
+    }
+
+    public String generateToken(final UserDetails userDetails, final Map<String, Object> extraClaims) {
+        return buildToken(extraClaims, userDetails, expirationTime);
+    }
+
+    public Boolean isTokenValid(final String token, final UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    private Boolean isTokenExpired(final String token) {
+        return extractExpirationDate(token).before(new Date());
+    }
+
+    private Date extractExpirationDate(final String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    private String buildToken(final Map<String, Object> extraClaims, final UserDetails userDetails, final Long expirationTime) {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    private Claims extractAllClaims(final String token) {
+        return Jwts
+                .parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJwt(token)
+                .getBody();
+    }
+
+    private Key getSigningKey() {
+        final byte[] keyBytes = secretKey.getBytes(StandardCharsets.UTF_8);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+}
