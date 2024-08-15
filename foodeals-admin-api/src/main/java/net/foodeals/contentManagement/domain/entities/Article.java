@@ -4,19 +4,22 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "article")
 
 @Getter
 @Setter
-public class Article extends AbstractEntity<Long> {
+public class Article extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     private String title;
 
@@ -24,7 +27,7 @@ public class Article extends AbstractEntity<Long> {
 
     private String content;
 
-    @Column(name = "thumbnail_path")
+    @Column(name = "thumbnail_path") // relation needed
     private String thumbnailPath;
 
     @ManyToMany

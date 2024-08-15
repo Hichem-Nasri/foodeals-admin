@@ -6,18 +6,23 @@ import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
 import net.foodeals.product.domain.entities.Product;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "box_items")
 
 @Getter
 @Setter
-public class BoxItem extends AbstractEntity<Long> {
+public class BoxItem extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
+    @Embedded
     private Price price;
 
     private Integer quantity;
@@ -25,6 +30,6 @@ public class BoxItem extends AbstractEntity<Long> {
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Box box;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Product product;
 }

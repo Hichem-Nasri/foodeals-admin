@@ -7,17 +7,21 @@ import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
 import net.foodeals.order.domain.enums.TransactionStatus;
 import net.foodeals.order.domain.enums.TransactionType;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "transcations")
 
 @Getter
 @Setter
-public class Transcation extends AbstractEntity<Long> {
+public class Transcation extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     @Column(name = "payment_id")
     private String paymentId;
