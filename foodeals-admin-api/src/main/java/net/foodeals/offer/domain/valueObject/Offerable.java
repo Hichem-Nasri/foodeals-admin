@@ -13,6 +13,5 @@ public record Offerable(
 
         @Enumerated(EnumType.STRING)
         @Column(name = "offerable_type")
-        OfferType offerType
-) {
+        OfferType type){
 }

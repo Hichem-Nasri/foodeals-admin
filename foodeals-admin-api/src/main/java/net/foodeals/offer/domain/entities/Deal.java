@@ -14,7 +14,7 @@ import net.foodeals.product.domain.entities.Product;
 @Getter
 @Setter
 public class Deal extends AbstractEntity<Long> implements OfferChoice{
-
+  
     @Id
     @GeneratedValue
     private Long id;
