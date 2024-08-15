@@ -9,11 +9,11 @@ import net.foodeals.organizationEntity.domain.entities.Activity;
 import java.util.List;
 
 @Entity
-@Table(name = "categories")
+@Table(name = "product_categories")
 
 @Getter
 @Setter
-public class Category extends AbstractEntity<Long> {
+public class ProductCategory extends AbstractEntity<Long> {
 
     @Id
     @GeneratedValue
