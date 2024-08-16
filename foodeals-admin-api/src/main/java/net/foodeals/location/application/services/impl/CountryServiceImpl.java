@@ -10,7 +10,6 @@ import net.foodeals.location.domain.repositories.CountryRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,25 +22,29 @@ class CountryServiceImpl implements CountryService {
     private final CountryRepository repository;
     private final ModelMapper modelMapper;
 
+    @Override
     public List<Country> findAll() {
         return repository.findAll();
     }
 
+    @Override
     public Page<Country> findAll(Integer pageNumber, Integer pageSize) {
-        final Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        return repository.findAll(pageable);
+        return repository.findAll(PageRequest.of(pageNumber, pageSize));
     }
 
+    @Override
     public Country findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new CountryNotFoundException(id));
     }
 
+    @Override
     public Country create(CountryRequest request) {
         Country country = modelMapper.map(request, Country.class);
         return repository.save(country);
     }
 
+    @Override
     public Country update(UUID id, CountryRequest request) {
         Country existingCountry = repository.findById(id)
                 .orElseThrow(() -> new CountryNotFoundException(id));
@@ -50,6 +53,7 @@ class CountryServiceImpl implements CountryService {
         return repository.save(existingCountry);
     }
 
+    @Override
     public void delete(UUID id) {
         if (!repository.existsById(id))
             throw new CountryNotFoundException(id);

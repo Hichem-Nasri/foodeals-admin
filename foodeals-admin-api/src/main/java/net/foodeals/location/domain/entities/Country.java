@@ -1,5 +1,6 @@
 package net.foodeals.location.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import net.foodeals.common.models.AbstractEntity;
@@ -24,10 +25,8 @@ public class Country extends AbstractEntity<UUID> {
     private String code;
 
     @OneToMany(mappedBy = "country", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<State> states;
-
-    @OneToMany(mappedBy = "country", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Address> addresses;
 
     Country() {
     }
@@ -58,11 +57,6 @@ public class Country extends AbstractEntity<UUID> {
 
     public Country setStates(List<State> states) {
         this.states = states;
-        return this;
-    }
-
-    public Country setAddresses(List<Address> addresses) {
-        this.addresses = addresses;
         return this;
     }
 }

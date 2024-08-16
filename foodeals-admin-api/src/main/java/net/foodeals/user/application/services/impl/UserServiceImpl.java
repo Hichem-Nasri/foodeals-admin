@@ -1,5 +1,6 @@
 package net.foodeals.user.application.services.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.authentication.application.dtos.requests.RegisterRequest;
 import net.foodeals.user.application.services.RoleService;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 class UserServiceImpl implements UserService {
 

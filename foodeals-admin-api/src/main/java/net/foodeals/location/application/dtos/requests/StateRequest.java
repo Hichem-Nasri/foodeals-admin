@@ -1,4 +1,13 @@
 package net.foodeals.location.application.dtos.requests;
 
-public record StateRequest() {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.UUID;
+
+public record StateRequest(
+        @NotBlank String name,
+        @NotBlank String code,
+        @NotNull UUID countryId
+        ) {
 }

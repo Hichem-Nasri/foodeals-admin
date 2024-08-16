@@ -1,5 +1,6 @@
 package net.foodeals.location.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,9 +29,7 @@ public class City extends AbstractEntity<UUID> {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private State state;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Country country;
-
     @OneToMany(mappedBy = "city", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Address> addresses;
 }
