@@ -36,6 +36,6 @@ public class Commission extends AbstractEntity<UUID> {
     })
     private Price card;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SolutionContract> solutionContracts;
+    @OneToOne(mappedBy = "commission", cascade = CascadeType.ALL)
+    private SolutionContract solutionContracts;
 }
