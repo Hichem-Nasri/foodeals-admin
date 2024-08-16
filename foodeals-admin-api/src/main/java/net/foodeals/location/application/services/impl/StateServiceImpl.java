@@ -20,7 +20,7 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class StateServiceImpl implements StateService {
+class StateServiceImpl implements StateService {
     private final StateRepository repository;
     private final CountryService countryService;
     private final ModelMapper modelMapper;

@@ -20,7 +20,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class CityServiceImpl implements CityService {
+class CityServiceImpl implements CityService {
 
     private final ModelMapper modelMapper;
     private final CityRepository repository;
