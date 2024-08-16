@@ -4,28 +4,35 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
+import net.foodeals.authentication.application.dtos.responses.AuthenticationResponse;
 import net.foodeals.authentication.application.services.JwtService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+@Service
 public class JwtServiceImpl implements JwtService {
 
     private final String secretKey;
 
     @Getter
     private final Long expirationTime;
+    private final Long refreshTokenExpirationTime;
 
     public JwtServiceImpl(
             @Value("${app.security.jwt.secret-key}") String secretKey,
-            @Value("${app.security.jwt.expiration}") Long expirationTime) {
+            @Value("${app.security.jwt.expiration}") Long expirationTime,
+            @Value("${app.security.jwt.refresh-token.expiration}") Long refreshTokenExpirationTime) {
         this.secretKey = secretKey;
         this.expirationTime = expirationTime;
+        this.refreshTokenExpirationTime = refreshTokenExpirationTime;
     }
 
     public String extractUsername(String token) {
@@ -45,6 +52,21 @@ public class JwtServiceImpl implements JwtService {
         return buildToken(extraClaims, userDetails, expirationTime);
     }
 
+    public String generateRefreshToken(UserDetails userDetails) {
+        return buildToken(Map.of(), userDetails, refreshTokenExpirationTime);
+    }
+
+    public AuthenticationResponse generateTokens(final UserDetails userDetails) {
+        return generateTokens(userDetails, Map.of());
+    }
+
+    public AuthenticationResponse generateTokens(final UserDetails userDetails, final Map<String, Object> extraClaims) {
+        return new AuthenticationResponse(
+                generateToken(userDetails),
+                generateRefreshToken(userDetails)
+        );
+    }
+
     public Boolean isTokenValid(final String token, final UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
@@ -59,6 +81,9 @@ public class JwtServiceImpl implements JwtService {
     }
 
     private String buildToken(final Map<String, Object> extraClaims, final UserDetails userDetails, final Long expirationTime) {
+        Map<String, Object> claims = new HashMap<>(extraClaims);
+        claims.put("token_type", expirationTime.equals(this.expirationTime) ? "access" : "refresh");
+
         return Jwts
                 .builder()
                 .setClaims(extraClaims)

@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Role
@@ -16,11 +18,12 @@ import java.util.List;
 
 @Getter
 @Setter
-public class Role extends AbstractEntity<Long> {
+public class Role extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     private String name;
 
@@ -29,4 +32,20 @@ public class Role extends AbstractEntity<Long> {
 
     @ManyToMany(mappedBy = "roles", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     private List<Authority> authorities = new ArrayList<>();
+
+    Role() {
+    }
+
+    public Role(String name) {
+        this.name = name;
+    }
+
+    public Role(UUID id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public static Role create(UUID id, String name) {
+        return new Role(id, name);
+    }
 }

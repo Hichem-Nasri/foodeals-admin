@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * User
@@ -42,28 +43,43 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Role role;
 
-    @OneToOne
+    @OneToOne(mappedBy = "user")
     private OrganizationEntity organizationEntity;
 
-    /**
-     * Returns the authorities granted to the user. Cannot return <code>null</code>.
-     *
-     * @return the authorities, sorted by natural key (never <code>null</code>)
-     */
+    public User(Name name, String email, String phone, String password, Boolean isEmailVerified, Role role) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.password = password;
+        this.isEmailVerified = isEmailVerified;
+        this.role = role;
+    }
+
+    public User() {
+
+    }
+
+    public static User create(String firstName, String lastName, String email, String phone, String password, Boolean isEmailVerified, Role role) {
+        return new User(
+                new Name(firstName, lastName),
+                email,
+                phone,
+                password,
+                isEmailVerified,
+                role
+        );
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role.getAuthorities()
+        final List<SimpleGrantedAuthority> authorities = role.getAuthorities()
                 .stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getName()))
                 .toList();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+        return authorities;
     }
 
-    /**
-     * Returns the username used to authenticate the user. Cannot return
-     * <code>null</code>.
-     *
-     * @return the username (never <code>null</code>)
-     */
     @Override
     public String getUsername() {
         return String.format("%s %s", name.firstName(), name.lastName());

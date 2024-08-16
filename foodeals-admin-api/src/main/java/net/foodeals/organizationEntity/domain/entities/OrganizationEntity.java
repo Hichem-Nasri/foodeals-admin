@@ -43,7 +43,7 @@ public class OrganizationEntity extends AbstractEntity<Long> {
     @ManyToMany
     private List<Activity> activities = new ArrayList<>();
 
-    @OneToOne(mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private User user;
 
     @ManyToOne(cascade = CascadeType.ALL)
