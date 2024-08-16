@@ -44,26 +44,18 @@ public class JwtServiceImpl implements JwtService {
         return claimsResolver.apply(claims);
     }
 
-    public String generateToken(final UserDetails userDetails) {
-        return generateToken(userDetails, Map.of());
-    }
-
     public String generateToken(final UserDetails userDetails, final Map<String, Object> extraClaims) {
         return buildToken(extraClaims, userDetails, expirationTime);
     }
 
-    public String generateRefreshToken(UserDetails userDetails) {
+    public String generateRefreshToken(final UserDetails userDetails, final Map<String, Object> extraClaims) {
         return buildToken(Map.of(), userDetails, refreshTokenExpirationTime);
-    }
-
-    public AuthenticationResponse generateTokens(final UserDetails userDetails) {
-        return generateTokens(userDetails, Map.of());
     }
 
     public AuthenticationResponse generateTokens(final UserDetails userDetails, final Map<String, Object> extraClaims) {
         return new AuthenticationResponse(
-                generateToken(userDetails),
-                generateRefreshToken(userDetails)
+                generateToken(userDetails, extraClaims),
+                generateRefreshToken(userDetails, extraClaims)
         );
     }
 
@@ -81,12 +73,12 @@ public class JwtServiceImpl implements JwtService {
     }
 
     private String buildToken(final Map<String, Object> extraClaims, final UserDetails userDetails, final Long expirationTime) {
-        Map<String, Object> claims = new HashMap<>(extraClaims);
+        final Map<String, Object> claims = new HashMap<>(extraClaims);
         claims.put("token_type", expirationTime.equals(this.expirationTime) ? "access" : "refresh");
 
         return Jwts
                 .builder()
-                .setClaims(extraClaims)
+                .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
@@ -99,7 +91,7 @@ public class JwtServiceImpl implements JwtService {
                 .parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
-                .parseClaimsJwt(token)
+                .parseClaimsJws(token)
                 .getBody();
     }
 

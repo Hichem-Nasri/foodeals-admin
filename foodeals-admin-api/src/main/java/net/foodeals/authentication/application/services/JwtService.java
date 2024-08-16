@@ -8,11 +8,9 @@ import java.util.Map;
 public interface JwtService {
     String extractUsername(final String token);
 
-    String generateToken(final UserDetails userDetails);
-
     String generateToken(final UserDetails userDetails, final Map<String, Object> extraClaims);
 
-    AuthenticationResponse generateTokens(final UserDetails userDetails);
+    String generateRefreshToken(final UserDetails userDetails, final Map<String, Object> extraClaims);
 
     AuthenticationResponse generateTokens(final UserDetails userDetails, final Map<String, Object> extraClaims);
 

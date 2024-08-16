@@ -30,7 +30,7 @@ public class Box extends AbstractEntity<UUID> implements OfferChoice {
     private List<BoxItem> boxItems;
     
     
-    @OneToMany(mappedBy = "box", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Offer> offers;
     
     @Override

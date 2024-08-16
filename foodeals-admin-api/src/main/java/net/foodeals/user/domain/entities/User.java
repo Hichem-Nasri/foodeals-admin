@@ -10,7 +10,6 @@ import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.user.domain.valueObjects.Name;
-
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -52,8 +51,25 @@ public class User extends AbstractEntity<UUID> implements UserDetails {
     private Role role;
 
     @ManyToOne
-    @JoinColumn(name = "organizationEntity_id", nullable = false)
     private OrganizationEntity organizationEntity;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Account> Accounts;
+
+    @ManyToOne
+    private SubEntity subEntity;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserActivities> userActivities;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Delivery> deliveries;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserContract> userContracts;
 
     public User(Name name, String email, String phone, String password, Boolean isEmailVerified, Role role) {
         this.name = name;
@@ -64,7 +80,7 @@ public class User extends AbstractEntity<UUID> implements UserDetails {
         this.role = role;
     }
 
-    public User() {
+    User() {
 
     }
 
@@ -79,25 +95,6 @@ public class User extends AbstractEntity<UUID> implements UserDetails {
                 role);
     }
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Notification> notifications;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Account> Accounts;
-
-    @ManyToOne
-    @JoinColumn(name = "subEntity_id", nullable = false)
-    private SubEntity subEntity;
-
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserActivities> userActivities;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Delivery> deliveries;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserContract> userContracts;
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         final List<SimpleGrantedAuthority> authorities = role.getAuthorities()
@@ -110,7 +107,7 @@ public class User extends AbstractEntity<UUID> implements UserDetails {
 
     @Override
     public String getUsername() {
-        return String.format("%s %s", name.firstName(), name.lastName());
+        return email;
     }
 
 }
