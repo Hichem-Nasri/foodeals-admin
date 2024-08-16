@@ -6,22 +6,26 @@ import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Coordinates;
 import net.foodeals.location.domain.entities.Address;
+import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.organizationEntity.domain.enums.EntityType;
 import net.foodeals.user.domain.entities.User;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "organization_entities")
 
 @Getter
 @Setter
-public class OrganizationEntity extends AbstractEntity<Long> {
+public class OrganizationEntity extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     private String name;
 
@@ -43,12 +47,16 @@ public class OrganizationEntity extends AbstractEntity<Long> {
     @ManyToMany
     private List<Activity> activities = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private User user;
+    @OneToMany(mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<User> users = new ArrayList<>();
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @OneToOne
+    @JoinColumn(name = "address_id", nullable = false, unique = true)
     private Address address;
 
     @ManyToMany
     private List<Solution> solutions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications;
 }

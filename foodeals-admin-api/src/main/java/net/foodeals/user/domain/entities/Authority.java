@@ -1,5 +1,8 @@
 package net.foodeals.user.domain.entities;
 
+import java.util.List;
+import java.util.UUID;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

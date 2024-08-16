@@ -5,17 +5,21 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.organizationEntity.domain.entities.Solution;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "solution_contracts")
 
 @Getter
 @Setter
-public class SolutionContract extends AbstractEntity<Long> {
+public class SolutionContract extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     @ManyToOne(cascade = CascadeType.ALL)
     private Solution solution;
@@ -25,4 +29,7 @@ public class SolutionContract extends AbstractEntity<Long> {
 
     @ManyToOne(cascade = CascadeType.ALL)
     private Commission commission;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private Subscription subscription;
 }

@@ -6,18 +6,25 @@ import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
 import net.foodeals.offer.domain.valueObject.Offerable;
+import net.foodeals.offer.domain.enums.OfferType;
+import net.foodeals.order.domain.entities.Order;
 import net.foodeals.organizationEntity.domain.entities.Activity;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "offers")
 
 @Getter
 @Setter
-public class Offer extends AbstractEntity<Long> {
+public class Offer extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
-    private Long id;
+    @UuidGenerator
+    private UUID id;
 
     @Embedded
     @AttributeOverrides({
@@ -37,8 +44,8 @@ public class Offer extends AbstractEntity<Long> {
 
     private String barcode;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    private OpenTime openTime;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "offer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OpenTime> openTime;
 
     @ManyToOne(cascade = CascadeType.ALL)
     private Activity activity;
@@ -48,4 +55,16 @@ public class Offer extends AbstractEntity<Long> {
 
     @Transient
     private OfferChoice offerChoice;
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "offer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders;
+
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "box_id")
+    private Box box;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "deal_id")
+    private Deal deal;
+
 }

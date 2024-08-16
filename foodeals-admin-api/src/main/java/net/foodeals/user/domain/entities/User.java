@@ -4,14 +4,21 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.contract.domain.entities.UserContract;
+import net.foodeals.delivery.domain.entities.Delivery;
+import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.user.domain.valueObjects.Name;
+
+import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * User
@@ -21,11 +28,12 @@ import java.util.List;
 
 @Getter
 @Setter
-public class User extends AbstractEntity<Integer> implements UserDetails {
+public class User extends AbstractEntity<UUID> implements UserDetails {
 
     @Id
     @GeneratedValue
-    private Integer id;
+    @UuidGenerator
+    private UUID id;
 
     @Embedded
     private Name name;
@@ -43,7 +51,8 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Role role;
 
-    @OneToOne(mappedBy = "user")
+    @ManyToOne
+    @JoinColumn(name = "organizationEntity_id", nullable = false)
     private OrganizationEntity organizationEntity;
 
     public User(Name name, String email, String phone, String password, Boolean isEmailVerified, Role role) {
@@ -59,16 +68,35 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
 
     }
 
-    public static User create(String firstName, String lastName, String email, String phone, String password, Boolean isEmailVerified, Role role) {
+    public static User create(String firstName, String lastName, String email, String phone, String password,
+            Boolean isEmailVerified, Role role) {
         return new User(
                 new Name(firstName, lastName),
                 email,
                 phone,
                 password,
                 isEmailVerified,
-                role
-        );
+                role);
     }
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Account> Accounts;
+
+    @ManyToOne
+    @JoinColumn(name = "subEntity_id", nullable = false)
+    private SubEntity subEntity;
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserActivities> userActivities;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Delivery> deliveries;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserContract> userContracts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -84,4 +112,5 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     public String getUsername() {
         return String.format("%s %s", name.firstName(), name.lastName());
     }
+
 }
