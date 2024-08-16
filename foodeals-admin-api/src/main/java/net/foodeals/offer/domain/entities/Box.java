@@ -26,10 +26,6 @@ public class Box extends AbstractEntity<UUID> implements OfferChoice {
     @Enumerated(EnumType.STRING)
     private BoxType type;
 
-    @Override
-    public OfferType getOfferType() {
-        return OfferType.BOX;
-    }
     @OneToMany(mappedBy = "box", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<BoxItem> boxItems;
 
@@ -37,4 +33,8 @@ public class Box extends AbstractEntity<UUID> implements OfferChoice {
     @OneToMany(mappedBy = "box", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Offer> offers;
 
+    @Override
+    public OfferType getOfferType() {
+        return OfferType.BOX;
+    }
 }
