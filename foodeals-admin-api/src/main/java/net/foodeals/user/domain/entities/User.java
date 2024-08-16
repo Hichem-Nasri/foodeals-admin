@@ -8,15 +8,14 @@ import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.delivery.domain.entities.Delivery;
 import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.user.domain.valueObjects.Name;
+import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import net.foodeals.organizationEntity.domain.entities.SubEntity;
-import org.hibernate.annotations.UuidGenerator;
-
 import java.util.List;
 import java.util.UUID;
 
@@ -52,32 +51,8 @@ public class User extends AbstractEntity<UUID> implements UserDetails {
     private Role role;
 
     @ManyToOne
-    @JoinColumn(name = "organizationEntity_id", nullable = false)
     private OrganizationEntity organizationEntity;
 
-    /**
-     * Returns the authorities granted to the user. Cannot return <code>null</code>.
-     *
-     * @return the authorities, sorted by natural key (never <code>null</code>)
-     */
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return role.getAuthorities()
-                .stream()
-                .map(authority -> new SimpleGrantedAuthority(authority.getName()))
-                .toList();
-    }
-
-    /**
-     * Returns the username used to authenticate the user. Cannot return
-     * <code>null</code>.
-     *
-     * @return the username (never <code>null</code>)
-     */
-    @Override
-    public String getUsername() {
-        return String.format("%s %s", name.firstName(), name.lastName());
-    }
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
 
@@ -85,7 +60,6 @@ public class User extends AbstractEntity<UUID> implements UserDetails {
     private List<Account> Accounts;
 
     @ManyToOne
-    @JoinColumn(name = "subEntity_id", nullable = false)
     private SubEntity subEntity;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -96,5 +70,44 @@ public class User extends AbstractEntity<UUID> implements UserDetails {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserContract> userContracts;
+
+    public User(Name name, String email, String phone, String password, Boolean isEmailVerified, Role role) {
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.password = password;
+        this.isEmailVerified = isEmailVerified;
+        this.role = role;
+    }
+
+    User() {
+
+    }
+
+    public static User create(String firstName, String lastName, String email, String phone, String password,
+            Boolean isEmailVerified, Role role) {
+        return new User(
+                new Name(firstName, lastName),
+                email,
+                phone,
+                password,
+                isEmailVerified,
+                role);
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        final List<SimpleGrantedAuthority> authorities = role.getAuthorities()
+                .stream()
+                .map(authority -> new SimpleGrantedAuthority(authority.getName()))
+                .toList();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+        return authorities;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
 
 }

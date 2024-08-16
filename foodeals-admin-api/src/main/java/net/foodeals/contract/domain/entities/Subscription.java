@@ -7,6 +7,7 @@ import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ public class Subscription extends AbstractEntity<UUID> {
     })
     private Price amount;
 
-    private Integer echeance;
+    private Date echeance;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SolutionContract> solutionContracts;
