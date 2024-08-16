@@ -1,6 +1,8 @@
 package net.foodeals.common.contracts;
 
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,8 +14,13 @@ import java.util.Optional;
 
 @NoRepositoryBean
 public interface BaseRepository<T, ID> extends JpaRepository<T, ID> {
+
     @Query("SELECT e FROM #{#entityName} e WHERE e.deletedAt IS NULL")
     List<T> findAll();
+
+    @Override
+    @Query("SELECT e FROM #{#entityName} e WHERE e.deletedAt IS NULL")
+    Page<T> findAll(Pageable pageable);
 
     @Query("SELECT e FROM #{#entityName} e")
     List<T> findAllWithTrashed();
