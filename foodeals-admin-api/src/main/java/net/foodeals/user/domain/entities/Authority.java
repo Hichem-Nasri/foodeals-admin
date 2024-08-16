@@ -3,14 +3,12 @@ package net.foodeals.user.domain.entities;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.UuidGenerator;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
-import org.hibernate.annotations.UuidGenerator;
-
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Permission

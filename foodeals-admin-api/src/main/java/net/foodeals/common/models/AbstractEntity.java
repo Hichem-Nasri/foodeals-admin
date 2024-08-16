@@ -33,12 +33,12 @@ public abstract class AbstractEntity<T> implements Serializable {
     @Setter
     private Instant updatedAt = Instant.now();
 
-    public abstract T getId();
-
     @Column(name = "deleted_at")
     @Getter
     @Setter
     private Instant deletedAt;
+
+    public abstract T getId();
 
     public void markDeleted() {
         this.deletedAt = Instant.now();

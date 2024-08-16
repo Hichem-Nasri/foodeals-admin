@@ -1,6 +1,12 @@
 package net.foodeals.order.domain.entities;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.hibernate.annotations.UuidGenerator;
+
 import jakarta.persistence.*;
+
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
@@ -11,11 +17,6 @@ import net.foodeals.offer.domain.entities.Offer;
 import net.foodeals.order.domain.enums.OrderStatus;
 import net.foodeals.order.domain.enums.OrderType;
 import net.foodeals.user.domain.entities.User;
-import org.hibernate.Transaction;
-import org.hibernate.annotations.UuidGenerator;
-
-import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
