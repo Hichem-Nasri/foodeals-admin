@@ -24,6 +24,8 @@ public class ProductCategory extends AbstractEntity<UUID> {
 
     private String name;
 
+    private String slug;
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Activity activity;
 
