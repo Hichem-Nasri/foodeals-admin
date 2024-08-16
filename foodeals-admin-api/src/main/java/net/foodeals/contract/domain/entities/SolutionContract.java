@@ -27,7 +27,8 @@ public class SolutionContract extends AbstractEntity<UUID> {
     @ManyToOne(cascade = CascadeType.ALL)
     private Contract contract;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "comission_id", nullable = true)
     private Commission commission;
 
     @ManyToOne(cascade = CascadeType.ALL)
