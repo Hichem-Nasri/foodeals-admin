@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class Deal extends AbstractEntity<UUID> implements OfferChoice{
+public class Deal extends AbstractEntity<UUID> implements OfferChoice {
 
     @Id
     @GeneratedValue
@@ -30,9 +30,6 @@ public class Deal extends AbstractEntity<UUID> implements OfferChoice{
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Product product;
-
-    @OneToMany(mappedBy = "deal", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<Offer> offers;
 
     @Override
     public OfferType getOfferType() {
