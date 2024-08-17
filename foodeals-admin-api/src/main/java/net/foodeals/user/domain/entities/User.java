@@ -2,7 +2,6 @@ package net.foodeals.user.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.delivery.domain.entities.Delivery;
@@ -26,7 +25,6 @@ import java.util.UUID;
 @Table(name = "users")
 
 @Getter
-@Setter
 public class User extends AbstractEntity<UUID> implements UserDetails {
 
     @Id
@@ -84,10 +82,10 @@ public class User extends AbstractEntity<UUID> implements UserDetails {
 
     }
 
-    public static User create(String firstName, String lastName, String email, String phone, String password,
-            Boolean isEmailVerified, Role role) {
+    public static User create(Name name, String email, String phone, String password,
+                              Boolean isEmailVerified, Role role) {
         return new User(
-                new Name(firstName, lastName),
+                name,
                 email,
                 phone,
                 password,
@@ -108,6 +106,36 @@ public class User extends AbstractEntity<UUID> implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    public User setName(Name name) {
+        this.name = name;
+        return this;
+    }
+
+    public User setEmail(String email) {
+        this.email = email;
+        return this;
+    }
+
+    public User setPhone(String phone) {
+        this.phone = phone;
+        return this;
+    }
+
+    public User setPassword(String password) {
+        this.password = password;
+        return this;
+    }
+
+    public User setIsEmailVerified(Boolean isEmailVerified) {
+        this.isEmailVerified = isEmailVerified;
+        return this;
+    }
+
+    public User setRole(Role role) {
+        this.role = role;
+        return this;
     }
 
 }
