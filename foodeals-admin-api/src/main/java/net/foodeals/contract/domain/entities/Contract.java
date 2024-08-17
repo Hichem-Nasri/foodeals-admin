@@ -28,8 +28,9 @@ public class Contract extends AbstractEntity<UUID> {
 
     private String content;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UserContract> userContracts;
+
+    @OneToOne(mappedBy = "contract")
+    private UserContract userContracts;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SolutionContract> solutionContracts;
