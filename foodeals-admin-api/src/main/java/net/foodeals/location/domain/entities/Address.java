@@ -4,13 +4,12 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.common.valueOjects.Coordinates;
 import net.foodeals.order.domain.entities.Order;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
-import net.foodeals.common.valueOjects.Coordinates;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,14 +30,13 @@ public class Address extends AbstractEntity<UUID> {
     @Column(name = "extra_address")
     private String extraAddress;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "city_id", nullable = false)
-    private City city;
-
     private String zip;
 
     @Embedded
     private Coordinates coordinates;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    private City city;
 
     @OneToMany(mappedBy = "shippingAddress", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Order> orders;
@@ -48,12 +46,4 @@ public class Address extends AbstractEntity<UUID> {
 
     @OneToOne(mappedBy = "address")
     private SubEntity subEntity;
-
-    @ManyToOne
-    @JoinColumn(name = "country_id", nullable = false)
-    private Country country;
-
-    @ManyToOne
-    @JoinColumn(name = "state_id", nullable = false)
-    private State state;
 }

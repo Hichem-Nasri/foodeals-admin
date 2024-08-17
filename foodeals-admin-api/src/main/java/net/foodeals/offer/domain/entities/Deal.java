@@ -31,9 +31,6 @@ public class Deal extends AbstractEntity<UUID> implements OfferChoice {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Product product;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<Offer> offers;
-
     @Override
     public OfferType getOfferType() {
         return OfferType.DEAL;

@@ -28,11 +28,7 @@ public class Box extends AbstractEntity<UUID> implements OfferChoice {
 
     @OneToMany(mappedBy = "box", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<BoxItem> boxItems;
-    
-    
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private List<Offer> offers;
-    
+
     @Override
     public OfferType getOfferType() {
         return OfferType.BOX;

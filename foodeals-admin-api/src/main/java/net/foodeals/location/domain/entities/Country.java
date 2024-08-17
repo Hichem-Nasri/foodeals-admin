@@ -1,8 +1,8 @@
 package net.foodeals.location.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -13,7 +13,6 @@ import java.util.UUID;
 @Table(name = "countries")
 
 @Getter
-@Setter
 public class Country extends AbstractEntity<UUID> {
 
     @Id
@@ -26,8 +25,38 @@ public class Country extends AbstractEntity<UUID> {
     private String code;
 
     @OneToMany(mappedBy = "country", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<State> states;
 
-    @OneToMany(mappedBy = "country", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<Address> addresses;
+    Country() {
+    }
+
+    public Country(String name, String code) {
+        this.name = name;
+        this.code = code;
+    }
+
+    public static Country create(String name, String code) {
+        return new Country(name, code);
+    }
+
+    public Country setId(UUID id) {
+        this.id = id;
+        return this;
+    }
+
+    public Country setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public Country setCode(String code) {
+        this.code = code;
+        return this;
+    }
+
+    public Country setStates(List<State> states) {
+        this.states = states;
+        return this;
+    }
 }
