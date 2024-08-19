@@ -2,9 +2,12 @@ package net.foodeals.delivery.application.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.foodeals.delivery.application.dtos.requests.DeliveryPositionRequest;
 import net.foodeals.delivery.application.dtos.requests.delivery.DeliveryRequest;
+import net.foodeals.delivery.application.services.AddNewDeliveryPositionToDelivery;
 import net.foodeals.delivery.application.services.DeliveryService;
 import net.foodeals.delivery.domain.entities.Delivery;
+import net.foodeals.delivery.domain.entities.DeliveryPosition;
 import net.foodeals.delivery.domain.exceptions.DeliveryNotFoundException;
 import net.foodeals.delivery.domain.repositories.DeliveryRepository;
 import net.foodeals.user.application.services.UserService;
@@ -26,6 +29,7 @@ import java.util.UUID;
 class DeliveryServiceImpl implements DeliveryService {
 
     private final DeliveryRepository repository;
+    private final AddNewDeliveryPositionToDelivery addNewDeliveryPositionToDelivery;
     private final UserService userService;
     private final ModelMapper mapper;
 
@@ -47,20 +51,25 @@ class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     public Delivery create(DeliveryRequest request) {
-        User deliveryBoy = userService.findById(request.deliveryBoId());
-        Delivery delivery = mapper.map(request, Delivery.class);
-        delivery.setDeliveryBoy(deliveryBoy);
-        // TODO assign orders and delivery postions
+        final User deliveryBoy = userService.findById(request.deliveryBoyId());
+        final Delivery delivery = Delivery.create(deliveryBoy, request.status());
+        final Delivery savedDelivery = repository.save(delivery);
+
+        final DeliveryPosition deliveryPosition = addNewDeliveryPositionToDelivery.execute(
+                new DeliveryPositionRequest(request.initialPosition().coordinates(), savedDelivery.getId())
+        );
+        delivery.setDeliveryPositions(List.of(deliveryPosition));
+        // TODO assign orders
         return repository.save(delivery);
     }
 
     @Override
     public Delivery update(UUID id, DeliveryRequest dto) {
-        User deliveryBoy = userService.findById(dto.deliveryBoId());
-        Delivery delivery = findById(id);
+        final User deliveryBoy = userService.findById(dto.deliveryBoyId());
+        final Delivery delivery = findById(id);
         mapper.map(dto, delivery);
         delivery.setDeliveryBoy(deliveryBoy);
-        // TODO assign orders and delivery postions
+        // TODO assign orders
         return repository.save(delivery);
     }
 

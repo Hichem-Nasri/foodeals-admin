@@ -30,6 +30,7 @@ public class RoleSeeder implements CommandLineRunner {
                             Role.create(UUID.randomUUID(), "CLIENT")
                     )
             );
+            System.out.println("roles seeded");
         }
     }
 }

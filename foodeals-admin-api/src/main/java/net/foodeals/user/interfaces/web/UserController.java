@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestControllerAdvice
+@RestController
 @RequestMapping("v1/users")
 @RequiredArgsConstructor
 public class UserController {
@@ -24,18 +24,18 @@ public class UserController {
         return ResponseEntity.ok(service.findAll());
     }
 
-    @GetMapping
+    @GetMapping("/page/{pageNumber}/{pageSize}")
     public ResponseEntity<Page<User>> getAll(@PathVariable Integer pageNumber, @PathVariable Integer pageSize) {
         return ResponseEntity.ok(service.findAll(pageNumber, pageSize));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getById(Integer id) {
+    public ResponseEntity<User> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<User> getByEmail(String email) {
+    public ResponseEntity<User> getByEmail(@PathVariable String email) {
         return ResponseEntity.ok(service.findByEmail(email));
     }
 

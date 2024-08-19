@@ -9,14 +9,12 @@ import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.user.domain.valueObjects.Name;
-import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * User
@@ -25,12 +23,11 @@ import java.util.UUID;
 @Table(name = "users")
 
 @Getter
-public class User extends AbstractEntity<UUID> implements UserDetails {
+public class User extends AbstractEntity<Integer> implements UserDetails {
 
     @Id
     @GeneratedValue
-    @UuidGenerator
-    private UUID id;
+    private Integer id;
 
     @Embedded
     private Name name;
