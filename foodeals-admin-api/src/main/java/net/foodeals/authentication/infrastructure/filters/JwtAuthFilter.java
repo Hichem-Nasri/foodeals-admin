@@ -89,7 +89,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json");
-            String jsonError = "{\n \"error from jwt auth filter \":  \n \"" + e.getMessage() + "\"\n}";
+            String jsonError = "{\n \"error occured \":  \n \"" + e.getMessage() + "\"\n}";
             response.getWriter().write(jsonError);
         } catch (IOException ex) {
             ex.printStackTrace();

@@ -1,6 +1,7 @@
 package net.foodeals.user.interfaces.web.advice;
 
 import net.foodeals.common.models.ErrorResponse;
+import net.foodeals.user.domain.exceptions.AuthorityNotFoundException;
 import net.foodeals.user.domain.exceptions.RoleNotFoundException;
 import net.foodeals.user.domain.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -35,4 +36,17 @@ public class UserDomainAdvice {
         );
         return new ResponseEntity<>(errorReponse, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(AuthorityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorityNotFoundException(AuthorityNotFoundException e) {
+        final ErrorResponse errorReponse = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                e.getMessage(),
+                Map.of()
+        );
+        return new ResponseEntity<>(errorReponse, HttpStatus.NOT_FOUND);
+    }
+
+
 }

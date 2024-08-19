@@ -29,8 +29,9 @@ class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        final User user = userService.save(request);
-        return handleRegistration(user);
+//        final User user = userService.createrequest);
+//        return handleRegistration(user);
+        return null;
     }
 
     public AuthenticationResponse login(LoginRequest request) {

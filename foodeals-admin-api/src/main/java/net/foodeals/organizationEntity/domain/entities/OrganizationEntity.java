@@ -50,13 +50,13 @@ public class OrganizationEntity extends AbstractEntity<UUID> {
     @OneToMany(mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<User> users = new ArrayList<>();
 
-    @OneToOne
-    @JoinColumn(name = "address_id", nullable = false, unique = true)
-    private Address address;
 
     @ManyToMany
     private List<Solution> solutions = new ArrayList<>();
 
     @OneToMany(mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
+
+    @OneToOne
+    private Address address;
 }

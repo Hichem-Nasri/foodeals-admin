@@ -1,18 +1,16 @@
 package net.foodeals.common.models;
 
-import java.io.Serializable;
-import java.time.Instant;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import lombok.Getter;
-import lombok.Setter;
+import java.io.Serializable;
+import java.time.Instant;
 
 /**
  * AbstractEntity
@@ -24,8 +22,7 @@ public abstract class AbstractEntity<T> implements Serializable {
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     @Getter
-    @Setter
-    private Instant createdAt = Instant.now();
+    private final Instant createdAt = Instant.now();
 
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
