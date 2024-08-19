@@ -1,8 +1,8 @@
-package net.foodeals.user.application.useCases.impl;
+package net.foodeals.user.application.services.impl;
 
 import lombok.RequiredArgsConstructor;
 import net.foodeals.common.annotations.UseCase;
-import net.foodeals.user.application.useCases.FindAllAuthoritiesByIdsUseCase;
+import net.foodeals.user.application.services.FindAllAuthoritiesByIdsUseCase;
 import net.foodeals.user.domain.entities.Authority;
 import net.foodeals.user.domain.repositories.AuthorityRepository;
 

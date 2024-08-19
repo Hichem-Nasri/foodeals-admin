@@ -1,4 +1,4 @@
-package net.foodeals.user.application.useCases;
+package net.foodeals.user.application.services;
 
 
 import net.foodeals.common.contracts.UseCase;

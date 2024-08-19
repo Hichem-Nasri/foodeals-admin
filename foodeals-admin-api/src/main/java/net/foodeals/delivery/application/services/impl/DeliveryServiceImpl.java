@@ -1,23 +1,21 @@
 package net.foodeals.delivery.application.services.impl;
 
-import java.util.List;
-import java.util.UUID;
-
 import jakarta.transaction.Transactional;
-
-import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-
 import lombok.RequiredArgsConstructor;
-import net.foodeals.delivery.application.dtos.requests.DeliveryRequest;
+import net.foodeals.delivery.application.dtos.requests.delivery.DeliveryRequest;
 import net.foodeals.delivery.application.services.DeliveryService;
 import net.foodeals.delivery.domain.entities.Delivery;
 import net.foodeals.delivery.domain.exceptions.DeliveryNotFoundException;
 import net.foodeals.delivery.domain.repositories.DeliveryRepository;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
 
 /**
  * DeliveryServiceImpl
@@ -25,7 +23,7 @@ import net.foodeals.user.domain.entities.User;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class DeliveryServiceImpl implements DeliveryService {
+class DeliveryServiceImpl implements DeliveryService {
 
     private final DeliveryRepository repository;
     private final UserService userService;
