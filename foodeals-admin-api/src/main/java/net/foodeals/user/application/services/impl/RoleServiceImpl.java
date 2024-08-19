@@ -51,7 +51,7 @@ class RoleServiceImpl implements RoleService {
         List<Authority> authorities = findAllAuthoritiesByIdsUseCase.execute(request.authorityIds());
         Role role = modelMapper.map(request, Role.class);
         role.setAuthorities(authorities);
-        return repository.save(null);
+        return repository.save(role);
     }
 
     @Override

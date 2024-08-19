@@ -1,19 +1,21 @@
 package net.foodeals.user.application.services.impl;
 
+import java.util.List;
+import java.util.UUID;
+
 import jakarta.transaction.Transactional;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
 import lombok.RequiredArgsConstructor;
 import net.foodeals.user.application.dtos.requests.AuthorityRequest;
 import net.foodeals.user.application.services.AuthorityService;
 import net.foodeals.user.domain.entities.Authority;
 import net.foodeals.user.domain.exceptions.AuthorityNotFoundException;
 import net.foodeals.user.domain.repositories.AuthorityRepository;
-import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @Transactional

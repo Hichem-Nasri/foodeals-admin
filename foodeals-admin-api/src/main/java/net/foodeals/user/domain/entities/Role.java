@@ -31,7 +31,7 @@ public class Role extends AbstractEntity<UUID> {
     private List<User> users = new ArrayList<>();
 
     @ManyToMany(mappedBy = "roles", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
-    private List<Authority> authorities = new ArrayList<>();
+    private List<Authority> authorities;
 
     Role() {
     }
