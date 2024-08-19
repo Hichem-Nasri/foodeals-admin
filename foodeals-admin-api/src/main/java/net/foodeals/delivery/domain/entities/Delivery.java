@@ -33,7 +33,4 @@ public class Delivery extends AbstractEntity<UUID> {
 
     @OneToMany(mappedBy = "delivery", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DeliveryPosition> deliveryPositions;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    private User user;
 }
