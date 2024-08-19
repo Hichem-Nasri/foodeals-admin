@@ -20,8 +20,10 @@ public class OpenTime extends AbstractEntity<UUID> {
 
     private String day;
 
+    @Column(name = "start_time")
     private String from;
 
+    @Column(name = "end_time")
     private String to;
 
     @ManyToOne
