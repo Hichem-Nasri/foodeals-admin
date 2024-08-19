@@ -1,15 +1,26 @@
 package net.foodeals.delivery.domain.entities;
 
-import jakarta.persistence.*;
+import java.util.List;
+import java.util.UUID;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+import org.hibernate.annotations.UuidGenerator;
+
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.delivery.domain.enums.DeliveryStatus;
+import net.foodeals.order.domain.entities.Order;
 import net.foodeals.user.domain.entities.User;
-import org.hibernate.annotations.UuidGenerator;
-
-import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Table(name = "deliveries")
@@ -34,6 +45,6 @@ public class Delivery extends AbstractEntity<UUID> {
     @OneToMany(mappedBy = "delivery", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DeliveryPosition> deliveryPositions;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    private User user;
+    @OneToMany(mappedBy = "delivery", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders;
 }
