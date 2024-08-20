@@ -1,4 +1,4 @@
-package net.foodeals.contentManagement.domain.Dto.upload;
+package net.foodeals.contentManagement.application.Dto.upload;
 
 import lombok.Data;
 
