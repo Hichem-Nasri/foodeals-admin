@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import net.foodeals.user.application.dtos.requests.AuthorityRequest;
 import net.foodeals.user.application.dtos.responses.AuthorityResponse;
 import net.foodeals.user.application.services.AuthorityService;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,32 +20,40 @@ import java.util.UUID;
 public class AuthorityController {
 
     private final AuthorityService service;
+    private final ModelMapper mapper;
 
     @GetMapping
     public ResponseEntity<List<AuthorityResponse>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+        final List<AuthorityResponse> responses = service.findAll()
+                .stream()
+                .map(authority -> mapper.map(authority, AuthorityResponse.class))
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/page/{pageNumber}/size/{pageSize}")
     public ResponseEntity<Page<AuthorityResponse>> getAll(@PathVariable Integer pageNumber, @PathVariable Integer pageSize) {
-        return ResponseEntity.ok(service.findAll(pageNumber, pageSize));
+        final Page<AuthorityResponse> responses = service.findAll(pageNumber, pageSize)
+                .map(authority -> mapper.map(authority, AuthorityResponse.class));
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<AuthorityResponse> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+        final AuthorityResponse response = mapper.map(service.findById(id), AuthorityResponse.class);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
     public ResponseEntity<AuthorityResponse> create(@RequestBody @Valid AuthorityRequest request) {
-        final AuthorityResponse authority = service.create(request);
-        return new ResponseEntity<>(authority, HttpStatus.CREATED);
+        final AuthorityResponse response = mapper.map(service.create(request), AuthorityResponse.class);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<AuthorityResponse> update(@PathVariable UUID id, @RequestBody @Valid AuthorityRequest request) {
-        final AuthorityResponse authority = service.update(id, request);
-        return ResponseEntity.ok(authority);
+        final AuthorityResponse response = mapper.map(service.update(id, request), AuthorityResponse.class);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
