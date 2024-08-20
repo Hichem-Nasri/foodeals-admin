@@ -35,6 +35,7 @@ public class ModelMapperConfig {
                 map(source.getTitle(), destination.getTitle());
                 map(source.getContent(), destination.getContent());
                 map(source.getSlug(), destination.getSlug());
+                map(source.getCategory().getName(), destination.getCategory());
             }
         });
 

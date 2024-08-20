@@ -73,4 +73,8 @@ public class ArticleService {
 
         return this.articleRepository.save(article);
     }
+
+    public Article save(Article article) {
+        return this.articleRepository.save(article);
+    }
 }

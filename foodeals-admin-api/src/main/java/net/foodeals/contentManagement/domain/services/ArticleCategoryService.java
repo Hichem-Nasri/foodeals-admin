@@ -1,6 +1,8 @@
 package net.foodeals.contentManagement.domain.services;
 
+import net.foodeals.contentManagement.domain.Dto.upload.AddArticleToCategoryDto;
 import net.foodeals.contentManagement.domain.Dto.upload.CreateArticleCategoryDto;
+import net.foodeals.contentManagement.domain.Dto.upload.DeleteArticleFromCategoryDto;
 import net.foodeals.contentManagement.domain.Dto.upload.UpdateArticleCategoryDto;
 import net.foodeals.contentManagement.domain.Utils.SlugUtil;
 import net.foodeals.contentManagement.domain.entities.Article;
@@ -18,9 +20,11 @@ import java.util.UUID;
 public class ArticleCategoryService {
 
     private final ArticleCategoryRepository articleCategoryRepository;
+    private final ArticleService articleService;
 
-    public ArticleCategoryService(ArticleCategoryRepository articleCategoryRepository) {
+    public ArticleCategoryService(ArticleCategoryRepository articleCategoryRepository, ArticleService articleService) {
         this.articleCategoryRepository = articleCategoryRepository;
+        this.articleService = articleService;
     }
 
     public List<ArticleCategory> getAllArticleCategories() {
@@ -72,5 +76,43 @@ public class ArticleCategoryService {
 
         this.articleCategoryRepository.delete(articleCategory);
         return articleCategory;
+    }
+
+    public void addAnArticleToCategory(String uuid, AddArticleToCategoryDto addArticleToCategoryDto) {
+        Article article = this.articleService.getArticleByUuid(addArticleToCategoryDto.getArticleUuid());
+        if (article == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Article Not Found");
+        }
+
+        UUID uuidObj = UUID.fromString(uuid);
+        ArticleCategory articleCategory = this.articleCategoryRepository.findById(uuidObj).orElse(null);
+        if (articleCategory == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Article Category Not Found");
+        }
+
+        List<Article> articles = articleCategory.getArticles();
+        article.setCategory(articleCategory);
+        articles.add(article);
+        articleCategory.setArticles(articles);
+        this.articleCategoryRepository.save(articleCategory);
+    }
+
+    public void deleteAnArticleFromCategory(String categoryId, DeleteArticleFromCategoryDto deleteArticleFromCategoryDto) {
+        Article article = this.articleService.getArticleByUuid(deleteArticleFromCategoryDto.getArticleUuid());
+        if (article == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Article Not Found");
+        }
+        UUID uuidObj = UUID.fromString(categoryId);
+        ArticleCategory articleCategory = this.articleCategoryRepository.findById(uuidObj).orElse(null);
+        if (articleCategory == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Article Category Not Found");
+        }
+
+        List<Article> articles = articleCategory.getArticles();
+        articles.remove(article);
+        article.setCategory(null);
+        this.articleService.save(article);
+        articleCategory.setArticles(articles);
+        this.articleCategoryRepository.save(articleCategory);
     }
 }

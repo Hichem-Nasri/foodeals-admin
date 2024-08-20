@@ -2,10 +2,7 @@ package net.foodeals.contentManagement.domain.controllers;
 
 import net.foodeals.contentManagement.domain.Dto.response.ArticleCategoryDto;
 import net.foodeals.contentManagement.domain.Dto.response.ArticleDto;
-import net.foodeals.contentManagement.domain.Dto.upload.CreateArticleCategoryDto;
-import net.foodeals.contentManagement.domain.Dto.upload.CreateArticleDto;
-import net.foodeals.contentManagement.domain.Dto.upload.UpdateArticleCategoryDto;
-import net.foodeals.contentManagement.domain.Dto.upload.UpdateArticleDto;
+import net.foodeals.contentManagement.domain.Dto.upload.*;
 import net.foodeals.contentManagement.domain.entities.Article;
 import net.foodeals.contentManagement.domain.entities.ArticleCategory;
 import net.foodeals.contentManagement.domain.services.ArticleCategoryService;
@@ -43,10 +40,10 @@ public class ArticleCategoriesController {
     @GetMapping("/ArticleCategory/{uuid}")
     public ResponseEntity<ArticleCategoryDto> getArticleCategoryByUuid(@PathVariable("uuid") String uuid) {
         ArticleCategory articleCategory = this.articleCategoryService.getArticleByUuid(uuid);
+
         if (articleCategory == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ArticleCategory Not Found");
         }
-
         ArticleCategoryDto articleCategoryDto = this.modelMapper.map(articleCategory, ArticleCategoryDto.class);
         return new ResponseEntity<ArticleCategoryDto>(articleCategoryDto, HttpStatus.OK);
     }
@@ -72,4 +69,15 @@ public class ArticleCategoriesController {
         return new ResponseEntity<ArticleCategoryDto>(articleCategoryDto, HttpStatus.OK);
     }
 
+    @PostMapping("/ArticleCategory/{CategoryId}/addArticle")
+    public ResponseEntity<String> addAnArticleToCategory(@PathVariable("CategoryId") String categoryId, @RequestBody AddArticleToCategoryDto addArticleToCategoryDto) {
+        this.articleCategoryService.addAnArticleToCategory(categoryId, addArticleToCategoryDto);
+        return new ResponseEntity<String>("Article was added successfully", HttpStatus.OK);
+    }
+
+    @DeleteMapping("/ArticleCategory/{CategoryId}/deleteArticle")
+    public ResponseEntity<String> DeleteAnArticleFromCategory(@PathVariable("CategoryId") String categoryId, @RequestBody DeleteArticleFromCategoryDto deleteArticleFromCategoryDto) {
+        this.articleCategoryService.deleteAnArticleFromCategory(categoryId, deleteArticleFromCategoryDto);
+        return new ResponseEntity<String>("Article was added successfully", HttpStatus.OK);
+    }
 }
