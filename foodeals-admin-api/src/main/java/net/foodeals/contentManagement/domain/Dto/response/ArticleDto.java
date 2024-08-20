@@ -12,4 +12,6 @@ public class ArticleDto {
     private String slug;
 
     private String content;
+
+    private String category;
 }
