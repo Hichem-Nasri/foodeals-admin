@@ -1,4 +1,4 @@
-package net.foodeals.user.interfaces.web;
+package net.foodeals.user.infrastructure.interfaces.web;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

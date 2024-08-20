@@ -1,4 +1,4 @@
-package net.foodeals.user.interfaces.web.advice;
+package net.foodeals.user.infrastructure.interfaces.web.advice;
 
 import net.foodeals.common.models.ErrorResponse;
 import net.foodeals.user.domain.exceptions.AuthorityNotFoundException;

@@ -1,10 +1,10 @@
-package net.foodeals.user.interfaces.web;
+package net.foodeals.user.infrastructure.interfaces.web;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.user.application.dtos.requests.RoleRequest;
+import net.foodeals.user.application.dtos.responses.RoleResponse;
 import net.foodeals.user.application.services.RoleService;
-import net.foodeals.user.domain.entities.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,34 +21,34 @@ public class RoleController {
     private final RoleService service;
 
     @GetMapping
-    public ResponseEntity<List<Role>> getAll() {
+    public ResponseEntity<List<RoleResponse>> getAll() {
         return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/page/{pageNumber}/size/{pageSize}")
-    public ResponseEntity<Page<Role>> getAll(@PathVariable Integer pageNumber, @PathVariable Integer pageSize) {
+    public ResponseEntity<Page<RoleResponse>> getAll(@PathVariable Integer pageNumber, @PathVariable Integer pageSize) {
         return ResponseEntity.ok(service.findAll(pageNumber, pageSize));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Role> getById(@PathVariable UUID id) {
+    public ResponseEntity<RoleResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
     @GetMapping("/name/{name}")
-    public ResponseEntity<Role> getByName(@PathVariable String name) {
+    public ResponseEntity<RoleResponse> getByName(@PathVariable String name) {
         return ResponseEntity.ok(service.findByName(name));
     }
 
     @PostMapping
-    public ResponseEntity<Role> create(@RequestBody @Valid RoleRequest request) {
-        final Role role = service.create(request);
+    public ResponseEntity<RoleResponse> create(@RequestBody @Valid RoleRequest request) {
+        final RoleResponse role = service.create(request);
         return new ResponseEntity<>(role, HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Role> update(@PathVariable UUID id, @RequestBody @Valid RoleRequest request) {
-        final Role role = service.update(id, request);
+    public ResponseEntity<RoleResponse> update(@PathVariable UUID id, @RequestBody @Valid RoleRequest request) {
+        final RoleResponse role = service.update(id, request);
         return ResponseEntity.ok(role);
     }
 
