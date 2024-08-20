@@ -2,7 +2,6 @@ package net.foodeals.user.application.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.foodeals.user.application.dtos.requests.ClientRegisterRequest;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.services.RoleService;
 import net.foodeals.user.application.services.UserService;

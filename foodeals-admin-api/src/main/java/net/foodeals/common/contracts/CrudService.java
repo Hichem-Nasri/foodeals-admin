@@ -4,16 +4,16 @@ import org.springframework.data.domain.Page;
 
 import java.util.List;
 
-public interface CrudService<T, ID, Dto> {
-    List<T> findAll();
+public interface CrudService<Response, ID, Argument> {
+    List<Response> findAll();
 
-    Page<T> findAll(Integer pageNumber, Integer pageSize);
+    Page<Response> findAll(Integer pageNumber, Integer pageSize);
 
-    T findById(ID id);
+    Response findById(ID id);
 
-    T create(Dto dto);
+    Response create(Argument dto);
 
-    T update(ID id, Dto dto);
+    Response update(ID id, Argument dto);
 
     void delete(ID id);
 

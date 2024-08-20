@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.delivery.domain.enums.DeliveryStatus;
+import net.foodeals.order.domain.entities.Order;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -33,4 +34,20 @@ public class Delivery extends AbstractEntity<UUID> {
 
     @OneToMany(mappedBy = "delivery", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DeliveryPosition> deliveryPositions;
+
+    @OneToMany(mappedBy = "delivery", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders;
+
+    Delivery() {
+
+    }
+
+    public Delivery(User deliveryBoy, DeliveryStatus status) {
+        this.deliveryBoy = deliveryBoy;
+        this.status = status;
+    }
+
+    public static Delivery create(User deliveryBoy, DeliveryStatus status) {
+        return new Delivery(deliveryBoy, status);
+    }
 }

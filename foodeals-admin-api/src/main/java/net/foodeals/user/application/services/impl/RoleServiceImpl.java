@@ -3,7 +3,7 @@ package net.foodeals.user.application.services.impl;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.user.application.dtos.requests.RoleRequest;
 import net.foodeals.user.application.services.RoleService;
-import net.foodeals.user.application.useCases.FindAllAuthoritiesByIdsUseCase;
+import net.foodeals.user.application.services.FindAllAuthoritiesByIdsUseCase;
 import net.foodeals.user.domain.entities.Authority;
 import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.exceptions.AuthorityNotFoundException;
