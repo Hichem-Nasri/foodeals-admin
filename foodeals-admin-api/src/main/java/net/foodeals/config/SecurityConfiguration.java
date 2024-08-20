@@ -30,7 +30,7 @@ public class SecurityConfiguration {
     private final PasswordEncoder passwordEncoder;
 
     private static final String[] WHITE_LIST = {
-            "/api/v1/auth/**"
+            "/api/v1/auth/**",
     };
 
     @Bean

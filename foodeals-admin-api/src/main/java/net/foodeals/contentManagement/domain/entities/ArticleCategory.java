@@ -30,6 +30,6 @@ public class ArticleCategory extends AbstractEntity<UUID> {
     private String slug;
 
     @Builder.Default
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "category", cascade = CascadeType.ALL)
     private List<Article> articles = new ArrayList<>();
 }
