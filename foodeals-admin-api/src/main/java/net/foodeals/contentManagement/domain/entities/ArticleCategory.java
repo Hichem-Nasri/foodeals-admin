@@ -1,8 +1,7 @@
 package net.foodeals.contentManagement.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -15,6 +14,10 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ArticleCategory extends AbstractEntity<UUID> {
 
     @Id
@@ -26,6 +29,7 @@ public class ArticleCategory extends AbstractEntity<UUID> {
 
     private String slug;
 
-    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "categories")
+    @Builder.Default
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Article> articles = new ArrayList<>();
 }

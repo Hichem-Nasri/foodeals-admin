@@ -1,8 +1,8 @@
 package net.foodeals.contentManagement.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -14,6 +14,9 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Article extends AbstractEntity<UUID> {
 
     @Id
@@ -23,14 +26,17 @@ public class Article extends AbstractEntity<UUID> {
 
     private String title;
 
+    @Column(unique = true)
     private String slug;
 
     private String content;
 
-    @Column(name = "thumbnail_path") // relation needed
-    private String thumbnailPath;
+    @JoinColumn(name = "thumbnail_imageId")
+    private String thumbnailImage;
 
-    @ManyToMany
-    private List<ArticleCategory> categories;
+    @ManyToOne
+    @JoinColumn(name = "articleCategory_id")
+    @JsonIgnore
+    private ArticleCategory category;
 
 }
