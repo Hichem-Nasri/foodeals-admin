@@ -2,10 +2,8 @@ package net.foodeals.user.application.dtos.responses;
 
 import net.foodeals.user.domain.valueObjects.Name;
 
-import java.util.UUID;
-
 public record UserResponse(
-        UUID id,
+        Integer id,
         Name name,
         String email,
         String phone,

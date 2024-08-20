@@ -1,4 +1,4 @@
-package net.foodeals.location.interfaces.web.advice;
+package net.foodeals.location.infrastructure.interfaces.web.advice;
 
 import net.foodeals.common.models.ErrorResponse;
 import net.foodeals.location.domain.exceptions.AddressNotFoundException;
