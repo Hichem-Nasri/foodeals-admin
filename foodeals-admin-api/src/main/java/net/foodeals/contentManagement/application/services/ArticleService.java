@@ -1,16 +1,13 @@
-package net.foodeals.contentManagement.domain.services;
+package net.foodeals.contentManagement.application.services;
 
 
-import net.foodeals.contentManagement.domain.Dto.response.ArticleDto;
-import net.foodeals.contentManagement.domain.Dto.upload.CreateArticleDto;
-import net.foodeals.contentManagement.domain.Dto.upload.UpdateArticleDto;
-import net.foodeals.contentManagement.domain.Utils.SlugUtil;
+import net.foodeals.contentManagement.application.Dto.upload.CreateArticleDto;
+import net.foodeals.contentManagement.application.Dto.upload.UpdateArticleDto;
+import net.foodeals.contentManagement.Utils.SlugUtil;
 import net.foodeals.contentManagement.domain.entities.Article;
-import net.foodeals.contentManagement.domain.repositories.ArticleRepository;
+import net.foodeals.contentManagement.domain.entities.repositories.ArticleRepository;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;

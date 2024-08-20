@@ -1,10 +1,10 @@
-package net.foodeals.contentManagement.domain.controllers;
+package net.foodeals.contentManagement.infrastructure.controllers;
 
-import net.foodeals.contentManagement.domain.Dto.response.ArticleDto;
-import net.foodeals.contentManagement.domain.Dto.upload.CreateArticleDto;
-import net.foodeals.contentManagement.domain.Dto.upload.UpdateArticleDto;
+import net.foodeals.contentManagement.application.Dto.response.ArticleDto;
+import net.foodeals.contentManagement.application.Dto.upload.CreateArticleDto;
+import net.foodeals.contentManagement.application.Dto.upload.UpdateArticleDto;
 import net.foodeals.contentManagement.domain.entities.Article;
-import net.foodeals.contentManagement.domain.services.ArticleService;
+import net.foodeals.contentManagement.application.services.ArticleService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.UUID;
 
 @Controller()
 public class ArticlesController {

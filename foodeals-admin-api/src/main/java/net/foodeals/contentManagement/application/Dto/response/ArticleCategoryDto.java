@@ -1,4 +1,4 @@
-package net.foodeals.contentManagement.domain.Dto.response;
+package net.foodeals.contentManagement.application.Dto.response;
 
 import lombok.Data;
 

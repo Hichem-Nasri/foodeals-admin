@@ -1,13 +1,14 @@
-package net.foodeals.contentManagement.domain.controllers;
+package net.foodeals.contentManagement.infrastructure.controllers;
 
-import net.foodeals.contentManagement.domain.Dto.response.ArticleCategoryDto;
-import net.foodeals.contentManagement.domain.Dto.response.ArticleDto;
-import net.foodeals.contentManagement.domain.Dto.upload.*;
-import net.foodeals.contentManagement.domain.entities.Article;
+import net.foodeals.contentManagement.application.Dto.response.ArticleCategoryDto;
+import net.foodeals.contentManagement.application.Dto.upload.AddArticleToCategoryDto;
+import net.foodeals.contentManagement.application.Dto.upload.CreateArticleCategoryDto;
+import net.foodeals.contentManagement.application.Dto.upload.DeleteArticleFromCategoryDto;
+import net.foodeals.contentManagement.application.Dto.upload.UpdateArticleCategoryDto;
+import net.foodeals.contentManagement.application.Dto.upload.*;
 import net.foodeals.contentManagement.domain.entities.ArticleCategory;
-import net.foodeals.contentManagement.domain.services.ArticleCategoryService;
+import net.foodeals.contentManagement.application.services.ArticleCategoryService;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;

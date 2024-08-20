@@ -1,9 +1,7 @@
-package net.foodeals.contentManagement.domain.Utils;
+package net.foodeals.contentManagement.Utils;
 
-import net.foodeals.contentManagement.domain.entities.Article;
-import net.foodeals.contentManagement.domain.entities.ArticleCategory;
-import net.foodeals.contentManagement.domain.repositories.ArticleCategoryRepository;
-import net.foodeals.contentManagement.domain.repositories.ArticleRepository;
+import net.foodeals.contentManagement.domain.entities.repositories.ArticleCategoryRepository;
+import net.foodeals.contentManagement.domain.entities.repositories.ArticleRepository;
 
 import java.text.Normalizer;
 import java.util.Locale;

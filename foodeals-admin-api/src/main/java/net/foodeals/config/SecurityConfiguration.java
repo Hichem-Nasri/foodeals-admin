@@ -3,6 +3,7 @@ package net.foodeals.config;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.authentication.application.services.JwtService;
 import net.foodeals.authentication.infrastructure.filters.JwtAuthFilter;
+import net.foodeals.contentManagement.domain.entities.Article;
 import net.foodeals.user.application.services.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +32,10 @@ public class SecurityConfiguration {
 
     private static final String[] WHITE_LIST = {
             "/api/v1/auth/**",
+            "/ArticleCategories/**",
+            "/ArticleCategory/**",
+            "/Articles/**",
+            "/Article/**"
     };
 
     @Bean
