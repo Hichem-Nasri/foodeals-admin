@@ -2,6 +2,7 @@ package net.foodeals.product.infrastructure.modelMapperConfig;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import net.foodeals.organizationEntity.application.dtos.responses.ActivityResponse;
 import net.foodeals.product.application.dtos.responses.ProductCategoryResponse;
 import net.foodeals.product.application.dtos.responses.ProductResponse;
 import net.foodeals.product.domain.entities.Product;
@@ -23,7 +24,10 @@ public class ProductModelMapperConfig {
                     category.getId(),
                     category.getName(),
                     category.getSlug(),
-                    category.getActivity()
+                    new ActivityResponse(
+                            category.getActivity().getId(),
+                            category.getActivity().getName()
+                    )
             );
         }, ProductCategory.class, ProductCategoryResponse.class);
 

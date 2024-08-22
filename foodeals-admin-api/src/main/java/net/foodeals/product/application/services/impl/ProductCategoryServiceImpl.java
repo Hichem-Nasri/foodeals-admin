@@ -56,11 +56,12 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
     @Override
     public ProductCategory update(UUID id, ProductCategoryRequest request) {
         final ProductCategory productCategory = findById(id);
+        final Activity activity = activityService.findById(request.activityId());
 
         productCategory
                 .setName(request.name())
                 .setSlug(makeUniqueSlug(toSlug(request.name()), repository))
-                .setActivity(new Activity());
+                .setActivity(activity);
 
         return repository.save(productCategory);
     }

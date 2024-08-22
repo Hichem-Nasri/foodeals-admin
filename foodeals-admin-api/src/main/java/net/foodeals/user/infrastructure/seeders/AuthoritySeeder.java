@@ -1,20 +1,18 @@
 package net.foodeals.user.infrastructure.seeders;
 
+import lombok.RequiredArgsConstructor;
+import net.foodeals.common.annotations.Seeder;
 import net.foodeals.user.domain.entities.Authority;
 import net.foodeals.user.domain.repositories.AuthorityRepository;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Component
+@Seeder
+@RequiredArgsConstructor
 public class AuthoritySeeder implements CommandLineRunner {
 
     private final AuthorityRepository authorityRepository;
-
-    public AuthoritySeeder(AuthorityRepository authorityRepository) {
-        this.authorityRepository = authorityRepository;
-    }
 
     @Override
     public void run(String... args) {

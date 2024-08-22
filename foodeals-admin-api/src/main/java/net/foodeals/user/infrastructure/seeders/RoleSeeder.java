@@ -1,20 +1,18 @@
 package net.foodeals.user.infrastructure.seeders;
 
+import lombok.RequiredArgsConstructor;
+import net.foodeals.common.annotations.Seeder;
 import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.repositories.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
 
-@Component
+@Seeder
+@RequiredArgsConstructor
 public class RoleSeeder implements CommandLineRunner {
     private final RoleRepository roleRepository;
-
-    public RoleSeeder(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
 
     @Override
     public void run(String... args) throws Exception {
