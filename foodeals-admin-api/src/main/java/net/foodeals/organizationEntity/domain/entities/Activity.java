@@ -37,4 +37,15 @@ public class Activity extends AbstractEntity<UUID> {
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Offer> offers;
 
+    Activity() {
+    }
+
+    public Activity(String name) {
+        this.name = name;
+    }
+
+    public static Activity create(String name) {
+        return new Activity(name);
+    }
+
 }

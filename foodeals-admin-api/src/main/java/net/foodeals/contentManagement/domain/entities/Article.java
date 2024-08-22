@@ -34,8 +34,7 @@ public class Article extends AbstractEntity<UUID> {
     private String thumbnailImage;
 
     @ManyToOne
-    @JoinColumn(name = "articleCategory_id")
+    @JoinColumn(name = "article_category_id")
     @JsonIgnore
     private ArticleCategory category;
-
 }

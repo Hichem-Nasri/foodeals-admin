@@ -1,7 +1,6 @@
-package net.foodeals.contentManagement.Utils;
+package net.foodeals.common.Utils;
 
-import net.foodeals.contentManagement.domain.entities.repositories.ArticleCategoryRepository;
-import net.foodeals.contentManagement.domain.entities.repositories.ArticleRepository;
+import net.foodeals.common.contracts.SlugRepository;
 
 import java.text.Normalizer;
 import java.util.Locale;
@@ -19,19 +18,10 @@ public class SlugUtil {
         return slug.toLowerCase(Locale.ENGLISH);
     }
 
-    public static String makeUniqueSlugForCategory(String slug, ArticleCategoryRepository articleCategoryRepository) {
+    public static  String makeUniqueSlug(String slug, SlugRepository repository) {
         String uniqueSlug = slug;
         int counter = 1;
-        while (articleCategoryRepository.existsBySlug(uniqueSlug)) {
-            uniqueSlug = slug + "-" + counter++;
-        }
-        return uniqueSlug;
-    }
-
-    public static String makeUniqueSlugForArticle(String slug, ArticleRepository articleRepository) {
-        String uniqueSlug = slug;
-        int counter = 1;
-        while (articleRepository.existsBySlug(uniqueSlug)) {
+        while (repository.existsBySlug(uniqueSlug)) {
             uniqueSlug = slug + "-" + counter++;
         }
         return uniqueSlug;

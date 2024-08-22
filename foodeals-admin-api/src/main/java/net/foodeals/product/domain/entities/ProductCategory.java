@@ -2,7 +2,6 @@ package net.foodeals.product.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.organizationEntity.domain.entities.Activity;
 import org.hibernate.annotations.UuidGenerator;
@@ -14,7 +13,6 @@ import java.util.UUID;
 @Table(name = "product_categories")
 
 @Getter
-@Setter
 public class ProductCategory extends AbstractEntity<UUID> {
 
     @Id
@@ -31,4 +29,37 @@ public class ProductCategory extends AbstractEntity<UUID> {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
     private List<Product> products;
+
+    ProductCategory() {
+    }
+
+    public ProductCategory(String name, String slug, Activity activity) {
+        this.name = name;
+        this.slug = slug;
+        this.activity = activity;
+    }
+
+    public static ProductCategory create(String name, String slug, Activity activity) {
+        return new ProductCategory(name, slug, activity);
+    }
+
+    public ProductCategory setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public ProductCategory setSlug(String slug) {
+        this.slug = slug;
+        return this;
+    }
+
+    public ProductCategory setActivity(Activity activity) {
+        this.activity = activity;
+        return this;
+    }
+
+    public ProductCategory setProducts(List<Product> products) {
+        this.products = products;
+        return this;
+    }
 }

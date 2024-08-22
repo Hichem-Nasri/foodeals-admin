@@ -1,13 +1,13 @@
 package net.foodeals.contentManagement.application.services;
 
 import net.foodeals.contentManagement.application.Dto.upload.UpdateArticleCategoryDto;
-import net.foodeals.contentManagement.Utils.SlugUtil;
+import net.foodeals.common.Utils.SlugUtil;
 import net.foodeals.contentManagement.application.Dto.upload.AddArticleToCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.CreateArticleCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.DeleteArticleFromCategoryDto;
 import net.foodeals.contentManagement.domain.entities.Article;
 import net.foodeals.contentManagement.domain.entities.ArticleCategory;
-import net.foodeals.contentManagement.domain.entities.repositories.ArticleCategoryRepository;
+import net.foodeals.contentManagement.domain.repositories.ArticleCategoryRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -45,7 +45,7 @@ public class ArticleCategoryService {
         ArticleCategory articleCategory = ArticleCategory.builder().name(createArticleCategoryDto.getName()).build();
 
         String generatedSlug = SlugUtil.toSlug(createArticleCategoryDto.getName());
-        articleCategory.setSlug(SlugUtil.makeUniqueSlugForCategory(generatedSlug, this.articleCategoryRepository));
+        articleCategory.setSlug(SlugUtil.makeUniqueSlug(generatedSlug, this.articleCategoryRepository));
 
         return this.articleCategoryRepository.save(articleCategory);
     }
@@ -60,7 +60,7 @@ public class ArticleCategoryService {
         if (updateArticleCategoryDto.getName().length() != 0) {
             articleCategory.setName(updateArticleCategoryDto.getName());
             String generatedSlug = SlugUtil.toSlug(updateArticleCategoryDto.getName());
-            articleCategory.setSlug(SlugUtil.makeUniqueSlugForCategory(generatedSlug, this.articleCategoryRepository));
+            articleCategory.setSlug(SlugUtil.makeUniqueSlug(generatedSlug, this.articleCategoryRepository));
         }
 
         return this.articleCategoryRepository.save(articleCategory);

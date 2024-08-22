@@ -44,5 +44,4 @@ public class LocationModelMapperConfig {
             return new AddressResponse(address.getId(), address.getAddress(), address.getExtraAddress(), address.getZip(), address.getCoordinates(), cityResponse);
         }, Address.class, AddressResponse.class);
     }
-
 }

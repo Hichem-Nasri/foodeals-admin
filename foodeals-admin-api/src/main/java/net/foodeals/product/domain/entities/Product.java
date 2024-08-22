@@ -27,9 +27,9 @@ public class Product extends AbstractEntity<UUID> {
 
     private String name;
 
-    private String description;
-
     private String slug;
+
+    private String description;
 
     private String title;
 
