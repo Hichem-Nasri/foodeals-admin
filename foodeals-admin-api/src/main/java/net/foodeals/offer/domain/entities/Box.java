@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class Box extends AbstractEntity<UUID> implements OfferChoice {
+public class Box extends AbstractEntity<UUID> implements IOfferChoice {
 
     @Id
     @GeneratedValue
@@ -29,8 +29,24 @@ public class Box extends AbstractEntity<UUID> implements OfferChoice {
     @OneToMany(mappedBy = "box", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<BoxItem> boxItems;
 
+    Box() {
+    }
+
+    public Box(BoxType type, List<BoxItem> boxItems) {
+        this.type = type;
+        this.boxItems = boxItems;
+    }
+
+    public static Box create(BoxType type, List<BoxItem> boxItems) {
+        return new Box(
+                type,
+                boxItems
+        );
+    }
+
     @Override
     public OfferType getOfferType() {
         return OfferType.BOX;
     }
+
 }

@@ -32,4 +32,23 @@ public class BoxItem extends AbstractEntity<UUID> {
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Product product;
+
+    BoxItem() {
+    }
+
+    public BoxItem(Price price, Integer quantity, Box box, Product product) {
+        this.price = price;
+        this.quantity = quantity;
+        this.box = box;
+        this.product = product;
+    }
+
+    public static BoxItem create(Price price, Integer quantity, Box box, Product product) {
+        return new BoxItem(
+                price,
+                quantity,
+                box,
+                product
+        );
+    }
 }

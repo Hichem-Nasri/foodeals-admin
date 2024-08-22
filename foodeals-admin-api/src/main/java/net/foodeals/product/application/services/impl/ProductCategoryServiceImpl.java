@@ -22,7 +22,7 @@ import static net.foodeals.common.Utils.SlugUtil.toSlug;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class ProductCategoryServiceImpl implements ProductCategoryService {
+class ProductCategoryServiceImpl implements ProductCategoryService {
 
     private final ProductCategoryRepository repository;
     private final ActivityService activityService;
