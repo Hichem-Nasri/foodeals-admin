@@ -4,8 +4,7 @@ import net.foodeals.offer.domain.enums.OfferType;
 
 import java.util.UUID;
 
-public interface OfferChoice {
-
+public interface IOfferChoice {
     UUID getId();
 
     OfferType getOfferType();

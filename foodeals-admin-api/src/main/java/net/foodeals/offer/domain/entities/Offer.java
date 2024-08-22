@@ -2,7 +2,6 @@ package net.foodeals.offer.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
 import net.foodeals.offer.domain.valueObject.Offerable;
@@ -17,7 +16,6 @@ import java.util.UUID;
 @Table(name = "offers")
 
 @Getter
-@Setter
 public class Offer extends AbstractEntity<UUID> {
 
         @Id
@@ -56,5 +54,48 @@ public class Offer extends AbstractEntity<UUID> {
         private List<Order> orders;
 
         @Transient
-        private OfferChoice offerChoice;
+        private IOfferChoice offerChoice;
+
+        Offer() {
+        }
+
+        public Offer setPrice(Price price) {
+                this.price = price;
+                return this;
+        }
+
+        public Offer setSalePrice(Price salePrice) {
+                this.salePrice = salePrice;
+                return this;
+        }
+
+        public Offer setReduction(Integer reduction) {
+                this.reduction = reduction;
+                return this;
+        }
+
+        public Offer setBarcode(String barcode) {
+                this.barcode = barcode;
+                return this;
+        }
+
+        public Offer setOpenTime(List<OpenTime> openTime) {
+                this.openTime = openTime;
+                return this;
+        }
+
+        public Offer setActivity(Activity activity) {
+                this.activity = activity;
+                return this;
+        }
+
+        public Offer setOfferable(Offerable offerable) {
+                this.offerable = offerable;
+                return this;
+        }
+
+        public Offer setOfferChoice(IOfferChoice offerChoice) {
+                this.offerChoice = offerChoice;
+                return this;
+        }
 }
