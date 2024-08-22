@@ -2,6 +2,7 @@ package net.foodeals.product.application.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.foodeals.organizationEntity.application.services.ActivityService;
 import net.foodeals.organizationEntity.domain.entities.Activity;
 import net.foodeals.product.application.dtos.requests.ProductCategoryRequest;
 import net.foodeals.product.application.services.ProductCategoryService;
@@ -24,6 +25,7 @@ import static net.foodeals.common.Utils.SlugUtil.toSlug;
 public class ProductCategoryServiceImpl implements ProductCategoryService {
 
     private final ProductCategoryRepository repository;
+    private final ActivityService activityService;
 
     @Override
     public List<ProductCategory> findAll() {
@@ -43,8 +45,10 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
 
     @Override
     public ProductCategory create(ProductCategoryRequest request) {
+        final Activity activity = activityService.findById(request.activityId());
+
         final String slug = makeUniqueSlug(toSlug(request.name()), repository);
-        final ProductCategory productCategory = ProductCategory.create(request.name(), slug, new Activity());
+        final ProductCategory productCategory = ProductCategory.create(request.name(), slug, activity);
 
         return repository.save(productCategory);
     }
