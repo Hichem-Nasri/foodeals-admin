@@ -6,7 +6,7 @@ import java.util.UUID;
 public record CouponResponse(
     UUID id,
     String code,
-    String discount,
+    Float discount,
     Date endsAt,
     Boolean isEnabled) {
 }
