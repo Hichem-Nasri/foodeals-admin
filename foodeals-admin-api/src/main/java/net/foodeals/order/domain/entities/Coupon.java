@@ -39,6 +39,10 @@ public class Coupon extends AbstractEntity<UUID> {
     @OneToMany(mappedBy = "coupon", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Order> orders;
 
+    Coupon() {
+
+    }
+
     public void toggleIsEnabled() {
         isEnabled = !isEnabled;
     }
