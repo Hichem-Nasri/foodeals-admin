@@ -10,5 +10,6 @@ public record CouponRequest(
         @NotBlank String code,
         @NotNull Float discount,
         @NotNull Date endsAt,
-        @NotNull UUID subEntityId) {
+        @NotNull UUID subEntityId,
+        @NotNull Boolean isEnabled) {
 }

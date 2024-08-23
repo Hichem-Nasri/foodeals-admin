@@ -7,6 +7,7 @@ import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,6 +30,16 @@ public class Coupon extends AbstractEntity<UUID> {
     @ManyToOne
     private SubEntity subEntity;
 
+    @Column(name = "ends_at")
+    private Date endsAt;
+
+    @Column(name = "is_enabled")
+    private Boolean isEnabled;
+
     @OneToMany(mappedBy = "coupon", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<Order> orders;
+
+    public void toggleIsEnabled() {
+        isEnabled = !isEnabled;
+    }
 }
