@@ -15,6 +15,5 @@ public record TransactionRequest(
         @NotNull Price price,
         @NotNull TransactionStatus status,
         @NotNull TransactionType type,
-        @NotNull UUID orderId
-) {
+        @NotNull UUID orderId) {
 }
