@@ -1,9 +1,9 @@
 package net.foodeals.order.domain.repositories;
 
-import net.foodeals.order.domain.entities.Transcation;
-import org.springframework.data.jpa.repository.JpaRepository;
+import net.foodeals.common.contracts.BaseRepository;
+import net.foodeals.order.domain.entities.Transaction;
 
 import java.util.UUID;
 
-public interface TransactionRepository extends JpaRepository<Transcation, UUID> {
+public interface TransactionRepository extends BaseRepository<Transaction, UUID> {
 }

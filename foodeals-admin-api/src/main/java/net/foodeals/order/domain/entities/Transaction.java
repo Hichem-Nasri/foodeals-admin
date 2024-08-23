@@ -12,11 +12,11 @@ import org.hibernate.annotations.UuidGenerator;
 import java.util.UUID;
 
 @Entity
-@Table(name = "transcations")
+@Table(name = "transactions")
 
 @Getter
 @Setter
-public class Transcation extends AbstractEntity<UUID> {
+public class Transaction extends AbstractEntity<UUID> {
 
     @Id
     @GeneratedValue
