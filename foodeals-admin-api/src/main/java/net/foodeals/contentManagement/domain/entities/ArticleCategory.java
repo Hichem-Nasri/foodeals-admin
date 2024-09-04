@@ -2,6 +2,10 @@ package net.foodeals.contentManagement.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import org.hibernate.annotations.UuidGenerator;
 

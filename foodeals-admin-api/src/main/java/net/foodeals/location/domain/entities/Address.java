@@ -1,8 +1,7 @@
 package net.foodeals.location.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Coordinates;
 import net.foodeals.order.domain.entities.Order;
@@ -18,6 +17,9 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Address extends AbstractEntity<UUID> {
 
     @Id
@@ -35,8 +37,11 @@ public class Address extends AbstractEntity<UUID> {
     @Embedded
     private Coordinates coordinates;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private City city;
+
+    @ManyToOne
+    private Region region;
 
     @OneToMany(mappedBy = "shippingAddress", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Order> orders;

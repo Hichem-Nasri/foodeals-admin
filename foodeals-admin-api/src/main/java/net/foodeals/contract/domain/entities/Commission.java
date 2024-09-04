@@ -1,13 +1,11 @@
 package net.foodeals.contract.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -15,6 +13,10 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Commission extends AbstractEntity<UUID> {
 
     @Id
@@ -22,20 +24,10 @@ public class Commission extends AbstractEntity<UUID> {
     @UuidGenerator
     private UUID id;
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "amount", column = @Column(name = "cash_amount")),
-            @AttributeOverride(name = "currency", column = @Column(name = "cash_currency"))
-    })
-    private Price cash;
+    private Float cash;
 
-    @Embedded
-    @AttributeOverrides({
-            @AttributeOverride(name = "amount", column = @Column(name = "card_amount")),
-            @AttributeOverride(name = "currency", column = @Column(name = "card_currency"))
-    })
-    private Price card;
+    private Float card;
 
     @OneToOne(mappedBy = "commission", cascade = CascadeType.ALL)
-    private SolutionContract solutionContracts;
+    private SolutionContract solutionContract;
 }

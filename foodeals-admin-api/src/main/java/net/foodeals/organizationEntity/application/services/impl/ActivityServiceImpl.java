@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -49,5 +50,19 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public void delete(UUID id) {
 
+    }
+
+    @Override
+    public Set<Activity> getActivitiesByName(List<String> subActivitiesNames) {
+        return this.repository.findByNameIn(subActivitiesNames);
+    }
+
+    @Override
+    public Activity getActivityByName(String name) {
+        return this.repository.findByName(name);
+    }
+    @Override
+    public Activity save(Activity activity) {
+        return this.repository.save(activity);
     }
 }

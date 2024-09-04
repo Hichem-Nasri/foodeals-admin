@@ -2,11 +2,14 @@ package net.foodeals.location.application.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.foodeals.organizationEntity.application.dto.upload.EntityAddressDto;
 import net.foodeals.location.application.dtos.requests.AddressRequest;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
+import net.foodeals.location.application.services.RegionService;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.location.domain.entities.City;
+import net.foodeals.location.domain.entities.Region;
 import net.foodeals.location.domain.exceptions.AddressNotFoundException;
 import net.foodeals.location.domain.repositories.AddressRepository;
 import org.modelmapper.ModelMapper;
@@ -25,6 +28,7 @@ class AddressServiceImpl implements AddressService {
     private final AddressRepository repository;
     private final CityService cityService;
     private final ModelMapper modelMapper;
+    private final RegionService regionService;
 
     @Override
     public List<Address> findAll() {
@@ -64,5 +68,21 @@ class AddressServiceImpl implements AddressService {
         if (!repository.existsById(id))
             throw new AddressNotFoundException(id);
         repository.softDelete(id);
+    }
+
+    @Transactional
+    public Address updateContractAddress(Address address, EntityAddressDto entityAddressDto) {
+        if (entityAddressDto.getAddress() != null) {
+            address.setAddress(entityAddressDto.getAddress());
+        }
+        if (entityAddressDto.getCity() != null) {
+            City city = this.cityService.findByName(entityAddressDto.getCity());
+            address.setCity(city);
+        }
+        if (entityAddressDto.getRegion() != null) {
+            Region region = this.regionService.findByName(entityAddressDto.getRegion());
+            address.setRegion(region);
+        }
+        return this.repository.save(address);
     }
 }

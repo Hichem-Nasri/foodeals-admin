@@ -35,7 +35,10 @@ public class SecurityConfiguration {
             "/ArticleCategories/**",
             "/ArticleCategory/**",
             "/Articles/**",
-            "/Article/**"
+            "/Article/**",
+            "/Contracts/**",
+            "/OrganizationEntity/**",
+            "/Activities/**"
     };
 
     @Bean

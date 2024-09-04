@@ -1,12 +1,12 @@
 package net.foodeals.contract.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -16,6 +16,9 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Subscription extends AbstractEntity<UUID> {
 
     @Id
@@ -30,8 +33,11 @@ public class Subscription extends AbstractEntity<UUID> {
     })
     private Price amount;
 
-    private Date echeance;
+    private Integer numberOfDueDates;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SolutionContract> solutionContracts;
+    private Float duration;
+
+    @OneToMany(mappedBy = "subscription", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<SolutionContract> solutionContracts = new ArrayList<>();
 }

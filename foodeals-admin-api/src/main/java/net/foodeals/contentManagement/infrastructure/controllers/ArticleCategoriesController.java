@@ -2,7 +2,6 @@ package net.foodeals.contentManagement.infrastructure.controllers;
 
 import net.foodeals.contentManagement.application.Dto.response.ArticleCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.AddArticleToCategoryDto;
-import net.foodeals.contentManagement.application.Dto.upload.CreateArticleCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.DeleteArticleFromCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.UpdateArticleCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.*;
@@ -50,7 +49,7 @@ public class ArticleCategoriesController {
     }
 
     @PostMapping("/ArticleCategory")
-    public ResponseEntity<ArticleCategoryDto> createAnArticleCategory(@RequestBody CreateArticleCategoryDto createArticleCategoryDto) {
+    public ResponseEntity<ArticleCategoryDto> createAnArticleCategory(@RequestBody net.foodeals.contentManagement.domain.Dto.upload.CreateArticleCategoryDto createArticleCategoryDto) {
         ArticleCategory articleCategory = this.articleCategoryService.createAnArticleCategory(createArticleCategoryDto);
         ArticleCategoryDto articleCategoryDto = this.modelMapper.map(articleCategory, ArticleCategoryDto.class);
         return new ResponseEntity<ArticleCategoryDto>(articleCategoryDto, HttpStatus.OK);

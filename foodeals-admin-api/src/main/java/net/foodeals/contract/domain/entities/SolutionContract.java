@@ -1,8 +1,7 @@
 package net.foodeals.contract.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.organizationEntity.domain.entities.Solution;
 import org.hibernate.annotations.UuidGenerator;
@@ -14,6 +13,9 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class SolutionContract extends AbstractEntity<UUID> {
 
     @Id
@@ -21,7 +23,9 @@ public class SolutionContract extends AbstractEntity<UUID> {
     @UuidGenerator
     private UUID id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    private String duration;
+
+    @ManyToOne
     private Solution solution;
 
     @ManyToOne(cascade = CascadeType.ALL)
