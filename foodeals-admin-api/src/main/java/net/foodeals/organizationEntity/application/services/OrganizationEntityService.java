@@ -15,8 +15,16 @@ import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizat
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.organizationEntity.enums.EntityType;
+import net.foodeals.user.application.dtos.requests.UserRequest;
+import net.foodeals.user.application.services.RoleService;
+import net.foodeals.user.application.services.UserService;
+import net.foodeals.user.domain.entities.Role;
+import net.foodeals.user.domain.entities.User;
+import org.apache.commons.lang.RandomStringUtils;
+import org.eclipse.angus.mail.imap.IMAPNestedMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -34,8 +42,10 @@ public class OrganizationEntityService {
     private final BankInformationService bankInformationService;
     private final AddressService addressService;
     private final ContactsService contactsService;
+    private final UserService userService;
+    private final RoleService roleService;
 
-    public OrganizationEntityService(OrganizationEntityRepository organizationEntityRepository, ContractService contractService, CityService cityService, RegionService regionService, ActivityService activityService, SolutionService solutionService, BankInformationService bankInformationService, AddressService addressService, ContactsService contactsService) {
+    public OrganizationEntityService(OrganizationEntityRepository organizationEntityRepository, ContractService contractService, CityService cityService, RegionService regionService, ActivityService activityService, SolutionService solutionService, BankInformationService bankInformationService, AddressService addressService, ContactsService contactsService, UserService userService, RoleService roleService) {
         this.organizationEntityRepository = organizationEntityRepository;
         this.contractService = contractService;
         this.cityService = cityService;
@@ -45,6 +55,8 @@ public class OrganizationEntityService {
         this.bankInformationService = bankInformationService;
         this.addressService = addressService;
         this.contactsService = contactsService;
+        this.userService = userService;
+        this.roleService = roleService;
     }
 
     public OrganizationEntity save(OrganizationEntity organizationEntity) {
@@ -196,5 +208,22 @@ public class OrganizationEntityService {
 
     public List<OrganizationEntity> getOrganizationEntities() {
         return this.organizationEntityRepository.findAll();
+    }
+
+    public String validateOrganizationEntity(UUID id) {
+        OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
+
+        if (organizationEntity == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization Entity not found");
+        }
+        Contact managerContact = organizationEntity.getContacts().getFirst();
+
+        Role role  = this.roleService.findByName("PARTNER");
+        String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId());
+        User manager = this.userService.create(userRequest);
+        manager.setOrganizationEntity(organizationEntity);
+        System.out.println("\"" + pass + "\"");
+        return "Contract validated successfully";
     }
 }

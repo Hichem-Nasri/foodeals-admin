@@ -51,4 +51,9 @@ public class OrganizationEntityController {
         List<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.stream().map(this.modelMapper::mapOrganizationEntity).toList();
         return new ResponseEntity<List<OrganizationEntityDto>>(organizationEntitiesDto, HttpStatus.OK);
     }
+
+    @PostMapping("/OrganizationEntity/{id}/validate")
+    public ResponseEntity<String> validateOrganizationEntity(@PathVariable("id") UUID id) {
+        return new ResponseEntity<String>(this.organizationEntityService.validateOrganizationEntity(id), HttpStatus.OK);
+    }
 }

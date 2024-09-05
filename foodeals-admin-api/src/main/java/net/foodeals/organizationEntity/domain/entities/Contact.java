@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.user.domain.valueObjects.Name;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
@@ -21,7 +22,8 @@ public class Contact extends AbstractEntity<UUID> {
     @UuidGenerator
     private UUID id;
 
-    private String name;
+    @Embedded
+    private Name name;
 
     @Column(unique = true)
     private String email;

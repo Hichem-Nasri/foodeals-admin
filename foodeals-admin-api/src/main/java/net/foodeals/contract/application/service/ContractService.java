@@ -97,7 +97,7 @@ public class ContractService {
         placeholders.put("[raison sociale du partenaire]", createAnOrganizationEntityDto.getEntityName());
         placeholders.put("[Adresse du partenaire]", createAnOrganizationEntityDto.getEntityAddressDto().getAddress());
         placeholders.put("[numéro du registre de commerce]", createAnOrganizationEntityDto.getCommercialNumber());
-        placeholders.put("[nom du gérant/responsable]", createAnOrganizationEntityDto.getEntityContactDto().getName());
+        placeholders.put("[nom du gérant/responsable]", createAnOrganizationEntityDto.getEntityContactDto().getName().firstName() + " " + createAnOrganizationEntityDto.getEntityContactDto().getName().lastName());
         placeholders.put("[Catégorie]", createAnOrganizationEntityDto.getActivities().get(0));
         placeholders.put("[sous-catégorie]", subActivities);
         placeholders.put("[nombre de points de vente]", createAnOrganizationEntityDto.getMaxNumberOfSubEntities().toString());
@@ -111,7 +111,7 @@ public class ContractService {
         placeholders.put("[Banque]", createAnOrganizationEntityDto.getEntityBankInformationDto().getBankName());
         placeholders.put("[RIB]", createAnOrganizationEntityDto.getEntityBankInformationDto().getRib());
         placeholders.put("[date]", formattedDate);
-        placeholders.put("[nom du signataire]", createAnOrganizationEntityDto.getEntityContactDto().getName());
+        placeholders.put("[nom du signataire]", createAnOrganizationEntityDto.getEntityContactDto().getName().firstName() + " " + createAnOrganizationEntityDto.getEntityContactDto().getName().lastName());
         placeholders.put("[responsibility]", "Manager");
 
         String template = new String(Files.readAllBytes(Paths.get(templatePath)));
@@ -180,7 +180,7 @@ public class ContractService {
         placeholders.put("[raison sociale du partenaire]", contract.getOrganizationEntity().getName());
         placeholders.put("[Adresse du partenaire]", contract.getOrganizationEntity().getAddress().getAddress());
         placeholders.put("[numéro du registre de commerce]", contract.getOrganizationEntity().getCommercialNumber());
-        placeholders.put("[nom du gérant/responsable]", contract.getOrganizationEntity().getContacts().get(0).getName());
+        placeholders.put("[nom du gérant/responsable]", contract.getOrganizationEntity().getContacts().get(0).getName().firstName() + " " + contract.getOrganizationEntity().getContacts().get(0).getName().lastName());
         placeholders.put("[Catégorie]", contract.getOrganizationEntity().getMainActivity().getName());
         placeholders.put("[sous-catégorie]", subActivities);
         placeholders.put("[nombre de points de vente]", contract.getMaxNumberOfSubEntities().toString());
@@ -194,7 +194,7 @@ public class ContractService {
         placeholders.put("[Banque]", contract.getOrganizationEntity().getBankInformation().getBankName());
         placeholders.put("[RIB]", contract.getOrganizationEntity().getBankInformation().getRib());
         placeholders.put("[date]", formattedDate);
-        placeholders.put("[nom du signataire]", contract.getOrganizationEntity().getContacts().get(0).getName());
+        placeholders.put("[nom du signataire]", contract.getOrganizationEntity().getContacts().get(0).getName().firstName() + " " + contract.getOrganizationEntity().getContacts().get(0).getName().lastName());
         placeholders.put("[responsibility]", "Manager");
 
         String template = new String(Files.readAllBytes(Paths.get(templatePath)));
