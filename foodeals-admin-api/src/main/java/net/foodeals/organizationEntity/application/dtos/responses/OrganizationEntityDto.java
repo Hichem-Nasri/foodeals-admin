@@ -1,15 +1,14 @@
-package net.foodeals.organizationEntity.application.dto.response;
+package net.foodeals.organizationEntity.application.dtos.responses;
 
 import lombok.Data;
-import net.foodeals.contract.domain.entities.enums.ContractStatus;
 
 @Data
 public class OrganizationEntityDto {
     private String createdAt;
 
-    private String logoPath;
+    private String avatarPath;
 
-    private String companyName;
+    private String name;
 
     private String manager;
 

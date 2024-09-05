@@ -1,4 +1,4 @@
-package net.foodeals.organizationEntity.application.dto.upload;
+package net.foodeals.organizationEntity.application.dtos.requests;
 
 import lombok.Data;
 

@@ -4,16 +4,19 @@ import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.contract.domain.entities.SolutionContract;
+import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.contract.domain.repositories.ContractRepository;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.RegionService;
 import net.foodeals.location.domain.repositories.CityRepository;
-import net.foodeals.organizationEntity.application.dto.upload.CreateAnOrganizationEntityDto;
-import net.foodeals.organizationEntity.application.dto.upload.UpdateOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.services.*;
 import net.foodeals.organizationEntity.domain.entities.*;
+import net.foodeals.user.application.services.UserService;
+import net.foodeals.user.domain.entities.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -42,8 +45,10 @@ public class ContractService {
     private final SubscriptionService subscriptionService;
     private final BankInformationService bankInformationService;
     private final RegionService regionService;
+    private final UserService userService;
+    private final UserContractService userContractService;
 
-    public ContractService(ContractRepository contractRepository, CityRepository cityRepository, CityService cityService, ActivityService activityService, SolutionService solutionService, SolutionContractService solutionContractService, AddressService addressService, ContactsService contactsService, CommissionService commissionService, SubscriptionService subscriptionService, BankInformationService bankInformationService, RegionService regionService) {
+    public ContractService(ContractRepository contractRepository, CityRepository cityRepository, CityService cityService, ActivityService activityService, SolutionService solutionService, SolutionContractService solutionContractService, AddressService addressService, ContactsService contactsService, CommissionService commissionService, SubscriptionService subscriptionService, BankInformationService bankInformationService, RegionService regionService, UserService userService, UserContractService userContractService) {
         this.contractRepository = contractRepository;
         this.cityService = cityService;
         this.activityService = activityService;
@@ -55,14 +60,22 @@ public class ContractService {
         this.subscriptionService = subscriptionService;
         this.bankInformationService = bankInformationService;
         this.regionService = regionService;
+        this.userService = userService;
+        this.userContractService = userContractService;
     }
 
         public Contract createANewContract(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
+        User user = this.userService.findById(createAnOrganizationEntityDto.getManagerId());
+        UserContract userContract = UserContract.builder().user(user).build();
         Contract contract = Contract.builder().name(createAnOrganizationEntityDto.getEntityName())
                 .maxNumberOfSubEntities(createAnOrganizationEntityDto.getMaxNumberOfSubEntities())
                 .maxNumberOfAccounts(createAnOrganizationEntityDto.getMaxNumberOfAccounts())
                 .minimumReduction(createAnOrganizationEntityDto.getMinimumReduction())
+                .contractStatus(ContractStatus.IN_PROGRESS)
+                .userContracts(userContract)
                 .build();
+        userContract.setContract(contract);
+        this.userContractService.save(userContract);
         contract.setOrganizationEntity(organizationEntity);
         List<SolutionContract> solutionsContracts = this.solutionContractService.createManySolutionContracts(createAnOrganizationEntityDto.getSolutionsContractDto(), contract, createAnOrganizationEntityDto.getOneSubscription());
         contract.getSolutionContracts().addAll(solutionsContracts);
@@ -215,6 +228,10 @@ public class ContractService {
 
         if (updateOrganizationEntityDto.getMinimumReduction() != null) {
             contract.setMinimumReduction(updateOrganizationEntityDto.getMinimumReduction());
+        }
+
+        if (updateOrganizationEntityDto.getManagerId() != null && updateOrganizationEntityDto.getManagerId() != contract.getUserContracts().getUser().getId()) {
+            this.userContractService.updateUserContract(contract.getUserContracts(), updateOrganizationEntityDto);
         }
 
         this.solutionContractService.update(contract, updateOrganizationEntityDto);

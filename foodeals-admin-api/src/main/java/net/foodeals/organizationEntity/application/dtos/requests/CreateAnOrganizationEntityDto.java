@@ -1,4 +1,4 @@
-package net.foodeals.organizationEntity.application.dto.upload;
+package net.foodeals.organizationEntity.application.dtos.requests;
 
 import lombok.Data;
 import net.foodeals.contract.application.DTo.upload.SolutionsContractDto;
@@ -18,7 +18,7 @@ public class CreateAnOrganizationEntityDto {
 
     private String commercialNumber;
 
-    private UUID salesManageId; // valid
+    private Integer managerId; // valid
 
     private EntityContactDto entityContactDto; // valid
 

@@ -2,7 +2,7 @@ package net.foodeals.location.application.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import net.foodeals.organizationEntity.application.dto.upload.EntityAddressDto;
+import net.foodeals.organizationEntity.application.dtos.requests.EntityAddressDto;
 import net.foodeals.location.application.dtos.requests.AddressRequest;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;

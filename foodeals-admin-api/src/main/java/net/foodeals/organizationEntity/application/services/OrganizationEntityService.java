@@ -3,7 +3,6 @@ package net.foodeals.organizationEntity.application.services;
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
 import net.foodeals.contract.application.service.ContractService;
-import net.foodeals.contract.application.service.SolutionContractService;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
@@ -11,8 +10,8 @@ import net.foodeals.location.application.services.RegionService;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Region;
-import net.foodeals.organizationEntity.application.dto.upload.CreateAnOrganizationEntityDto;
-import net.foodeals.organizationEntity.application.dto.upload.UpdateOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.organizationEntity.enums.EntityType;
@@ -184,5 +183,18 @@ public class OrganizationEntityService {
         contact.setOrganizationEntity(organizationEntity);
         this.contractService.update(contract, updateOrganizationEntityDto);
         return "Organization Entity updated successfully";
+    }
+
+    public OrganizationEntity getOrganizationEntityById(UUID id) {
+        OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
+
+        if (organizationEntity == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "organization Entity not found");
+        }
+        return organizationEntity;
+    }
+
+    public List<OrganizationEntity> getOrganizationEntities() {
+        return this.organizationEntityRepository.findAll();
     }
 }

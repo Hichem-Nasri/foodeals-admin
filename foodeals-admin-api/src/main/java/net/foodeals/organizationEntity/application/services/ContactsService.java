@@ -1,6 +1,6 @@
 package net.foodeals.organizationEntity.application.services;
 
-import net.foodeals.organizationEntity.application.dto.upload.EntityContactDto;
+import net.foodeals.organizationEntity.application.dtos.requests.EntityContactDto;
 import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.repositories.ContactRepository;
 import org.springframework.stereotype.Service;

@@ -34,7 +34,7 @@ public class Contract extends AbstractEntity<UUID> {
     @JsonIgnore
     private byte[] document;
 
-    @OneToOne(mappedBy = "contract")
+    @OneToOne(mappedBy = "contract", cascade = CascadeType.ALL)
     @JsonIgnore
     private UserContract userContracts;
 

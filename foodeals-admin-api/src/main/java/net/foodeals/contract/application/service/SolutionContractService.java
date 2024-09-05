@@ -2,13 +2,12 @@ package net.foodeals.contract.application.service;
 
 import jakarta.transaction.Transactional;
 import net.foodeals.contract.application.DTo.upload.SolutionsContractDto;
-import net.foodeals.contract.application.DTo.upload.UpdateContractDto;
 import net.foodeals.contract.domain.entities.Commission;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.contract.domain.entities.SolutionContract;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.contract.domain.repositories.SolutionContractRepository;
-import net.foodeals.organizationEntity.application.dto.upload.UpdateOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.services.SolutionService;
 import net.foodeals.organizationEntity.domain.entities.Solution;
 import org.springframework.stereotype.Service;

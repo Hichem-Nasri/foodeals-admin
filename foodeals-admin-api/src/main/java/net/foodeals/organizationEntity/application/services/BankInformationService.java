@@ -1,6 +1,6 @@
 package net.foodeals.organizationEntity.application.services;
 
-import net.foodeals.organizationEntity.application.dto.upload.EntityBankInformationDto;
+import net.foodeals.organizationEntity.application.dtos.requests.EntityBankInformationDto;
 import net.foodeals.organizationEntity.domain.entities.BankInformation;
 import net.foodeals.organizationEntity.domain.repositories.BankInformationRepository;
 import org.springframework.stereotype.Service;

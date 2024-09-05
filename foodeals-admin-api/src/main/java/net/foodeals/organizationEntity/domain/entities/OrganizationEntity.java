@@ -41,7 +41,7 @@ public class OrganizationEntity extends AbstractEntity<UUID> {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubEntity> subEntities = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Activity mainActivity;
 
     @ManyToMany(cascade = CascadeType.ALL)

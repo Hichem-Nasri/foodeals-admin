@@ -1,9 +1,9 @@
 package net.foodeals.contract.application.DTo.upload;
 
 import lombok.Data;
-import net.foodeals.organizationEntity.application.dto.upload.EntityAddressDto;
-import net.foodeals.organizationEntity.application.dto.upload.EntityBankInformationDto;
-import net.foodeals.organizationEntity.application.dto.upload.EntityContactDto;
+import net.foodeals.organizationEntity.application.dtos.requests.EntityAddressDto;
+import net.foodeals.organizationEntity.application.dtos.requests.EntityBankInformationDto;
+import net.foodeals.organizationEntity.application.dtos.requests.EntityContactDto;
 
 import java.util.List;
 import java.util.UUID;
