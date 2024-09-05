@@ -49,7 +49,7 @@ public class ArticleCategoriesController {
     }
 
     @PostMapping("/ArticleCategory")
-    public ResponseEntity<ArticleCategoryDto> createAnArticleCategory(@RequestBody net.foodeals.contentManagement.domain.Dto.upload.CreateArticleCategoryDto createArticleCategoryDto) {
+    public ResponseEntity<ArticleCategoryDto> createAnArticleCategory(@RequestBody CreateArticleCategoryDto createArticleCategoryDto) {
         ArticleCategory articleCategory = this.articleCategoryService.createAnArticleCategory(createArticleCategoryDto);
         ArticleCategoryDto articleCategoryDto = this.modelMapper.map(articleCategory, ArticleCategoryDto.class);
         return new ResponseEntity<ArticleCategoryDto>(articleCategoryDto, HttpStatus.OK);
