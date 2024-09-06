@@ -21,7 +21,6 @@ import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
 import org.apache.commons.lang.RandomStringUtils;
-import org.eclipse.angus.mail.imap.IMAPNestedMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;

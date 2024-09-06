@@ -39,6 +39,7 @@ public class SecurityConfiguration {
             "/Contracts/**",
             "/OrganizationEntity/**",
             "/Activities/**",
+            "/Activity/**",
             "/Rayon/**"
     };
 
