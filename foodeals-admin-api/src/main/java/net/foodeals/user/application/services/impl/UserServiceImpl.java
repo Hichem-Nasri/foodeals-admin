@@ -12,6 +12,7 @@ import net.foodeals.user.domain.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -80,5 +81,11 @@ class UserServiceImpl implements UserService {
         user.setRole(role)
                 .setPassword(passwordEncoder.encode(user.getPassword()));
         return user;
+    }
+
+    @Override
+    public User loadUserByUsername(String email) throws UsernameNotFoundException {
+        return repository.findByEmailWithRoleAndAuthorities(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 }

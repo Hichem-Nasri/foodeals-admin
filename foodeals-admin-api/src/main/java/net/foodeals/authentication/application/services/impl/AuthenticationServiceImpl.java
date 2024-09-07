@@ -1,11 +1,13 @@
 package net.foodeals.authentication.application.services.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.foodeals.authentication.application.dtos.requests.LoginRequest;
 import net.foodeals.authentication.application.dtos.requests.RegisterRequest;
 import net.foodeals.authentication.application.dtos.responses.AuthenticationResponse;
 import net.foodeals.authentication.application.services.AuthenticationService;
 import net.foodeals.authentication.application.services.JwtService;
+import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,19 +25,45 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 class AuthenticationServiceImpl implements AuthenticationService {
     private final UserService userService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
-//        final User user = userService.createrequest);
-//        return handleRegistration(user);
-        return null;
+        final User user = userService.create(new UserRequest(request.name(), request.email(), request.phone(), request.password(), request.isEmailVerified(), request.roleId()));
+        return handleRegistration(user);
     }
 
     public AuthenticationResponse login(LoginRequest request) {
-        return handleLogin(request);
+        log.debug("Login attempt for user: {}", request.email());
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.email(),
+                            request.password()));
+
+            log.debug("Authentication successful for user: {}", request.email());
+
+            SecurityContext sc = SecurityContextHolder.getContext();
+            sc.setAuthentication(authentication);
+
+            log.debug("SecurityContext updated with authentication");
+
+            final User user = userService.loadUserByUsername(request.email());
+            log.debug("User loaded: {}", user);
+            log.debug("User authorities: {}", user.getAuthorities());
+
+            AuthenticationResponse response = getTokens(user);
+            log.debug("Tokens generated for user: {}", user.getEmail());
+
+            return response;
+        } catch (Exception e) {
+            log.error("Login failed for user: {}", request.email(), e);
+            System.out.println(e.getMessage());
+            throw e;
+        }
     }
 
     private AuthenticationResponse handleRegistration(User user) {
@@ -52,7 +80,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
         SecurityContext sc = SecurityContextHolder.getContext();
         sc.setAuthentication(authentication);
 
-        final User user = userService.findByEmail(request.email());
+        final User user = userService.loadUserByUsername(request.email());
         return getTokens(user);
     }
 
