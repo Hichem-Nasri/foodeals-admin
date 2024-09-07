@@ -115,7 +115,7 @@ public class OrganizationEntityService {
     }
 
     @Transactional
-    public String updateOrganizationEntity(UUID id, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
+    public UUID updateOrganizationEntity(UUID id, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
 
         OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
 
@@ -193,7 +193,7 @@ public class OrganizationEntityService {
         this.organizationEntityRepository.save(organizationEntity);
         contact.setOrganizationEntity(organizationEntity);
         this.contractService.update(contract, updateOrganizationEntityDto);
-        return "Organization Entity updated successfully";
+        return organizationEntity.getId();
     }
 
     public OrganizationEntity getOrganizationEntityById(UUID id) {
@@ -224,5 +224,15 @@ public class OrganizationEntityService {
         manager.setOrganizationEntity(organizationEntity);
         System.out.println("\"" + pass + "\"");
         return "Contract validated successfully";
+    }
+
+    public byte[] getContractDocument(UUID id) {
+        OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
+
+        if (organizationEntity == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "organization Entity not found");
+        }
+
+        return this.contractService.getContractDocument(organizationEntity.getContract().getId());
     }
 }

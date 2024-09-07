@@ -32,7 +32,7 @@ public class OrganizationEntityController {
     }
 
     @PutMapping("/OrganizationEntity/{id}")
-    public ResponseEntity<String> updateOrganizationEntity(@RequestBody UpdateOrganizationEntityDto updateOrganizationEntityDto, @PathVariable("id") UUID id) throws DocumentException, IOException {
+    public ResponseEntity<UUID> updateOrganizationEntity(@RequestBody UpdateOrganizationEntityDto updateOrganizationEntityDto, @PathVariable("id") UUID id) throws DocumentException, IOException {
             return new ResponseEntity<>(this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto), HttpStatus.OK);
     }
 
@@ -55,5 +55,14 @@ public class OrganizationEntityController {
     @PostMapping("/OrganizationEntity/{id}/validate")
     public ResponseEntity<String> validateOrganizationEntity(@PathVariable("id") UUID id) {
         return new ResponseEntity<String>(this.organizationEntityService.validateOrganizationEntity(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/OrganizationEntity/{id}/Contract")
+    public ResponseEntity<byte[]> getContractDocument(@PathVariable("id") UUID id) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.add("Content-Disposition", "attachment; filename=contract.pdf");
+
+        return new ResponseEntity<byte []>(this.organizationEntityService.getContractDocument(id), headers, HttpStatus.OK);
     }
 }
