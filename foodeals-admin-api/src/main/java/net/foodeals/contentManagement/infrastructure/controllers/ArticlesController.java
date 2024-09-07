@@ -58,9 +58,8 @@ public class ArticlesController {
     }
 
     @DeleteMapping("Article/{uuid}")
-    public ResponseEntity<ArticleDto> deleteAnArticle(@PathVariable("uuid") String uuid) {
-        Article article = this.articleService.deleteAnArticleByUuid(uuid);
-        ArticleDto articleDto = this.modelMapper.map(article, ArticleDto.class);
-        return new ResponseEntity<ArticleDto>(articleDto, HttpStatus.OK);
+    public ResponseEntity<String> deleteAnArticle(@PathVariable("uuid") String uuid) {
+        this.articleService.deleteAnArticleByUuid(uuid);
+        return new ResponseEntity<String>("Article has been deleted", HttpStatus.OK);
     }
 }
