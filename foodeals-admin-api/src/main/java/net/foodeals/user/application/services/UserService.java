@@ -7,4 +7,6 @@ import net.foodeals.user.domain.entities.User;
 public interface UserService extends CrudService<User, Integer, UserRequest> {
 
     User findByEmail(String email);
+
+    User save(User manager);
 }

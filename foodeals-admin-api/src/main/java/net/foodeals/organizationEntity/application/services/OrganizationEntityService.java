@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.application.services;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.location.application.services.AddressService;
@@ -43,8 +44,9 @@ public class OrganizationEntityService {
     private final ContactsService contactsService;
     private final UserService userService;
     private final RoleService roleService;
+    private final EmailService emailService;
 
-    public OrganizationEntityService(OrganizationEntityRepository organizationEntityRepository, ContractService contractService, CityService cityService, RegionService regionService, ActivityService activityService, SolutionService solutionService, BankInformationService bankInformationService, AddressService addressService, ContactsService contactsService, UserService userService, RoleService roleService) {
+    public OrganizationEntityService(OrganizationEntityRepository organizationEntityRepository, ContractService contractService, CityService cityService, RegionService regionService, ActivityService activityService, SolutionService solutionService, BankInformationService bankInformationService, AddressService addressService, ContactsService contactsService, UserService userService, RoleService roleService, EmailService emailService) {
         this.organizationEntityRepository = organizationEntityRepository;
         this.contractService = contractService;
         this.cityService = cityService;
@@ -56,6 +58,7 @@ public class OrganizationEntityService {
         this.contactsService = contactsService;
         this.userService = userService;
         this.roleService = roleService;
+        this.emailService = emailService;
     }
 
     public OrganizationEntity save(OrganizationEntity organizationEntity) {
@@ -222,7 +225,13 @@ public class OrganizationEntityService {
         UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId());
         User manager = this.userService.create(userRequest);
         manager.setOrganizationEntity(organizationEntity);
-        System.out.println("\"" + pass + "\"");
+        organizationEntity.getUsers().add(manager);
+        this.userService.save(manager);
+        this.organizationEntityRepository.save(organizationEntity);
+        String receiver = manager.getEmail();
+        String subject = "Foodeals account validation";
+        String message = "You're account has been validated\n Your email : " + manager.getEmail() + " \n" + " Your password : " + pass;
+        this.emailService.sendEmail(receiver, subject, message);
         return "Contract validated successfully";
     }
 
