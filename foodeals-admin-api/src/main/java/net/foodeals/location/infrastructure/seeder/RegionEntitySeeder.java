@@ -12,7 +12,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 @Component
-@Order(6)
+@Order(4)
 public class RegionEntitySeeder {
 
     private final RegionRepository regionRepository;

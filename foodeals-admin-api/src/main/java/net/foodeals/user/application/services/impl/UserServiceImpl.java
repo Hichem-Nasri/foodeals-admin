@@ -3,6 +3,7 @@ package net.foodeals.user.application.services.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.user.application.dtos.requests.UserRequest;
+import net.foodeals.user.application.dtos.responses.ClientDto;
 import net.foodeals.user.application.services.RoleService;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.Role;
@@ -12,6 +13,7 @@ import net.foodeals.user.domain.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -87,6 +89,16 @@ class UserServiceImpl implements UserService {
         return this.repository.save(user);
     }
 
+    @Override
+    public Page<User> getClientsData(Pageable page) {
+        String roleName = "CLIENT";
+        return this.repository.findByRoleName(roleName, page);
+    }
 
+    public ClientDto toClientDto(User user) {
+        ClientDto client = this.modelMapper.map(user, ClientDto.class);
 
+        client.setNumberOfCommands(user.getOrders().size());
+        return client;
+    }
 }
