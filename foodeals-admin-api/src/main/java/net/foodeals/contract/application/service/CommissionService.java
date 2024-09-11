@@ -43,4 +43,8 @@ public class CommissionService {
         }
         return this.commissionRepository.save(commission);
     }
+
+    public Commission getCommissionByPartnerName(String name) {
+        return this.commissionRepository.findByPartnerName(name);
+    }
 }
