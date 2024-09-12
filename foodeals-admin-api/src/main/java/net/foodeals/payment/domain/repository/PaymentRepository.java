@@ -1,8 +1,7 @@
 package net.foodeals.payment.domain.repository;
 
 
-import net.foodeals.common.contracts.BaseRepository;
-import net.foodeals.payment.domain.Payment;
+import net.foodeals.payment.domain.entities.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

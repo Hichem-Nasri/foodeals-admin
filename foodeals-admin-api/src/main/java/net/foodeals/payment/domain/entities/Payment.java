@@ -1,4 +1,4 @@
-package net.foodeals.payment.domain;
+package net.foodeals.payment.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;

@@ -4,6 +4,7 @@ import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
+import net.foodeals.contract.application.service.DeadlinesService;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
@@ -16,7 +17,7 @@ import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizat
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.organizationEntity.enums.EntityType;
-import net.foodeals.payment.domain.Payment;
+import net.foodeals.payment.domain.entities.Payment;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 import net.foodeals.user.application.dtos.requests.UserRequest;
@@ -27,7 +28,6 @@ import net.foodeals.user.domain.entities.User;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class OrganizationEntityService {
     private final RoleService roleService;
     private final EmailService emailService;
 
-    public OrganizationEntityService(OrganizationEntityRepository organizationEntityRepository, ContractService contractService, CityService cityService, RegionService regionService, ActivityService activityService, SolutionService solutionService, BankInformationService bankInformationService, AddressService addressService, ContactsService contactsService, UserService userService, RoleService roleService, EmailService emailService) {
+    public OrganizationEntityService(OrganizationEntityRepository organizationEntityRepository, ContractService contractService, CityService cityService, RegionService regionService, ActivityService activityService, SolutionService solutionService, BankInformationService bankInformationService, AddressService addressService, ContactsService contactsService, UserService userService, RoleService roleService, EmailService emailService, DeadlinesService deadlinesService) {
         this.organizationEntityRepository = organizationEntityRepository;
         this.contractService = contractService;
         this.cityService = cityService;
@@ -216,6 +216,7 @@ public class OrganizationEntityService {
         return this.organizationEntityRepository.findAll();
     }
 
+    @Transactional
     public String validateOrganizationEntity(UUID id) {
         OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
 
@@ -242,10 +243,11 @@ public class OrganizationEntityService {
         organizationEntity.getPayments().add(payment);
         this.userService.save(manager);
         this.organizationEntityRepository.save(organizationEntity);
-        String receiver = manager.getEmail();
-        String subject = "Foodeals account validation";
-        String message = "You're account has been validated\n Your email : " + manager.getEmail() + " \n" + " Your password : " + pass;
-        this.emailService.sendEmail(receiver, subject, message);
+        this.contractService.validateContract(organizationEntity.getContract());
+//        String receiver = manager.getEmail();
+//        String subject = "Foodeals account validation";
+//        String message = "You're account has been validated\n Your email : " + manager.getEmail() + " \n" + " Your password : " + pass;
+//        this.emailService.sendEmail(receiver, subject, message);
         return "Contract validated successfully";
     }
 

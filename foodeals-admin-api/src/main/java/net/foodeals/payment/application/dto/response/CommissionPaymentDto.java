@@ -4,7 +4,7 @@ import lombok.Data;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 
 @Data
-public class PaymentDto {
+public class CommissionPaymentDto {
     private String id;
 
     private String date;

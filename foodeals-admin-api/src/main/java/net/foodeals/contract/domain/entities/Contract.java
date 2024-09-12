@@ -56,6 +56,8 @@ public class Contract extends AbstractEntity<UUID> {
     @JsonIgnore
     private OrganizationEntity organizationEntity;
 
+    private boolean singleSubscription;
+
     @Enumerated(EnumType.STRING)
     private ContractStatus contractStatus;
 }

@@ -1,8 +1,10 @@
 package net.foodeals.payment.infrastructure.controller;
 
-import net.foodeals.payment.application.dto.response.PaymentDto;
+import net.foodeals.contract.domain.entities.Subscription;
+import net.foodeals.payment.application.dto.response.CommissionPaymentDto;
+import net.foodeals.payment.application.dto.response.SubscriptionPaymentDto;
 import net.foodeals.payment.application.services.PaymentService;
-import net.foodeals.payment.domain.Payment;
+import net.foodeals.payment.domain.entities.Payment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,10 +24,17 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    @GetMapping
-    public ResponseEntity<Page<PaymentDto>> getPayments(Pageable page) {
-        Page<Payment> payments = this.paymentService.getPayments(page);
-        Page<PaymentDto> paymentsDtos = payments.map(this.paymentService::toPaymentDto);
-        return new ResponseEntity<Page<PaymentDto>>(paymentsDtos, HttpStatus.OK);
+    @GetMapping("/commissions")
+    public ResponseEntity<Page<CommissionPaymentDto>> getCommissionPayments(Pageable page) {
+        Page<Payment> payments = this.paymentService.getCommissionPayments(page);
+        Page<CommissionPaymentDto> paymentsDtos = payments.map(this.paymentService::toCommissionPaymentDto);
+        return new ResponseEntity<Page<CommissionPaymentDto>>(paymentsDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/subscriptions")
+    public ResponseEntity<Page<SubscriptionPaymentDto>> getSubscriptionPayments(Pageable page) {
+        Page<Subscription> subscriptions = this.paymentService.getSubscriptionPayments(page);
+        Page<SubscriptionPaymentDto> paymentsDtos = subscriptions.map(this.paymentService::toSubscriptionPaymentDto);
+        return new ResponseEntity<Page<SubscriptionPaymentDto>>(paymentsDtos, HttpStatus.OK);
     }
 }

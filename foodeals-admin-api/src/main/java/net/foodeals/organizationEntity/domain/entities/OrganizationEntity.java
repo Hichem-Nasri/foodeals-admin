@@ -4,10 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.contract.domain.entities.Contract;
+import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.organizationEntity.enums.EntityType;
-import net.foodeals.payment.domain.Payment;
+import net.foodeals.payment.domain.entities.Payment;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -81,4 +82,8 @@ public class OrganizationEntity extends AbstractEntity<UUID> {
     @Builder.Default
     @OneToMany(mappedBy = "organizationEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payment> payments = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "organizationEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Subscription> subscriptions = new ArrayList<>();
 }

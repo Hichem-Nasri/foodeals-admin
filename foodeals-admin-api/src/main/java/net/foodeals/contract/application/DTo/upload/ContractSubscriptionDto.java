@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Data
 public class ContractSubscriptionDto {
 
-    private Float duration;
+    private Integer duration;
 
     private Float annualPayment;
 

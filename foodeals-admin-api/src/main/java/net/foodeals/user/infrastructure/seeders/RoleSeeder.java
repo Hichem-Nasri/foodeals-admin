@@ -3,6 +3,7 @@ package net.foodeals.user.infrastructure.seeders;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.common.annotations.Seeder;
 import net.foodeals.user.domain.entities.Role;
+import net.foodeals.user.domain.repositories.RoleRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 
