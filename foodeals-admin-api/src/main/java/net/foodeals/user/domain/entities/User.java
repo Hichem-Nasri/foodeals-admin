@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * User
@@ -100,7 +101,7 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
         final List<SimpleGrantedAuthority> authorities = role.getAuthorities()
                 .stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getName()))
-                .toList();
+                .collect(Collectors.toList());
         authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
         return authorities;
     }

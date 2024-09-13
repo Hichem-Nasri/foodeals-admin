@@ -9,6 +9,4 @@ public interface UserService extends CrudService<User, Integer, UserRequest> {
 
 
     User findByEmail(String email);
-
-    User loadUserByUsername(String email) throws UsernameNotFoundException;
 }

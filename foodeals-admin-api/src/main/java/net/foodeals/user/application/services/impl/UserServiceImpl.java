@@ -82,10 +82,4 @@ class UserServiceImpl implements UserService {
                 .setPassword(passwordEncoder.encode(user.getPassword()));
         return user;
     }
-
-    @Override
-    public User loadUserByUsername(String email) throws UsernameNotFoundException {
-        return repository.findByEmailWithRoleAndAuthorities(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-    }
 }

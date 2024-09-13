@@ -37,50 +37,28 @@ class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     public AuthenticationResponse login(LoginRequest request) {
-        log.debug("Login attempt for user: {}", request.email());
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.email(),
                             request.password()));
 
-            log.debug("Authentication successful for user: {}", request.email());
-
             SecurityContext sc = SecurityContextHolder.getContext();
             sc.setAuthentication(authentication);
 
-            log.debug("SecurityContext updated with authentication");
-
-            final User user = userService.loadUserByUsername(request.email());
-            log.debug("User loaded: {}", user);
-            log.debug("User authorities: {}", user.getAuthorities());
+            final User user = userService.findByEmail(request.email());
 
             AuthenticationResponse response = getTokens(user);
-            log.debug("Tokens generated for user: {}", user.getEmail());
 
             return response;
         } catch (Exception e) {
             log.error("Login failed for user: {}", request.email(), e);
-            System.out.println(e.getMessage());
+            e.printStackTrace();
             throw e;
         }
     }
 
     private AuthenticationResponse handleRegistration(User user) {
-        return getTokens(user);
-    }
-
-    private AuthenticationResponse handleLogin(LoginRequest request) {
-        System.out.println("here is the login request " + request);
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.password()));
-
-        SecurityContext sc = SecurityContextHolder.getContext();
-        sc.setAuthentication(authentication);
-
-        final User user = userService.loadUserByUsername(request.email());
         return getTokens(user);
     }
 
