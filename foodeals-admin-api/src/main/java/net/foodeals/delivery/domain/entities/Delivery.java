@@ -32,11 +32,11 @@ public class Delivery extends AbstractEntity<UUID> {
     @Enumerated
     private DeliveryStatus status;
 
-    @OneToMany(mappedBy = "delivery", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<DeliveryPosition> deliveryPositions;
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private DeliveryPosition deliveryPosition;
 
-    @OneToMany(mappedBy = "delivery", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orders;
+    @OneToOne(mappedBy = "delivery", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Order order;
 
     Delivery() {
 

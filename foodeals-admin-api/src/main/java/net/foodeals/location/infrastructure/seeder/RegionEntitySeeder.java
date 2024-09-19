@@ -27,11 +27,21 @@ public class RegionEntitySeeder {
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
     public void RegionSeeder() {
-        City city = this.cityService.findByName("Casablanca");
-        Region region = Region.builder().name("maarif")
-                .city(city)
+        City city1 = this.cityService.findByName("Casablanca");
+        Region region1 = Region.builder().name("maarif")
+                .city(city1)
                 .build();
-        this.regionRepository.save(region);
+        this.regionRepository.save(region1);
+        city1.getRegions().add(region1);
+        this.cityService.save(city1);
+
+        City city2 = this.cityService.findByName("Settat");
+        Region region2 = Region.builder().name("region")
+                .city(city2)
+                .build();
+        this.regionRepository.saveAndFlush(region2);
+        city2.getRegions().add(region2);
+        this.cityService.save(city2);
     }
 
 }

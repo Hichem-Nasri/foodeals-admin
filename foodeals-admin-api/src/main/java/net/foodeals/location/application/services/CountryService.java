@@ -7,4 +7,9 @@ import net.foodeals.location.domain.entities.Country;
 import java.util.UUID;
 
 public interface CountryService extends CrudService<Country, UUID, CountryRequest> {
+    int countTotalCitiesByCountryName(String name);
+
+    Country findByName(String name);
+
+    Country save(Country country);
 }

@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,5 +65,20 @@ class StateServiceImpl implements StateService {
             throw new StateNotFoundException(id);
 
         repository.softDelete(id);
+    }
+
+    @Override
+    public State save(State state) {
+        return this.repository.saveAndFlush(state);
+    }
+
+    @Override
+    public State findByName(String name) {
+        return this.repository.findByName(name);
+    }
+
+    @Override
+    public State findByCode(String number) {
+        return this.repository.findByCode("102436");
     }
 }

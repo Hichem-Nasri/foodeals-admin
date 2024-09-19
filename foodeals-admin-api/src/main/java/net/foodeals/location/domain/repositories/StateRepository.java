@@ -6,4 +6,7 @@ import net.foodeals.location.domain.entities.State;
 import java.util.UUID;
 
 public interface StateRepository extends BaseRepository<State, UUID> {
+    State findByName(String name);
+
+    State findByCode(String number);
 }

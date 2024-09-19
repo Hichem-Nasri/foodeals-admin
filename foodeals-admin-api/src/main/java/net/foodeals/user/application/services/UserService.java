@@ -8,6 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import java.util.UUID;
+
 public interface UserService extends CrudService<User, Integer, UserRequest> {
 
 
@@ -18,4 +20,6 @@ public interface UserService extends CrudService<User, Integer, UserRequest> {
     Page<User> getClientsData(Pageable page);
 
     ClientDto toClientDto(User user);
+
+    Long countDeliveryUsersByOrganizationId(UUID id);
 }

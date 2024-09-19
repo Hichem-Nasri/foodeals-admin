@@ -2,12 +2,16 @@ package net.foodeals.organizationEntity.application.dtos.requests;
 
 import lombok.Data;
 import net.foodeals.contract.application.DTo.upload.SolutionsContractDto;
+import net.foodeals.delivery.domain.entities.CoveredZones;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 
 import java.util.List;
-import java.util.UUID;
 
 @Data
 public class CreateAnOrganizationEntityDto {
+
+    private EntityType entityType;
+
     private String entityName; // valid
 
     private EntityAddressDto entityAddressDto; // valid
@@ -34,5 +38,7 @@ public class CreateAnOrganizationEntityDto {
 
     private Boolean oneSubscription; // valid
 
-    private EntityBankInformationDto entityBankInformationDto; // valid
+    private EntityBankInformationDto entityBankInformationDto;
+
+    private List<CoveredZonesDto> coveredZonesDtos;
 }

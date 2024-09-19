@@ -10,7 +10,6 @@ import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.order.domain.entities.Coupon;
-import net.foodeals.organizationEntity.enums.EntityType;
 import net.foodeals.payment.domain.entities.Payment;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
@@ -41,9 +40,6 @@ public class SubEntity extends AbstractEntity<UUID> {
 
     @Embedded
     private Coordinates coordinates;
-
-    @Enumerated
-    private EntityType type;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
     private OrganizationEntity organizationEntity;

@@ -41,7 +41,7 @@ class CountryServiceImpl implements CountryService {
     @Override
     public Country create(CountryRequest request) {
         Country country = modelMapper.map(request, Country.class);
-        return repository.save(country);
+        return repository.saveAndFlush(country);
     }
 
     @Override
@@ -59,6 +59,21 @@ class CountryServiceImpl implements CountryService {
             throw new CountryNotFoundException(id);
 
         repository.softDelete(id);
+    }
+
+    @Override
+    public int countTotalCitiesByCountryName(String name) {
+        return this.repository.countTotalCitiesByCountryName(name);
+    }
+
+    @Override
+    public Country findByName(String name) {
+        return this.repository.findByName(name);
+    }
+
+    @Override
+    public Country save(Country country) {
+        return this.repository.saveAndFlush(country);
     }
 }
 

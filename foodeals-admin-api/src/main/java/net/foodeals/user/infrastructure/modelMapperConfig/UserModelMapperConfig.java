@@ -43,7 +43,7 @@ public class UserModelMapperConfig {
             System.out.println("user converter is working");
             System.out.println(user.getRole());
 
-            return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getPhone(), roleResponse);
+            return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getPhone(), roleResponse, user.getOrganizationEntity().getId());
         }, User.class, UserResponse.class);
 
         modelMapper.addMappings(new PropertyMap<User, ClientDto>() {

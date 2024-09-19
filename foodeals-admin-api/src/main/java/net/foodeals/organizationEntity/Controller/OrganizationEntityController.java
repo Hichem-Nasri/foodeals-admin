@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.Controller;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import net.foodeals.organizationEntity.application.dtos.responses.DeliveryPartnerDto;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
@@ -53,6 +54,14 @@ public class OrganizationEntityController {
         Page<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.map(this.modelMapper::mapOrganizationEntity);
         return new ResponseEntity<Page<OrganizationEntityDto>>(organizationEntitiesDto, HttpStatus.OK);
     }
+
+    @GetMapping("/delivery-partners")
+    public ResponseEntity<Page<DeliveryPartnerDto>> getDeliveryPartner(Pageable pageable) {
+        Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getDeliveryPartners(pageable);
+        Page<DeliveryPartnerDto> deliveryPartnerDtos = organizationEntities.map(this.modelMapper::mapDeliveryPartners);
+        return new ResponseEntity<Page<DeliveryPartnerDto>>(deliveryPartnerDtos, HttpStatus.OK);
+    }
+
 
     @PostMapping("/OrganizationEntity/{id}/validate")
     public ResponseEntity<String> validateOrganizationEntity(@PathVariable("id") UUID id) {

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-@Order(2)
+@Order(5)
 public class ActivityEntitySeeder {
 
     @Autowired

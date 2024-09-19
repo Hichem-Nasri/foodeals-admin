@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface CityService extends CrudService<City, UUID, CityRequest> {
     City findByName(String name);
+
+    City save(City city);
 }

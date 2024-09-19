@@ -7,6 +7,7 @@ import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ public class State extends AbstractEntity<UUID> {
 
     @OneToMany(mappedBy = "state", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonIgnore
-    private List<City> cities;
+    private List<City> cities = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Country country;
