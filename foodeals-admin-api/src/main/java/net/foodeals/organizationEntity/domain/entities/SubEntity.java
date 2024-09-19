@@ -1,14 +1,17 @@
 package net.foodeals.organizationEntity.domain.entities;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Coordinates;
+import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.order.domain.entities.Coupon;
 import net.foodeals.organizationEntity.enums.EntityType;
+import net.foodeals.payment.domain.entities.Payment;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -60,4 +63,11 @@ public class SubEntity extends AbstractEntity<UUID> {
 
     @OneToMany(mappedBy = "subEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Coupon> coupons;
+
+    @OneToMany(mappedBy = "subEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Payment> payments;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "subEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Subscription> subscriptions = new ArrayList<>();
 }

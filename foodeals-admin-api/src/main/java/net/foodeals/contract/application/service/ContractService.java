@@ -4,6 +4,7 @@ import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.contract.domain.entities.SolutionContract;
+import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.contract.domain.repositories.ContractRepository;
@@ -72,6 +73,7 @@ public class ContractService {
                 .maxNumberOfAccounts(createAnOrganizationEntityDto.getMaxNumberOfAccounts())
                 .minimumReduction(createAnOrganizationEntityDto.getMinimumReduction())
                 .contractStatus(ContractStatus.IN_PROGRESS)
+                .singleSubscription(createAnOrganizationEntityDto.getOneSubscription())
                 .userContracts(userContract)
                 .build();
         userContract.setContract(contract);
@@ -248,6 +250,23 @@ public class ContractService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Contract not found");
         }
         return contract.getDocument();
+    }
+
+    public void validateContract(Contract contract) {
+        List<SolutionContract> solutionContracts = contract.getSolutionContracts();
+
+        if (contract.isSingleSubscription()) {
+            SolutionContract solutionContract = solutionContracts.stream().filter(solutionContract1 -> solutionContract1.getSubscription() != null).findFirst().get();
+            this.subscriptionService.startSubscription(solutionContract.getSubscription());
+        }
+        else {
+            solutionContracts.forEach(solutionContract -> {
+                if (solutionContract.getSubscription() != null) {
+                    this.subscriptionService.startSubscription(solutionContract.getSubscription());
+                }
+            });
+        }
+
     }
 }
 

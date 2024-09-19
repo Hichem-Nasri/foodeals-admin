@@ -23,8 +23,6 @@ public class SolutionContract extends AbstractEntity<UUID> {
     @UuidGenerator
     private UUID id;
 
-    private String duration;
-
     @ManyToOne
     private Solution solution;
 
