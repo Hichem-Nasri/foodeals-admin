@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Seeder
-@Order(5)
+@Order(7)
 @RequiredArgsConstructor
 public class RoleSeeder implements CommandLineRunner {
     private final RoleRepository roleRepository;
@@ -23,11 +23,10 @@ public class RoleSeeder implements CommandLineRunner {
                     List.of(
                             Role.create(UUID.fromString("d7d7a9c5-b153-4526-ac16-05f19bf97270"), "ADMIN"),
                             Role.create(UUID.randomUUID(), "SUPER_ADMIN"),
-                            Role.create(UUID.randomUUID(), "ASSOCIATION"),
-                            Role.create(UUID.randomUUID(), "PARTNER"),
+                            Role.create(UUID.randomUUID(), "MANAGER"),
                             Role.create(UUID.randomUUID(), "SALES_MANAGER"),
-                            Role.create(UUID.randomUUID(), "USER"),
-                            Role.create(UUID.randomUUID(), "CLIENT")
+                            Role.create(UUID.randomUUID(), "CLIENT"),
+                            Role.create(UUID.randomUUID(), "DELIVERY_MAN")
                     )
             );
             System.out.println("roles seeded");

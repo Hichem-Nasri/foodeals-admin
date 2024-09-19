@@ -2,6 +2,9 @@ package net.foodeals.user.application.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
+import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.ClientDto;
 import net.foodeals.user.application.services.RoleService;
@@ -18,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -28,6 +32,7 @@ class UserServiceImpl implements UserService {
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final OrganizationEntityRepository organizationEntityRepository;
 
     @Override
     public List<User> findAll() {
@@ -57,7 +62,7 @@ class UserServiceImpl implements UserService {
                 modelMapper.map(request, User.class),
                 request
         );
-        return repository.save(user);
+        return user;
     }
 
     @Override
@@ -81,6 +86,15 @@ class UserServiceImpl implements UserService {
         final Role role = roleService.findById(request.roleId());
         user.setRole(role)
                 .setPassword(passwordEncoder.encode(user.getPassword()));
+        user = this.repository.save(user);
+        if (request.organizationEntityId() != null) {
+            final OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(request.organizationEntityId()).orElse(null);
+            if (organizationEntity != null) {
+                user.setOrganizationEntity(organizationEntity);
+                organizationEntity.getUsers().add(user);
+                this.organizationEntityRepository.save(organizationEntity);
+            }
+        }
         return user;
     }
 
@@ -100,5 +114,10 @@ class UserServiceImpl implements UserService {
 
         client.setNumberOfCommands(user.getOrders().size());
         return client;
+    }
+
+    @Override
+    public Long countDeliveryUsersByOrganizationId(UUID id) {
+        return this.repository.countDeliveryUsersByOrganizationId(id);
     }
 }

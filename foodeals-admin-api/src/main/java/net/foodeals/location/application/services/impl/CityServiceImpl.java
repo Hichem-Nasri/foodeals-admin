@@ -74,4 +74,9 @@ class CityServiceImpl implements CityService {
     public City findByName(String name) {
         return this.repository.findByName(name);
     }
+
+    @Override
+    public City save(City city) {
+        return this.repository.saveAndFlush(city);
+    }
 }

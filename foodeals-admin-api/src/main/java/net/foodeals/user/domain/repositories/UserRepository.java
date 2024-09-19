@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public interface UserRepository extends BaseRepository<User, Integer> {
 
@@ -15,4 +16,7 @@ public interface UserRepository extends BaseRepository<User, Integer> {
 
     @Query("SELECT u FROM User u WHERE u.role.name = :roleName")
     Page<User> findByRoleName(@Param("roleName") String roleName, Pageable pageable);
+
+    @Query("SELECT COUNT(u) FROM User u WHERE u.organizationEntity.id = :organizationId AND u.role.name = 'DELIVERY_MAN'")
+    Long countDeliveryUsersByOrganizationId(@Param("organizationId") UUID organizationId);
 }

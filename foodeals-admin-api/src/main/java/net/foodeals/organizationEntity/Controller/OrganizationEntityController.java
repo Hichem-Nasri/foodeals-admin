@@ -2,12 +2,15 @@ package net.foodeals.organizationEntity.Controller;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import net.foodeals.organizationEntity.application.dtos.responses.DeliveryPartnerDto;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.infrastructure.seeders.ModelMapper.OrganizationEntityModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +54,14 @@ public class OrganizationEntityController {
         List<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.stream().map(this.modelMapper::mapOrganizationEntity).toList();
         return new ResponseEntity<List<OrganizationEntityDto>>(organizationEntitiesDto, HttpStatus.OK);
     }
+
+    @GetMapping("/delivery-partners")
+    public ResponseEntity<Page<DeliveryPartnerDto>> getDeliveryPartner(Pageable pageable) {
+        Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getDeliveryPartners(pageable);
+        Page<DeliveryPartnerDto> deliveryPartnerDtos = organizationEntities.map(this.modelMapper::mapDeliveryPartners);
+        return new ResponseEntity<Page<DeliveryPartnerDto>>(deliveryPartnerDtos, HttpStatus.OK);
+    }
+
 
     @PostMapping("/OrganizationEntity/{id}/validate")
     public ResponseEntity<String> validateOrganizationEntity(@PathVariable("id") UUID id) {

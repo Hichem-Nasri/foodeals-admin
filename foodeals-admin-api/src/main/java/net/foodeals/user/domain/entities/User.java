@@ -39,6 +39,8 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @Embedded
     private Name name;
 
+    private String avatarPath;
+
     @Column(unique = true)
     private String email;
 

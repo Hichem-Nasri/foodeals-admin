@@ -24,6 +24,6 @@ public class DeliveryPosition extends AbstractEntity<UUID> {
     @Embedded
     private Coordinates coordinates;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "deliveryPosition",fetch = FetchType.LAZY)
     private Delivery delivery;
 }

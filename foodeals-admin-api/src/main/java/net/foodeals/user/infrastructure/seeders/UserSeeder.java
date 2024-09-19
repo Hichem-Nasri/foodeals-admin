@@ -25,7 +25,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-@Order(6)
+@Order(8)
 @Component
 public class UserSeeder {
 
@@ -33,8 +33,6 @@ public class UserSeeder {
     private final RoleRepository roleRepository;
     private final AddressRepository addressRepository;
     private final CityRepository cityRepository;
-    private final StateRepository stateRepository;
-    private final CountryRepository countryRepository;
     private final AccountRepository accountRepository;
     private final OrderRepository orderRepository;
 
@@ -43,8 +41,6 @@ public class UserSeeder {
         this.roleRepository = roleRepository;
         this.addressRepository = addressRepository;
         this.cityRepository = cityRepository;
-        this.stateRepository = stateRepository;
-        this.countryRepository = countryRepository;
         this.accountRepository = accountRepository;
         this.orderRepository = orderRepository;
     }
@@ -52,32 +48,22 @@ public class UserSeeder {
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void UserSeeder() {
-        User user = this.createNewUser();
+        User user = this.createNewClient();
         this.userRepository.saveAndFlush(user);
     }
 
-    public User createNewUser() {
+    public User createNewClient() {
         Account account = new Account();
         net.foodeals.order.domain.entities.Order order = new net.foodeals.order.domain.entities.Order();
 
         account.setProvider("fb");
         Address address = new Address();
         address.setAddress("123");
-        City city = new City();
-        State state = new State();
-        Country country = new Country();
-        country.setName("Morocco");
-        state.setName("state");
-        state.setCountry(country);
-        city.setName("city");
-        city.setState(state);
+        City city = this.cityRepository.findByName("Casablanca");
         address.setCity(city);
         Role i = this.roleRepository.findByName("CLIENT").orElse(null);
         this.accountRepository.saveAndFlush(account);
         this.orderRepository.saveAndFlush(order);
-        this.countryRepository.saveAndFlush(country);
-        this.stateRepository.saveAndFlush(state);
-        this.cityRepository.saveAndFlush(city);
         this.addressRepository.saveAndFlush(address);
 
         Name name = new Name("test ", "test");

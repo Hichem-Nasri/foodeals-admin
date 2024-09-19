@@ -60,7 +60,8 @@ public class PaymentService {
         Double toReceive = difference < 0 ? difference : 0;
         paymentDto.setToReceive(toReceive.toString());
         paymentDto.setFoodealsCommission(commissionTotal.toString());
-        PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getName(), organizationEntity.getAvatarPath(), payment.getPartnerType());
+        PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getName(), organizationEntity.getAvatarPath());
+        paymentDto.setPartnerType(payment.getPartnerType());
         paymentDto.setPartnerInfoDto(partnerInfoDto);
         return paymentDto;
     }
@@ -90,8 +91,8 @@ public class PaymentService {
         subscriptionPaymentDto.setTotalAmount(subscription.getAmount().amount());
         PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder().name(partnerName)
                 .avatarPath(avatarPath)
-                .partnerType(subscription.getPartnerType())
                 .build();
+        subscriptionPaymentDto.setPartnerType(subscription.getPartnerType());
         subscriptionPaymentDto.setPartnerInfoDto(partnerInfoDto);
         return subscriptionPaymentDto;
     }

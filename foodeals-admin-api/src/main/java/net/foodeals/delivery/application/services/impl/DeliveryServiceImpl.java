@@ -55,10 +55,10 @@ class DeliveryServiceImpl implements DeliveryService {
         final Delivery delivery = Delivery.create(deliveryBoy, request.status());
         final Delivery savedDelivery = repository.save(delivery);
 
-        final DeliveryPosition deliveryPosition = addNewDeliveryPositionToDelivery.execute(
-                new DeliveryPositionRequest(request.initialPosition().coordinates(), savedDelivery.getId())
-        );
-        delivery.setDeliveryPositions(List.of(deliveryPosition));
+//        final DeliveryPosition deliveryPosition = addNewDeliveryPositionToDelivery.execute(
+//                new DeliveryPositionRequest(request.initialPosition().coordinates(), savedDelivery.getId())
+//        );
+//        delivery.setDeliveryPositions(List.of(deliveryPosition));
         // TODO assign orders
         return repository.save(delivery);
     }
@@ -78,6 +78,11 @@ class DeliveryServiceImpl implements DeliveryService {
         if (!repository.existsById(id))
             throw new DeliveryNotFoundException(id);
         repository.softDelete(id);
+    }
+
+    @Override
+    public Long countDeliveriesByDeliveryPartner(UUID organizationEntityId) {
+        return this.repository.countDeliveriesByDeliveryPartner(organizationEntityId);
     }
 
 }

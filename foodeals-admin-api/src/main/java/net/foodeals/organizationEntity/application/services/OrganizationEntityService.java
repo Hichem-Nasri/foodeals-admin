@@ -6,17 +6,20 @@ import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.application.service.DeadlinesService;
 import net.foodeals.contract.domain.entities.Contract;
+import net.foodeals.delivery.application.services.impl.CoveredZonesService;
+import net.foodeals.delivery.domain.entities.CoveredZones;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.RegionService;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Region;
+import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.domain.entities.*;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
-import net.foodeals.organizationEntity.enums.EntityType;
 import net.foodeals.payment.domain.entities.Payment;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
@@ -26,6 +29,8 @@ import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
 import org.apache.commons.lang.RandomStringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -49,8 +54,9 @@ public class OrganizationEntityService {
     private final UserService userService;
     private final RoleService roleService;
     private final EmailService emailService;
+    private final CoveredZonesService coveredZonesService;
 
-    public OrganizationEntityService(OrganizationEntityRepository organizationEntityRepository, ContractService contractService, CityService cityService, RegionService regionService, ActivityService activityService, SolutionService solutionService, BankInformationService bankInformationService, AddressService addressService, ContactsService contactsService, UserService userService, RoleService roleService, EmailService emailService, DeadlinesService deadlinesService) {
+    public OrganizationEntityService(OrganizationEntityRepository organizationEntityRepository, ContractService contractService, CityService cityService, RegionService regionService, ActivityService activityService, SolutionService solutionService, BankInformationService bankInformationService, AddressService addressService, ContactsService contactsService, UserService userService, RoleService roleService, EmailService emailService, DeadlinesService deadlinesService, CoveredZonesService coveredZonesService) {
         this.organizationEntityRepository = organizationEntityRepository;
         this.contractService = contractService;
         this.cityService = cityService;
@@ -63,6 +69,7 @@ public class OrganizationEntityService {
         this.userService = userService;
         this.roleService = roleService;
         this.emailService = emailService;
+        this.coveredZonesService = coveredZonesService;
     }
 
     public OrganizationEntity save(OrganizationEntity organizationEntity) {
@@ -80,13 +87,6 @@ public class OrganizationEntityService {
                 .city(city)
                 .region(region)
                 .build();
-        List<String> subActivitiesNames = createAnOrganizationEntityDto.getActivities().subList(1, createAnOrganizationEntityDto.getActivities().size());
-        Set<Activity> subActivities = this.activityService.getActivitiesByName(subActivitiesNames);
-        Activity mainActivity = this.activityService.getActivityByName(createAnOrganizationEntityDto.getActivities().get(0));
-        BankInformation bankInformation = BankInformation.builder().beneficiaryName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBeneficiaryName())
-                .bankName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBankName())
-                .rib(createAnOrganizationEntityDto.getEntityBankInformationDto().getRib())
-                .build();
         Contact contact = Contact.builder().name(createAnOrganizationEntityDto.getEntityContactDto().getName())
                 .email(createAnOrganizationEntityDto.getEntityContactDto().getEmail())
                 .phone(createAnOrganizationEntityDto.getEntityContactDto().getPhone())
@@ -94,31 +94,84 @@ public class OrganizationEntityService {
                 .build();
         Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAnOrganizationEntityDto.getSolutions());
         OrganizationEntity organizationEntity = OrganizationEntity.builder().name(createAnOrganizationEntityDto.getEntityName())
-                .type(EntityType.PARTNER)
-                .subActivities(subActivities)
-                .mainActivity(mainActivity)
+                .type(createAnOrganizationEntityDto.getEntityType())
                 .solutions(solutions)
                 .address(address)
-                .commercialNumber(createAnOrganizationEntityDto.getCommercialNumber())
-                .bankInformation(bankInformation)
                 .build();
-        mainActivity.getOrganizationEntities().add(organizationEntity);
-        this.activityService.save(mainActivity);
+        OrganizationEntity finalOrganizationEntity = organizationEntity;
+        solutions.forEach(solution -> {
+            solution.getOrganizationEntities().add(finalOrganizationEntity);
+            this.solutionService.save(solution);
+        });
         contact.setOrganizationEntity(organizationEntity);
         List<Contact> contacts = organizationEntity.getContacts();
         contacts.add(contact);
         organizationEntity.setContacts(contacts);
+        organizationEntity = this.organizationEntityRepository.save(organizationEntity);
+        switch (organizationEntity.getType()) {
+            case EntityType.PARTNER :
+                organizationEntity = savePartner(createAnOrganizationEntityDto, organizationEntity);
+                break;
+            case EntityType.DELIVERY_PARTNER :
+                organizationEntity = saveDeliveryPartner(createAnOrganizationEntityDto, organizationEntity);
+                break;
+            default:
+        }
+        return organizationEntity.getId();
+    }
+
+    private OrganizationEntity saveDeliveryPartner(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) {
+        if (createAnOrganizationEntityDto.getCoveredZonesDtos() != null) {
+            List<CoveredZonesDto> coveredZonesDtos = createAnOrganizationEntityDto.getCoveredZonesDtos();
+            coveredZonesDtos.forEach(coveredZonesDto -> {
+                List<String> regionsNames = coveredZonesDto.getRegions();
+                regionsNames.forEach(regionName -> {
+                    CoveredZones coveredZone = CoveredZones.builder().organizationEntity(organizationEntity)
+                            .build();
+                    Region region = this.regionService.findByName(regionName);
+                    if (region == null) {
+                        region = this.regionService.create(coveredZonesDto.getCity(), regionName);
+                    }
+                    coveredZone.setRegion(region);
+                    this.coveredZonesService.save(coveredZone);
+                    organizationEntity.getCoveredZones().add(coveredZone);
+                });
+            });
+        }
+        Contact managerContact = organizationEntity.getContacts().getFirst();
+
+        Role role  = this.roleService.findByName("MANAGER");
+        String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId(), organizationEntity.getId());
+        User manager = this.userService.create(userRequest);
+        //        String receiver = manager.getEmail();
+//        String subject = "Foodeals account validation";
+//        String message = "You're account has been validated\n Your email : " + manager.getEmail() + " \n" + " Your password : " + pass;
+//        this.emailService.sendEmail(receiver, subject, message);
+        return this.organizationEntityRepository.save(organizationEntity);
+    }
+
+    private OrganizationEntity savePartner(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
+        BankInformation bankInformation = BankInformation.builder().beneficiaryName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBeneficiaryName())
+                .bankName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBankName())
+                .rib(createAnOrganizationEntityDto.getEntityBankInformationDto().getRib())
+                .build();
+        organizationEntity.setBankInformation(bankInformation);
+        List<String> subActivitiesNames = createAnOrganizationEntityDto.getActivities().subList(1, createAnOrganizationEntityDto.getActivities().size());
+        Set<Activity> subActivities = this.activityService.getActivitiesByName(subActivitiesNames);
+        Activity mainActivity = this.activityService.getActivityByName(createAnOrganizationEntityDto.getActivities().get(0));
+        organizationEntity.setSubActivities(subActivities);
+        organizationEntity.setMainActivity(mainActivity);
+        organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
+        mainActivity.getOrganizationEntities().add(organizationEntity);
+        this.activityService.save(mainActivity);
         subActivities.forEach(activity -> {
             activity.getOrganizationEntities().add(organizationEntity);
             this.activityService.save(activity);
         });
-        solutions.forEach(solution -> {
-            solution.getOrganizationEntities().add(organizationEntity);
-            this.solutionService.save(solution);
-        });
         Contract contract = this.contractService.createANewContract(createAnOrganizationEntityDto, organizationEntity);
         organizationEntity.setContract(contract);
-        return this.organizationEntityRepository.save(organizationEntity).getId();
+        return this.organizationEntityRepository.save(organizationEntity);
     }
 
     @Transactional
@@ -225,12 +278,10 @@ public class OrganizationEntityService {
         }
         Contact managerContact = organizationEntity.getContacts().getFirst();
 
-        Role role  = this.roleService.findByName("PARTNER");
+        Role role  = this.roleService.findByName("MANAGER");
         String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId());
+        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId(), organizationEntity.getId());
         User manager = this.userService.create(userRequest);
-        manager.setOrganizationEntity(organizationEntity);
-        organizationEntity.getUsers().add(manager);
         SimpleDateFormat formatter = new SimpleDateFormat("M/y");
         Date date = new Date();
         String formattedDate = formatter.format(date);
@@ -259,5 +310,9 @@ public class OrganizationEntityService {
         }
 
         return this.contractService.getContractDocument(organizationEntity.getContract().getId());
+    }
+
+    public Page<OrganizationEntity> getDeliveryPartners(Pageable pageable) {
+        return this.organizationEntityRepository.findByType(EntityType.DELIVERY_PARTNER, pageable);
     }
 }

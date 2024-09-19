@@ -45,7 +45,7 @@ public class Order extends AbstractEntity<UUID> {
     @ManyToOne(cascade = CascadeType.ALL)
     private Address shippingAddress;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     private Delivery delivery;
 
     @ManyToOne(cascade = CascadeType.ALL)
