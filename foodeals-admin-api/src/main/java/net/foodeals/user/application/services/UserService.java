@@ -6,10 +6,12 @@ import net.foodeals.user.application.dtos.responses.ClientDto;
 import net.foodeals.user.domain.entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.UUID;
 
 public interface UserService extends CrudService<User, Integer, UserRequest> {
+
 
     User findByEmail(String email);
 

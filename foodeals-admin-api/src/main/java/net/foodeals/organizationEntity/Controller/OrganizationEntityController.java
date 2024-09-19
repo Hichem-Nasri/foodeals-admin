@@ -49,10 +49,10 @@ public class OrganizationEntityController {
 
     @GetMapping("/OrganizationEntities")
     @Transactional
-    public ResponseEntity<List<OrganizationEntityDto>> getOrganizationEntities() {
-        List<OrganizationEntity> organizationEntities = this.organizationEntityService.getOrganizationEntities();
-        List<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.stream().map(this.modelMapper::mapOrganizationEntity).toList();
-        return new ResponseEntity<List<OrganizationEntityDto>>(organizationEntitiesDto, HttpStatus.OK);
+    public ResponseEntity<Page<OrganizationEntityDto>> getOrganizationEntities(Pageable pageable) {
+        Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getOrganizationEntities(pageable);
+        Page<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.map(this.modelMapper::mapOrganizationEntity);
+        return new ResponseEntity<Page<OrganizationEntityDto>>(organizationEntitiesDto, HttpStatus.OK);
     }
 
     @GetMapping("/delivery-partners")

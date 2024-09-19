@@ -3,7 +3,6 @@ package net.foodeals.user.domain.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import net.foodeals.common.models.AbstractEntity;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -32,9 +31,9 @@ public class Role extends AbstractEntity<UUID> {
     private List<User> users = new ArrayList<>();
 
     @ManyToMany(mappedBy = "roles", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
-    private List<Authority> authorities;
+    private List<Authority> authorities = new ArrayList<>();
 
-    Role() {
+    public Role() {
     }
 
     public Role(String name) {

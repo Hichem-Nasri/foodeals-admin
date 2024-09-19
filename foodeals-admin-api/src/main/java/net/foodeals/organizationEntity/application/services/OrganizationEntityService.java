@@ -265,8 +265,8 @@ public class OrganizationEntityService {
         return organizationEntity;
     }
 
-    public List<OrganizationEntity> getOrganizationEntities() {
-        return this.organizationEntityRepository.findAll();
+    public Page<OrganizationEntity> getOrganizationEntities(Pageable pageable) {
+        return this.organizationEntityRepository.findAll(pageable);
     }
 
     @Transactional
