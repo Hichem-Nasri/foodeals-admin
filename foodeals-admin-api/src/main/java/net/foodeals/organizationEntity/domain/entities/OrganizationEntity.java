@@ -1,25 +1,25 @@
 package net.foodeals.organizationEntity.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
-import net.foodeals.common.valueOjects.Coordinates;
+import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
-import net.foodeals.organizationEntity.domain.enums.EntityType;
+import net.foodeals.organizationEntity.enums.EntityType;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "organization_entities")
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrganizationEntity extends AbstractEntity<UUID> {
 
     @Id
@@ -35,28 +35,44 @@ public class OrganizationEntity extends AbstractEntity<UUID> {
     @Column(name = "cover_path")
     private String coverPath;
 
-    @Embedded
-    private Coordinates coordinates;
-
     @Enumerated
     private EntityType type;
 
-    @OneToMany(mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubEntity> subEntities = new ArrayList<>();
 
-    @ManyToMany
-    private List<Activity> activities = new ArrayList<>();
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Activity mainActivity;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Set<Activity> subActivities = new HashSet<>();
 
     @OneToMany(mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<User> users = new ArrayList<>();
 
 
-    @ManyToMany
-    private List<Solution> solutions = new ArrayList<>();
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Set<Solution> solutions = new HashSet<>();
 
     @OneToMany(mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Notification> notifications;
+    private List<Notification> notifications = new ArrayList<>();
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Address address;
+
+    private String commercialNumber;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "organizationEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Contact> contacts = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JoinColumn(name = "bank_information")
+    private BankInformation bankInformation;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Contract contract;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Set<Features> features;
 }

@@ -69,4 +69,9 @@ class CityServiceImpl implements CityService {
 
         repository.softDelete(id);
     }
+
+    @Override
+    public City findByName(String name) {
+        return this.repository.findByName(name);
+    }
 }

@@ -1,14 +1,15 @@
 package net.foodeals.organizationEntity.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.offer.domain.entities.Offer;
 import net.foodeals.product.domain.entities.ProductCategory;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -16,6 +17,8 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 public class Activity extends AbstractEntity<UUID> {
 
     @Id
@@ -31,10 +34,11 @@ public class Activity extends AbstractEntity<UUID> {
     @ManyToMany(mappedBy = "activities",fetch = FetchType.LAZY)
     private List<SubEntity> subEntities;
 
-    @ManyToMany(mappedBy = "activities",fetch = FetchType.LAZY)
-    private List<OrganizationEntity> organizationEntities;
+    @ManyToMany(mappedBy = "subActivities",fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<OrganizationEntity> organizationEntities = new HashSet<>();
 
-    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Offer> offers;
 
     Activity() {

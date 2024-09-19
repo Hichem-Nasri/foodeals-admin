@@ -8,7 +8,7 @@ import net.foodeals.common.valueOjects.Coordinates;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.order.domain.entities.Coupon;
-import net.foodeals.organizationEntity.domain.enums.EntityType;
+import net.foodeals.organizationEntity.enums.EntityType;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
 

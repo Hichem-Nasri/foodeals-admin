@@ -1,14 +1,15 @@
 package net.foodeals.contract.domain.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
-import net.foodeals.user.domain.entities.User;
-import org.hibernate.annotations.GenericGenerator;
+import net.foodeals.contract.domain.entities.enums.ContractStatus;
+import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +18,9 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Contract extends AbstractEntity<UUID> {
 
     @Id
@@ -26,12 +30,32 @@ public class Contract extends AbstractEntity<UUID> {
 
     private String name;
 
-    private String content;
+    @Lob
+    @JsonIgnore
+    private byte[] document;
 
-
-    @OneToOne(mappedBy = "contract")
+    @OneToOne(mappedBy = "contract", cascade = CascadeType.ALL)
+    @JsonIgnore
     private UserContract userContracts;
 
+    @Builder.Default
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SolutionContract> solutionContracts;
+    @JsonIgnore
+    private List<SolutionContract> solutionContracts = new ArrayList<>();
+
+    @JsonIgnore
+    private Integer maxNumberOfSubEntities;
+
+    @JsonIgnore
+    private Integer maxNumberOfAccounts;
+
+    @JsonIgnore
+    private Float minimumReduction;
+
+    @OneToOne(mappedBy = "contract", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
+    @JsonIgnore
+    private OrganizationEntity organizationEntity;
+
+    @Enumerated(EnumType.STRING)
+    private ContractStatus contractStatus;
 }

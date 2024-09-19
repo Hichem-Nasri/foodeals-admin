@@ -1,20 +1,20 @@
 package net.foodeals.organizationEntity.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "solutions")
 
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Solution extends AbstractEntity<UUID> {
 
     @Id
@@ -25,6 +25,6 @@ public class Solution extends AbstractEntity<UUID> {
     private String name;
 
     @ManyToMany(mappedBy = "solutions")
-    private List<OrganizationEntity> organizationEntities = new ArrayList<>();
+    private Set<OrganizationEntity> organizationEntities = new HashSet<>();
 
 }

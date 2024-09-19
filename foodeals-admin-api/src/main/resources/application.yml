@@ -1,4 +1,18 @@
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${USER_NAME}
+    password: ${PASSWORD}
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   application:
     name: Foodeals
   datasource:
@@ -9,7 +23,7 @@ spring:
   jpa:
     hibernate:
       dialect: org.hibernate.dialect.PostgreSQLDialect
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: true
 
 app:

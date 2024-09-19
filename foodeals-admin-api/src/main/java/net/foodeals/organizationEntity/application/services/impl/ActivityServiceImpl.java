@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -22,7 +23,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public List<Activity> findAll() {
-        return List.of();
+        return this.repository.findAll();
     }
 
     @Override
@@ -38,16 +39,38 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Activity create(ActivityRequest dto) {
-        return null;
+        Activity activity = Activity.builder().name(dto.name()).build();
+        return this.repository.save(activity);
     }
 
     @Override
     public Activity update(UUID id, ActivityRequest dto) {
-        return null;
+        Activity activity = repository.findById(id)
+                .orElseThrow(() -> new ActivityNotFoundException(id));
+
+        activity.setName(dto.name());
+        return activity;
     }
 
     @Override
     public void delete(UUID id) {
+        Activity activity = repository.findById(id)
+                .orElseThrow(() -> new ActivityNotFoundException(id));
 
+        this.repository.delete(activity);
+    }
+
+    @Override
+    public Set<Activity> getActivitiesByName(List<String> subActivitiesNames) {
+        return this.repository.findByNameIn(subActivitiesNames);
+    }
+
+    @Override
+    public Activity getActivityByName(String name) {
+        return this.repository.findByName(name);
+    }
+    @Override
+    public Activity save(Activity activity) {
+        return this.repository.save(activity);
     }
 }

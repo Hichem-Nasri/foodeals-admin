@@ -1,8 +1,12 @@
 package net.foodeals.contentManagement.domain.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import org.hibernate.annotations.UuidGenerator;
 

@@ -1,9 +1,9 @@
 package net.foodeals.contentManagement.application.services;
 
+import net.foodeals.contentManagement.application.Dto.upload.CreateArticleCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.UpdateArticleCategoryDto;
 import net.foodeals.common.Utils.SlugUtil;
 import net.foodeals.contentManagement.application.Dto.upload.AddArticleToCategoryDto;
-import net.foodeals.contentManagement.application.Dto.upload.CreateArticleCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.DeleteArticleFromCategoryDto;
 import net.foodeals.contentManagement.domain.entities.Article;
 import net.foodeals.contentManagement.domain.entities.ArticleCategory;
@@ -60,7 +60,7 @@ public class ArticleCategoryService {
         if (updateArticleCategoryDto.getName().length() != 0) {
             articleCategory.setName(updateArticleCategoryDto.getName());
             String generatedSlug = SlugUtil.toSlug(updateArticleCategoryDto.getName());
-            articleCategory.setSlug(SlugUtil.makeUniqueSlug(generatedSlug, this.articleCategoryRepository));
+//            articleCategory.setSlug(SlugUtil.makeUniqueSlug(generatedSlug, this.articleCategoryRepository));
         }
 
         return this.articleCategoryRepository.save(articleCategory);

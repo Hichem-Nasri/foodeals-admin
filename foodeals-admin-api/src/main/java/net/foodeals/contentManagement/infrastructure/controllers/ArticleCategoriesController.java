@@ -2,7 +2,6 @@ package net.foodeals.contentManagement.infrastructure.controllers;
 
 import net.foodeals.contentManagement.application.Dto.response.ArticleCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.AddArticleToCategoryDto;
-import net.foodeals.contentManagement.application.Dto.upload.CreateArticleCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.DeleteArticleFromCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.UpdateArticleCategoryDto;
 import net.foodeals.contentManagement.application.Dto.upload.*;
@@ -64,10 +63,9 @@ public class ArticleCategoriesController {
     }
 
     @DeleteMapping("ArticleCategory/{uuid}")
-    public ResponseEntity<ArticleCategoryDto> deleteAnArticleCategory(@PathVariable("uuid") String uuid) {
-        ArticleCategory articleCategory = this.articleCategoryService.deleteAnArticleCategoryByUuid(uuid);
-        ArticleCategoryDto articleCategoryDto = this.modelMapper.map(articleCategory, ArticleCategoryDto.class);
-        return new ResponseEntity<ArticleCategoryDto>(articleCategoryDto, HttpStatus.OK);
+    public ResponseEntity<String> deleteAnArticleCategory(@PathVariable("uuid") String uuid) {
+        this.articleCategoryService.deleteAnArticleCategoryByUuid(uuid);
+        return new ResponseEntity<String>("category has been deleted", HttpStatus.OK);
     }
 
     @PostMapping("/ArticleCategory/{CategoryId}/addArticle")
@@ -79,6 +77,6 @@ public class ArticleCategoriesController {
     @DeleteMapping("/ArticleCategory/{CategoryId}/deleteArticle")
     public ResponseEntity<String> DeleteAnArticleFromCategory(@PathVariable("CategoryId") String categoryId, @RequestBody DeleteArticleFromCategoryDto deleteArticleFromCategoryDto) {
         this.articleCategoryService.deleteAnArticleFromCategory(categoryId, deleteArticleFromCategoryDto);
-        return new ResponseEntity<String>("Article was added successfully", HttpStatus.OK);
+        return new ResponseEntity<String>("Article was deleted successfully", HttpStatus.OK);
     }
 }

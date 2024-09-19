@@ -1,7 +1,10 @@
 package net.foodeals.user.domain.entities;
 
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.delivery.domain.entities.Delivery;
@@ -143,6 +146,11 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
 
     public User setRole(Role role) {
         this.role = role;
+        return this;
+    }
+
+    public User setOrganizationEntity(OrganizationEntity organizationEntity) {
+        this.organizationEntity = organizationEntity;
         return this;
     }
 

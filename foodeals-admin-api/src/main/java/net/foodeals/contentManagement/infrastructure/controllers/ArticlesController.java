@@ -3,8 +3,8 @@ package net.foodeals.contentManagement.infrastructure.controllers;
 import net.foodeals.contentManagement.application.Dto.response.ArticleDto;
 import net.foodeals.contentManagement.application.Dto.upload.CreateArticleDto;
 import net.foodeals.contentManagement.application.Dto.upload.UpdateArticleDto;
-import net.foodeals.contentManagement.domain.entities.Article;
 import net.foodeals.contentManagement.application.services.ArticleService;
+import net.foodeals.contentManagement.domain.entities.Article;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,9 +58,8 @@ public class ArticlesController {
     }
 
     @DeleteMapping("Article/{uuid}")
-    public ResponseEntity<ArticleDto> deleteAnArticle(@PathVariable("uuid") String uuid) {
-        Article article = this.articleService.deleteAnArticleByUuid(uuid);
-        ArticleDto articleDto = this.modelMapper.map(article, ArticleDto.class);
-        return new ResponseEntity<ArticleDto>(articleDto, HttpStatus.OK);
+    public ResponseEntity<String> deleteAnArticle(@PathVariable("uuid") String uuid) {
+        this.articleService.deleteAnArticleByUuid(uuid);
+        return new ResponseEntity<String>("Article has been deleted", HttpStatus.OK);
     }
 }

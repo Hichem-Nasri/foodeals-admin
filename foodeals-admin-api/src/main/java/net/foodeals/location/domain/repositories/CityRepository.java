@@ -6,4 +6,5 @@ import net.foodeals.location.domain.entities.City;
 import java.util.UUID;
 
 public interface CityRepository extends BaseRepository<City, UUID> {
+    City findByName(String name);
 }
