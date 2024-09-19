@@ -32,7 +32,7 @@ class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        final User user = userService.create(new UserRequest(request.name(), request.email(), request.phone(), request.password(), request.isEmailVerified(), request.roleId()));
+        final User user = userService.create(new UserRequest(request.name(), request.email(), request.phone(), request.password(), request.isEmailVerified(), request.roleId(), null));
         return handleRegistration(user);
     }
 
