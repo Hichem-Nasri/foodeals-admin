@@ -28,7 +28,7 @@ public class Country extends AbstractEntity<UUID> {
     @JsonIgnore
     private List<State> states;
 
-    Country() {
+    public Country() {
     }
 
     public Country(String name, String code) {

@@ -54,7 +54,7 @@ public class Order extends AbstractEntity<UUID> {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions;
 
-    Order() {
+    public Order() {
 
     }
 

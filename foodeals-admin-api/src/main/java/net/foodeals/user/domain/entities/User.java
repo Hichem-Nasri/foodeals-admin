@@ -8,7 +8,10 @@ import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.delivery.domain.entities.Delivery;
+import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
+import net.foodeals.offer.domain.entities.Offer;
+import net.foodeals.order.domain.entities.Order;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.user.domain.valueObjects.Name;
@@ -16,6 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -56,8 +60,9 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Account> Accounts;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "account_id")
+    private Account account;
 
     @ManyToOne
     private SubEntity subEntity;
@@ -70,6 +75,16 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserContract> userContracts;
+
+    @Enumerated
+    private UserStatus status;
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "address_id")
+    private Address address;
 
     public User(Name name, String email, String phone, String password, Boolean isEmailVerified, Role role) {
         this.name = name;
@@ -154,4 +169,20 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
         return this;
     }
 
+    public User setAccount(Account account) {
+        this.account = account;
+        return this;
+    }
+
+    public User setStatus(UserStatus st)
+    {
+        this.status = st;
+        return this;
+    }
+
+    public User setAddress(Address st)
+    {
+        this.address = st;
+        return this;
+    }
 }
