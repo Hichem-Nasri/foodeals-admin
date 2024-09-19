@@ -14,7 +14,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * User
@@ -75,7 +77,7 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
         this.role = role;
     }
 
-    User() {
+    public User() {
 
     }
 
@@ -92,10 +94,14 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (role == null || role.getAuthorities() == null) {
+            return Collections.emptyList();
+        }
+
         final List<SimpleGrantedAuthority> authorities = role.getAuthorities()
                 .stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getName()))
-                .toList();
+                .collect(Collectors.toList());
         authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
         return authorities;
     }
@@ -103,6 +109,16 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @Override
     public String getUsername() {
         return email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public User setPassword(String password) {
+        this.password = password;
+        return this;
     }
 
     public User setName(Name name) {
@@ -117,11 +133,6 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
 
     public User setPhone(String phone) {
         this.phone = phone;
-        return this;
-    }
-
-    public User setPassword(String password) {
-        this.password = password;
         return this;
     }
 
