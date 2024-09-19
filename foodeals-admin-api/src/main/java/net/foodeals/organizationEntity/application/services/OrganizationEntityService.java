@@ -26,6 +26,8 @@ import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
 import org.apache.commons.lang.RandomStringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -212,8 +214,8 @@ public class OrganizationEntityService {
         return organizationEntity;
     }
 
-    public List<OrganizationEntity> getOrganizationEntities() {
-        return this.organizationEntityRepository.findAll();
+    public Page<OrganizationEntity> getOrganizationEntities(Pageable pageable) {
+        return this.organizationEntityRepository.findAll(pageable);
     }
 
     @Transactional

@@ -8,6 +8,8 @@ import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizat
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.infrastructure.seeders.ModelMapper.OrganizationEntityModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -46,10 +48,10 @@ public class OrganizationEntityController {
 
     @GetMapping("/OrganizationEntities")
     @Transactional
-    public ResponseEntity<List<OrganizationEntityDto>> getOrganizationEntities() {
-        List<OrganizationEntity> organizationEntities = this.organizationEntityService.getOrganizationEntities();
-        List<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.stream().map(this.modelMapper::mapOrganizationEntity).toList();
-        return new ResponseEntity<List<OrganizationEntityDto>>(organizationEntitiesDto, HttpStatus.OK);
+    public ResponseEntity<Page<OrganizationEntityDto>> getOrganizationEntities(Pageable pageable) {
+        Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getOrganizationEntities(pageable);
+        Page<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.map(this.modelMapper::mapOrganizationEntity);
+        return new ResponseEntity<Page<OrganizationEntityDto>>(organizationEntitiesDto, HttpStatus.OK);
     }
 
     @PostMapping("/OrganizationEntity/{id}/validate")

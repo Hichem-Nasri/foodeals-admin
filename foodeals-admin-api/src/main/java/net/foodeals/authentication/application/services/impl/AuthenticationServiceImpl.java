@@ -1,11 +1,13 @@
 package net.foodeals.authentication.application.services.impl;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import net.foodeals.authentication.application.dtos.requests.LoginRequest;
 import net.foodeals.authentication.application.dtos.requests.RegisterRequest;
 import net.foodeals.authentication.application.dtos.responses.AuthenticationResponse;
 import net.foodeals.authentication.application.services.AuthenticationService;
 import net.foodeals.authentication.application.services.JwtService;
+import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,36 +25,40 @@ import java.util.Map;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 class AuthenticationServiceImpl implements AuthenticationService {
     private final UserService userService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
-//        final User user = userService.createrequest);
-//        return handleRegistration(user);
-        return null;
+        final User user = userService.create(new UserRequest(request.name(), request.email(), request.phone(), request.password(), request.isEmailVerified(), request.roleId()));
+        return handleRegistration(user);
     }
 
     public AuthenticationResponse login(LoginRequest request) {
-        return handleLogin(request);
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.email(),
+                            request.password()));
+
+            SecurityContext sc = SecurityContextHolder.getContext();
+            sc.setAuthentication(authentication);
+
+            final User user = userService.findByEmail(request.email());
+
+            AuthenticationResponse response = getTokens(user);
+
+            return response;
+        } catch (Exception e) {
+            log.error("Login failed for user: {}", request.email(), e);
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     private AuthenticationResponse handleRegistration(User user) {
-        return getTokens(user);
-    }
-
-    private AuthenticationResponse handleLogin(LoginRequest request) {
-        System.out.println("here is the login request " + request);
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.email(),
-                        request.password()));
-
-        SecurityContext sc = SecurityContextHolder.getContext();
-        sc.setAuthentication(authentication);
-
-        final User user = userService.findByEmail(request.email());
         return getTokens(user);
     }
 
