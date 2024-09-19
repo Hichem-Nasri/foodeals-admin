@@ -33,7 +33,7 @@ public class Authority extends AbstractEntity<UUID> {
     @JsonIgnore
     private List<Role> roles;
 
-    Authority() {
+    public Authority() {
 
     }
 
