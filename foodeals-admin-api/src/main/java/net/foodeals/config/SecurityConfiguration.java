@@ -34,10 +34,12 @@ public class SecurityConfiguration {
             "/Articles/**",
             "/Article/**",
             "/Contracts/**",
+            "/OrganizationEntities",
             "/OrganizationEntity/**",
             "/Activities/**",
             "/Activity/**",
-            "/Rayon/**"
+            "/Rayon/**",
+            "/v1/users"
     };
     private final JwtService jwtService;
     private final UserService userService;
