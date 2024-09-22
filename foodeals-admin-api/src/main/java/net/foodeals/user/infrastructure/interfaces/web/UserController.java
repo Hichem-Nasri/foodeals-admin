@@ -1,10 +1,10 @@
 package net.foodeals.user.infrastructure.interfaces.web;
 
-import ch.qos.logback.core.net.server.Client;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.ClientDto;
+import net.foodeals.user.application.dtos.responses.DeliveryPartnerUserDto;
 import net.foodeals.user.application.dtos.responses.UserResponse;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("v1/users")
@@ -76,5 +77,12 @@ public class UserController {
         Page<User> clients = this.service.getClientsData(page);
         Page<ClientDto> clientDtos = clients.map(this.service::toClientDto);
         return new ResponseEntity<Page<ClientDto>>(clientDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/delivery-partners/{id}")
+    public ResponseEntity<Page<DeliveryPartnerUserDto>> getCompanyUsers(Pageable pageable, @PathVariable("id") UUID id) {
+        Page<User> users = this.service.getDeliveryPartnerUsers(pageable, id);
+        Page<DeliveryPartnerUserDto> deliveyPartnerUsersDtos = users.map(user -> this.mapper.map(user, DeliveryPartnerUserDto.class));
+        return new ResponseEntity<Page<DeliveryPartnerUserDto>>(deliveyPartnerUsersDtos, HttpStatus.OK);
     }
 }

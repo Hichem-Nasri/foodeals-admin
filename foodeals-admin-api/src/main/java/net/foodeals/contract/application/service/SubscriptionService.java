@@ -36,7 +36,7 @@ public class SubscriptionService {
         Subscription subscription = Subscription.builder().amount(new Price(new BigDecimal(contractSubscriptionDto.getAnnualPayment()), Currency.getInstance("MAD")))
                 .numberOfDueDates(contractSubscriptionDto.getNumberOfDueDates())
                 .duration(contractSubscriptionDto.getDuration())
-                .subscriptionStatus(SubscriptionStatus.IN_PROGRESS)
+                .subscriptionStatus(SubscriptionStatus.NOT_STARTED)
                 .build();
         return subscription;
     }

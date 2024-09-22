@@ -21,4 +21,6 @@ public interface UserRepository extends BaseRepository<User, Integer> {
     Long countDeliveryUsersByOrganizationId(@Param("organizationId") UUID organizationId);
     @Query("SELECT u FROM User u JOIN FETCH u.role r JOIN FETCH r.authorities WHERE u.email = :email")
     Optional<User> findByEmailWithRoleAndAuthorities(@Param("email") String email);
+
+    Page<User> findByOrganizationEntity_Id(UUID organizationId, Pageable pageable);
 }

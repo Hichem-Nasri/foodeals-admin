@@ -232,9 +232,9 @@ public class ContractService {
             contract.setMinimumReduction(updateOrganizationEntityDto.getMinimumReduction());
         }
 
-        if (updateOrganizationEntityDto.getManagerId() != null && updateOrganizationEntityDto.getManagerId() != contract.getUserContracts().getUser().getId()) {
-            this.userContractService.updateUserContract(contract.getUserContracts(), updateOrganizationEntityDto);
-        }
+//        if (updateOrganizationEntityDto.getManagerId() != null && updateOrganizationEntityDto.getManagerId() != contract.getUserContracts().getUser().getId()) {
+//            this.userContractService.updateUserContract(contract.getUserContracts(), updateOrganizationEntityDto);
+//        }
 
         this.solutionContractService.update(contract, updateOrganizationEntityDto);
         byte[] document = this.updateDocument(contract);

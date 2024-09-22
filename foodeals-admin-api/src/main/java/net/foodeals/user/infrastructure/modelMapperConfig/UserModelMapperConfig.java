@@ -3,8 +3,6 @@ package net.foodeals.user.infrastructure.modelMapperConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.location.domain.entities.Address;
-import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
-import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.user.application.dtos.responses.*;
 import net.foodeals.user.domain.entities.Authority;
 import net.foodeals.user.domain.entities.Role;
@@ -13,6 +11,12 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.context.DelegatingApplicationListener;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -57,6 +61,18 @@ public class UserModelMapperConfig {
                 map(source.getAddress(), destination.getClientAddressDto());
             }
         });
+
+        modelMapper.addConverter(context -> {
+            final User user = context.getSource();
+            List<String> solutions = user.getOrganizationEntity().getSolutions().stream().map(solution -> solution.getName()).toList();
+            String city = user.getAddress().getCity().getName();
+            String region = user.getAddress().getRegion().getName();
+            UserInfoDto userInfoDto = new UserInfoDto(user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+            LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
+            String createdAt = localDateTime.format(formatter);
+            return new DeliveryPartnerUserDto(createdAt, user.getRole().getName(), "OFFLINE", city, region, solutions, userInfoDto);
+        }, User.class, DeliveryPartnerUserDto.class);
 
         modelMapper.addMappings(new PropertyMap<Address, ClientAddressDto>() {
             @Override

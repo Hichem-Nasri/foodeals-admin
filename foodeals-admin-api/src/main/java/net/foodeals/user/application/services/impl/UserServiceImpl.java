@@ -2,6 +2,9 @@ package net.foodeals.user.application.services.impl;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.foodeals.location.application.services.AddressService;
+import net.foodeals.location.domain.entities.Address;
+import net.foodeals.location.domain.repositories.AddressRepository;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
@@ -34,6 +37,7 @@ class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
+    private final AddressService addressService;
 
     @Override
     public List<User> findAll() {
@@ -63,7 +67,7 @@ class UserServiceImpl implements UserService {
                 modelMapper.map(request, User.class),
                 request
         );
-        return user;
+        return this.repository.save(user);
     }
 
     @Override
@@ -87,6 +91,10 @@ class UserServiceImpl implements UserService {
         final Role role = roleService.findById(request.roleId());
         user.setRole(role)
                 .setPassword(passwordEncoder.encode(user.getPassword()));
+        if (request.userAddress() != null) {
+            Address address = this.addressService.createUserAddress(request.userAddress());
+            user.setAddress(address);
+        }
         user = this.repository.save(user);
         if (request.organizationEntityId() != null) {
             final OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(request.organizationEntityId()).orElse(null);
@@ -120,5 +128,10 @@ class UserServiceImpl implements UserService {
     @Override
     public Long countDeliveryUsersByOrganizationId(UUID id) {
         return this.repository.countDeliveryUsersByOrganizationId(id);
+    }
+
+    @Override
+    public Page<User> getDeliveryPartnerUsers(Pageable pageable, UUID id) {
+        return this.repository.findByOrganizationEntity_Id(id, pageable);
     }
 }

@@ -25,6 +25,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
+import java.util.Random;
+
 @Order(8)
 @Component
 public class UserSeeder {
@@ -48,8 +50,10 @@ public class UserSeeder {
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void UserSeeder() {
-        User user = this.createNewClient();
-        this.userRepository.saveAndFlush(user);
+        if (userRepository.count() == 0) {
+            User user = this.createNewClient();
+            this.userRepository.saveAndFlush(user);
+        }
     }
 
     public User createNewClient() {

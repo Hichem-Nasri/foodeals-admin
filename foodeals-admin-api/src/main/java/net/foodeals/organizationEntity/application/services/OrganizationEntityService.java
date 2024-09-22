@@ -23,6 +23,7 @@ import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRep
 import net.foodeals.payment.domain.entities.Payment;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
+import net.foodeals.user.application.dtos.requests.UserAddress;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.services.RoleService;
 import net.foodeals.user.application.services.UserService;
@@ -142,7 +143,8 @@ public class OrganizationEntityService {
 
         Role role  = this.roleService.findByName("MANAGER");
         String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId(), organizationEntity.getId());
+        UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
+        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId(), organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
         //        String receiver = manager.getEmail();
 //        String subject = "Foodeals account validation";
@@ -280,7 +282,8 @@ public class OrganizationEntityService {
 
         Role role  = this.roleService.findByName("MANAGER");
         String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId(), organizationEntity.getId());
+        UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
+        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId(), organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
         SimpleDateFormat formatter = new SimpleDateFormat("M/y");
         Date date = new Date();
@@ -290,6 +293,9 @@ public class OrganizationEntityService {
                 .partnerType(PartnerType.ORGANIZATION_ENTITY)
                 .paymentStatus(PaymentStatus.IN_VALID)
                 .date(formattedDate)
+                .numberOfOrders(Long.valueOf(0))
+                .paymentsWithCard(Double.valueOf(0))
+                .paymentsWithCash(Double.valueOf(0))
                 .build();
         organizationEntity.getPayments().add(payment);
         this.userService.save(manager);

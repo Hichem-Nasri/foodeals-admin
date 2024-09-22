@@ -22,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Locale;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -39,7 +41,10 @@ public class SecurityConfiguration {
             "/Activities/**",
             "/Activity/**",
             "/Rayon/**",
-            "/v1/users"
+            "/v1/users/**",
+            "api/v1/payments/**",
+            "/delivery-partners",
+            "/v1/deliveries"
     };
     private final JwtService jwtService;
     private final UserService userService;
