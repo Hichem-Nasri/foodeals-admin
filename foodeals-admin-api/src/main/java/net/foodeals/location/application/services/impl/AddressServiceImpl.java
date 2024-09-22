@@ -12,6 +12,7 @@ import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Region;
 import net.foodeals.location.domain.exceptions.AddressNotFoundException;
 import net.foodeals.location.domain.repositories.AddressRepository;
+import net.foodeals.user.application.dtos.requests.UserAddress;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -83,6 +84,17 @@ class AddressServiceImpl implements AddressService {
             Region region = this.regionService.findByName(entityAddressDto.getRegion());
             address.setRegion(region);
         }
+        return this.repository.save(address);
+    }
+
+    @Override
+    public Address createUserAddress(UserAddress userAddress) {
+        City city = this.cityService.findByName(userAddress.city());
+        Region region = this.regionService.findByName(userAddress.region());
+
+        Address address = Address.builder().city(city)
+                .region(region)
+                .build();
         return this.repository.save(address);
     }
 }

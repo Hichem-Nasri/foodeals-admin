@@ -61,11 +61,11 @@ public class OrganizationEntityModelMapper {
 
         Optional<Contact> firstContact = Optional.ofNullable(source.getContacts())
                 .flatMap(list -> list.stream().findFirst());
-        Optional<User> manager = Optional.ofNullable(source.getContract().getUserContracts().getUser());
-
-        manager.ifPresent(salesManger -> {
-            destination.setManager(salesManger.getName().firstName() + " " + salesManger.getName().lastName());
-        });
+//        Optional<User> manager = Optional.ofNullable(source.getContract().getUserContracts().getUser());
+//
+//        manager.ifPresent(salesManger -> {
+//            destination.setManager(salesManger.getName().firstName() + " " + salesManger.getName().lastName());
+//        });
         firstContact.ifPresent(contact -> {
             destination.setEmail(contact.getEmail());
             destination.setPhone(contact.getPhone());
@@ -106,12 +106,6 @@ public class OrganizationEntityModelMapper {
         deliveryPartnerDto.setSolutions(solutionsNames);
         int numberOfCoveredCities = organizationEntity.getCoveredZones().stream().map(coveredZone -> coveredZone.getRegion().getCity().getName()).collect(Collectors.toSet()).size();
         int totalNumberOfCities = this.countryService.countTotalCitiesByCountryName(organizationEntity.getAddress().getCity().getState().getCountry().getName());
-
-        System.out.println("\n\n");
-        System.out.println(totalNumberOfCities);
-        System.out.println("\n\n");
-        System.out.println(numberOfCoveredCities);
-        System.out.println("\n\n");
 
         DistributionType distribution = totalNumberOfCities == numberOfCoveredCities ? DistributionType.EVERYWHERE : DistributionType.MULTI_CITY;
         deliveryPartnerDto.setDistribution(distribution);

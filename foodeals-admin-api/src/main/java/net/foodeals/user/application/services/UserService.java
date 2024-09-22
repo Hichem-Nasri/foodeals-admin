@@ -22,4 +22,6 @@ public interface UserService extends CrudService<User, Integer, UserRequest> {
     ClientDto toClientDto(User user);
 
     Long countDeliveryUsersByOrganizationId(UUID id);
+
+    Page<User> getDeliveryPartnerUsers(Pageable pageable, UUID id);
 }
