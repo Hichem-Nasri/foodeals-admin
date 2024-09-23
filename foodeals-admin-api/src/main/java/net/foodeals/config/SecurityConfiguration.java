@@ -31,20 +31,6 @@ public class SecurityConfiguration {
 
     private static final String[] WHITE_LIST = {
             "/api/v1/auth/**",
-            "/ArticleCategories/**",
-            "/ArticleCategory/**",
-            "/Articles/**",
-            "/Article/**",
-            "/Contracts/**",
-            "/OrganizationEntities",
-            "/OrganizationEntity/**",
-            "/Activities/**",
-            "/Activity/**",
-            "/Rayon/**",
-            "/v1/users/**",
-            "api/v1/payments/**",
-            "/delivery-partners",
-            "/v1/deliveries"
     };
     private final JwtService jwtService;
     private final UserService userService;
