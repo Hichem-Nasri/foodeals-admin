@@ -3,7 +3,11 @@ package net.foodeals.location.application.services;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Region;
 import net.foodeals.location.domain.repositories.RegionRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.UUID;
 
 @Service
 public class RegionService {
@@ -29,5 +33,9 @@ public class RegionService {
         city.getRegions().add(region);
         this.cityService.save(city);
         return region;
+    }
+
+    public Region findById(UUID uuid) {
+        return this.regionRepository.findById(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Region with Id : " + uuid + " not found"));
     }
 }

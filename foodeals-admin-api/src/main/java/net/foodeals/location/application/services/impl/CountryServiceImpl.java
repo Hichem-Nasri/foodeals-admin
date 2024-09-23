@@ -75,5 +75,10 @@ class CountryServiceImpl implements CountryService {
     public Country save(Country country) {
         return this.repository.saveAndFlush(country);
     }
+
+    @Override
+    public Long count() {
+        return this.repository.count();
+    }
 }
 

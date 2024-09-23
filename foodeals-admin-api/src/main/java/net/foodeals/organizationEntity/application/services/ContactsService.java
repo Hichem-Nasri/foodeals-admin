@@ -2,8 +2,11 @@ package net.foodeals.organizationEntity.application.services;
 
 import net.foodeals.organizationEntity.application.dtos.requests.EntityContactDto;
 import net.foodeals.organizationEntity.domain.entities.Contact;
+import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.repositories.ContactRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class ContactsService {
@@ -28,6 +31,16 @@ public class ContactsService {
         if (entityContactDto.getPhone() != null) {
             contact.setPhone(entityContactDto.getPhone());
         }
+        return this.contactRepository.save(contact);
+    }
+
+    public Contact create(EntityContactDto entityContactDto, OrganizationEntity organizationEntity, Boolean isResponsible) {
+        Contact contact = Contact.builder().name(entityContactDto.getName())
+                .phone(entityContactDto.getPhone())
+                .email(entityContactDto.getEmail())
+                .isResponsible(isResponsible)
+                .organizationEntity(organizationEntity)
+                .build();
         return this.contactRepository.save(contact);
     }
 }

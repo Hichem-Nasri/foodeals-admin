@@ -4,7 +4,6 @@ import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.contract.domain.entities.SolutionContract;
-import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.contract.domain.repositories.ContractRepository;
@@ -65,7 +64,7 @@ public class ContractService {
         this.userContractService = userContractService;
     }
 
-        public Contract createANewContract(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
+        public Contract createPartnerContract(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
         User user = this.userService.findById(createAnOrganizationEntityDto.getManagerId());
         UserContract userContract = UserContract.builder().user(user).build();
         Contract contract = Contract.builder().name(createAnOrganizationEntityDto.getEntityName())
@@ -267,6 +266,13 @@ public class ContractService {
             });
         }
 
+    }
+
+    public Contract createAssociationContract(Integer maxNumberOfPoints, OrganizationEntity organizationEntity) {
+        Contract contract = Contract.builder().maxNumberOfSubEntities(maxNumberOfPoints)
+                .organizationEntity(organizationEntity)
+                .build();
+        return this.contractRepository.save(contract);
     }
 }
 

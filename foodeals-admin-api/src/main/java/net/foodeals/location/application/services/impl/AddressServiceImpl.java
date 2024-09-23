@@ -49,18 +49,20 @@ class AddressServiceImpl implements AddressService {
 
     @Override
     public Address create(AddressRequest request) {
-        City city = cityService.findById(request.cityId());
+        City city = cityService.findByName(request.cityName());
+        Region region = this.regionService.findByName(request.regionName());
         Address address = modelMapper.map(request, Address.class);
         address.setCity(city);
+        address.setRegion(region);
         return repository.save(address);
     }
 
     @Override
     public Address update(UUID id, AddressRequest request) {
-        City city = cityService.findById(request.cityId());
+//        City city = cityService.findById(request.cityId());
         Address address = findById(id);
         modelMapper.map(request, address);
-        address.setCity(city);
+//        address.setCity(city);
         return repository.save(address);
     }
 

@@ -8,6 +8,7 @@ import net.foodeals.contract.application.service.DeadlinesService;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.delivery.application.services.impl.CoveredZonesService;
 import net.foodeals.delivery.domain.entities.CoveredZones;
+import net.foodeals.location.application.dtos.requests.AddressRequest;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.RegionService;
@@ -16,6 +17,7 @@ import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Region;
 import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
@@ -171,7 +173,7 @@ public class OrganizationEntityService {
             activity.getOrganizationEntities().add(organizationEntity);
             this.activityService.save(activity);
         });
-        Contract contract = this.contractService.createANewContract(createAnOrganizationEntityDto, organizationEntity);
+        Contract contract = this.contractService.createPartnerContract(createAnOrganizationEntityDto, organizationEntity);
         organizationEntity.setContract(contract);
         return this.organizationEntityRepository.save(organizationEntity);
     }
@@ -320,5 +322,37 @@ public class OrganizationEntityService {
 
     public Page<OrganizationEntity> getDeliveryPartners(Pageable pageable) {
         return this.organizationEntityRepository.findByType(EntityType.DELIVERY_PARTNER, pageable);
+    }
+
+    public UUID createAssociation(CreateAssociationDto createAssociationDto) {
+        AddressRequest addressRequest = new AddressRequest(createAssociationDto.associationAddress().getAddress(), "", "", createAssociationDto.associationAddress().getCity(), createAssociationDto.associationAddress().getRegion(), createAssociationDto.associationAddress().getIframe());
+        Address address = this.addressService.create(addressRequest);
+        Set<Activity> subActivities = this.activityService.getActivitiesByName(createAssociationDto.activities());
+        Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAssociationDto.solutions());
+        OrganizationEntity organizationEntity = OrganizationEntity.builder().name(createAssociationDto.companyName())
+                .subActivities(subActivities)
+                .address(address)
+                .type(createAssociationDto.entityType())
+                .solutions(solutions)
+                .commercialNumber(createAssociationDto.pv())
+                .build();
+        organizationEntity = this.organizationEntityRepository.save(organizationEntity);
+        Contact manager1 = this.contactsService.create(createAssociationDto.manager1(), organizationEntity, true);
+        Contact manager2 = this.contactsService.create(createAssociationDto.manager2(), organizationEntity, true);
+        organizationEntity.getContacts().add(manager1);
+        organizationEntity.getContacts().add(manager2);
+
+        OrganizationEntity finalOrganizationEntity = organizationEntity;
+        subActivities.forEach(activity -> {
+            activity.getOrganizationEntities().add(finalOrganizationEntity);
+            this.activityService.save(activity);
+        });
+        solutions.forEach(solution -> {
+            solution.getOrganizationEntities().add(finalOrganizationEntity);
+            this.solutionService.save(solution);
+        });
+        Contract contract = this.contractService.createAssociationContract(createAssociationDto.numberOfPoints(), organizationEntity);
+        organizationEntity.setContract(contract);
+        return this.organizationEntityRepository.save(organizationEntity). getId();
     }
 }

@@ -10,7 +10,8 @@ public record AddressRequest(
         @NotBlank String address,
         @NotBlank String extraAddress,
         @NotBlank String zip,
-        @NotNull UUID cityId,
-        @NotNull Coordinates coordinates
-) {
+        @NotNull String cityName,
+        @NotNull String regionName,
+        @NotBlank String iframe
+        ) {
 }

@@ -2,6 +2,8 @@ package net.foodeals.organizationEntity.Controller;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.responses.DeliveryPartnerDto;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller
+@RequestMapping("v1/organizations")
 public class OrganizationEntityController {
     private final OrganizationEntityService organizationEntityService;
     private final OrganizationEntityModelMapper modelMapper;
@@ -32,6 +35,11 @@ public class OrganizationEntityController {
     @PostMapping("/OrganizationEntity/add")
     public ResponseEntity<UUID> addAnOrganizationEntity(@RequestBody CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
             return new ResponseEntity<>(this.organizationEntityService.createAnewOrganizationEntity(createAnOrganizationEntityDto), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/associations/create")
+    public ResponseEntity<UUID> createAssociation(@RequestBody @Valid CreateAssociationDto createAssociationDto) {
+        return new ResponseEntity<UUID>(this.organizationEntityService.createAssociation(createAssociationDto), HttpStatus.OK);
     }
 
     @PutMapping("/OrganizationEntity/{id}")
