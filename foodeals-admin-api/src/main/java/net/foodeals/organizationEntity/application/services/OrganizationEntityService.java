@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.application.services;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.application.service.DeadlinesService;
@@ -36,13 +37,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Logger;
 
 @Service
+@Slf4j
 public class OrganizationEntityService {
 
     private final OrganizationEntityRepository organizationEntityRepository;
@@ -324,7 +328,7 @@ public class OrganizationEntityService {
         return this.organizationEntityRepository.findByType(EntityType.DELIVERY_PARTNER, pageable);
     }
 
-    public UUID createAssociation(CreateAssociationDto createAssociationDto) {
+    public UUID createAssociation(CreateAssociationDto createAssociationDto, MultipartFile logo, MultipartFile cover) {
         AddressRequest addressRequest = new AddressRequest(createAssociationDto.associationAddress().getAddress(), "", "", createAssociationDto.associationAddress().getCity(), createAssociationDto.associationAddress().getRegion(), createAssociationDto.associationAddress().getIframe());
         Address address = this.addressService.create(addressRequest);
         Set<Activity> subActivities = this.activityService.getActivitiesByName(createAssociationDto.activities());
