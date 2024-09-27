@@ -2,8 +2,8 @@ package net.foodeals.organizationEntity.Controller;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
+import net.foodeals.organizationEntity.application.dtos.responses.AssociationsDto;
 import net.foodeals.organizationEntity.application.dtos.responses.DeliveryPartnerDto;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -84,5 +83,12 @@ public class OrganizationEntityController {
         headers.add("Content-Disposition", "attachment; filename=contract.pdf");
 
         return new ResponseEntity<byte []>(this.organizationEntityService.getContractDocument(id), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/associations")
+    public ResponseEntity<Page<AssociationsDto>> getAssociations(Pageable pageable) {
+        Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getAssociations(pageable);
+        Page<AssociationsDto> associationsDtos = organizationEntities.map(this.modelMapper::mapToAssociation);
+        return new ResponseEntity<Page<AssociationsDto>>(associationsDtos, HttpStatus.OK);
     }
 }

@@ -1,5 +1,6 @@
 package net.foodeals.user.infrastructure.seeders;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.common.annotations.Seeder;
 import net.foodeals.user.domain.entities.Role;
@@ -15,11 +16,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class RoleSeeder implements CommandLineRunner {
     private final RoleRepository roleRepository;
+    private final EntityManager entityManager;
 
     @Override
     public void run(String... args) throws Exception {
         if (roleRepository.count() == 0) {
-            roleRepository.saveAll(
+            List<Role> roles = roleRepository.saveAll(
                     List.of(
                             Role.create(UUID.fromString("d7d7a9c5-b153-4526-ac16-05f19bf97270"), "ADMIN"),
                             Role.create(UUID.randomUUID(), "SUPER_ADMIN"),
@@ -29,7 +31,17 @@ public class RoleSeeder implements CommandLineRunner {
                             Role.create(UUID.randomUUID(), "DELIVERY_MAN")
                     )
             );
+
+            // merge the updated entity
+            roles.forEach(role -> {
+                System.out.flush();
+                System.out.println("name -> " + role.getName() + " id -> "  + role.getId());
+            });
+
             System.out.println("roles seeded");
+        } else {
+            System.out.println("------------------------------------------------------");
+            this.roleRepository.findAll().forEach(role ->  System.out.println("name -> " + role.getName() + " id -> " + role.getId()));
         }
     }
 }

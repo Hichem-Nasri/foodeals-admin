@@ -1,15 +1,23 @@
 package net.foodeals.organizationEntity.infrastructure.seeders.ModelMapper;
 
+import ch.qos.logback.core.net.AbstractSocketAppender;
 import jakarta.annotation.PostConstruct;
+import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.delivery.application.services.DeliveryService;
 import net.foodeals.location.application.services.CountryService;
+import net.foodeals.offer.application.services.DonationService;
+import net.foodeals.organizationEntity.application.dtos.responses.AssociationsDto;
 import net.foodeals.organizationEntity.application.dtos.responses.DeliveryPartnerDto;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.responses.ResponsibleInfoDto;
 import net.foodeals.organizationEntity.application.dtos.responses.enums.DistributionType;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
+import net.foodeals.organizationEntity.application.services.SubEntityService;
 import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.organizationEntity.domain.entities.SubEntity;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
+import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.payment.application.dto.response.PartnerInfoDto;
 import net.foodeals.user.application.services.UserService;
@@ -37,6 +45,11 @@ public class OrganizationEntityModelMapper {
     private DeliveryService deliveryService;
     @Autowired
     private CountryService countryService;
+    @Autowired
+    private DonationService donationService;
+    @Autowired
+    private SubEntityService subEntityService;
+
 
     @PostConstruct
     private void postConstruct() {
@@ -49,6 +62,34 @@ public class OrganizationEntityModelMapper {
                 map(source.getContract().getContractStatus(), destination.getContractStatus());
             }
         });
+
+        mapper.addConverter(mappingContext -> {
+            OrganizationEntity organizationEntity = mappingContext.getSource();
+
+            OffsetDateTime dateTime = OffsetDateTime.parse(organizationEntity.getCreatedAt().toString());
+            LocalDate date = dateTime.toLocalDate();
+
+            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getName(), organizationEntity.getAvatarPath());
+            Optional<User> responsible = organizationEntity.getUsers().stream().filter(user -> user.getRole().getName().equals("MANAGER")).findFirst();
+
+            ResponsibleInfoDto responsibleInfoDto = ResponsibleInfoDto.builder().build();
+            responsible.ifPresent(user -> {
+                responsibleInfoDto.setName(user.getName());
+                responsibleInfoDto.setAvatarPath(user.getAvatarPath());
+                responsibleInfoDto.setPhone(user.getPhone());
+                responsibleInfoDto.setEmail(user.getEmail());
+            });
+            List<String> solutions = organizationEntity.getSolutions().stream().map(solution -> solution.getName()).toList();
+            String city = organizationEntity.getAddress().getCity().getName();
+            ContractStatus contractStatus = organizationEntity.getContract().getContractStatus();
+            Integer users = organizationEntity.getUsers().size();
+            Integer subEntities = this.subEntityService.countByOrganizationEntity_IdAndType(organizationEntity.getId(), SubEntityType.FOOD_BANK_SB);
+            EntityType entityType = organizationEntity.getType();
+            Integer donations = this.donationService.countByDonor_Id(organizationEntity.getId());
+            Integer recovered = this.donationService.countByReceiver_Id(organizationEntity.getId());
+            Integer associations = this.subEntityService.countByOrganizationEntity_IdAndType(organizationEntity.getId(), SubEntityType.FOOD_BANK_ASSOCIATION);
+            return new AssociationsDto(date.toString(), partnerInfoDto, responsibleInfoDto, users, donations, recovered, subEntities, associations, contractStatus, city, solutions, entityType);
+        }, OrganizationEntity.class, AssociationsDto.class);
     }
 
     public OrganizationEntityDto mapOrganizationEntity(OrganizationEntity source) {
@@ -110,6 +151,10 @@ public class OrganizationEntityModelMapper {
         DistributionType distribution = totalNumberOfCities == numberOfCoveredCities ? DistributionType.EVERYWHERE : DistributionType.MULTI_CITY;
         deliveryPartnerDto.setDistribution(distribution);
         return deliveryPartnerDto;
+    }
+
+    public AssociationsDto mapToAssociation(OrganizationEntity organizationEntity) {
+        return this.mapper.map(organizationEntity, AssociationsDto.class);
     }
 }
 

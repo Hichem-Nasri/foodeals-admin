@@ -34,7 +34,7 @@ public class SolutionEntitySeeder {
                     .build();
             Solution solution3 = Solution.builder().name("dlc")
                     .build();
-            this.solutionRepository.saveAll(List.of(solution, solution2, solution3));
+            this.solutionRepository.saveAllAndFlush(List.of(solution, solution2, solution3));
         }
     }
 }

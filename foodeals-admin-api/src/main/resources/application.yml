@@ -24,7 +24,7 @@ spring:
     hibernate:
       dialect: org.hibernate.dialect.PostgreSQLDialect
       ddl-auto: update
-    show-sql: true
+    show-sql: false
 
 app:
   security:
@@ -35,3 +35,7 @@ app:
       refresh-token:
         # 7 days
         expiration: 604800000
+
+logging:
+  level:
+    root: ERROR

@@ -27,6 +27,11 @@ public class OpenTime extends AbstractEntity<UUID> {
     private String to;
 
     @ManyToOne
-    @JoinColumn(name = "offer_id", nullable = false)
+    @JoinColumn(name = "offer_id", nullable = true)
     private Offer offer;
+
+
+    @ManyToOne
+    @JoinColumn(name = "donation_id", nullable = true)
+    private Donation donation;
 }

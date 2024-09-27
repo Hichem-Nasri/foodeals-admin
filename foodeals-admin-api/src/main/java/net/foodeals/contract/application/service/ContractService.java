@@ -271,6 +271,7 @@ public class ContractService {
     public Contract createAssociationContract(Integer maxNumberOfPoints, OrganizationEntity organizationEntity) {
         Contract contract = Contract.builder().maxNumberOfSubEntities(maxNumberOfPoints)
                 .organizationEntity(organizationEntity)
+                .contractStatus(ContractStatus.IN_PROGRESS)
                 .build();
         return this.contractRepository.save(contract);
     }

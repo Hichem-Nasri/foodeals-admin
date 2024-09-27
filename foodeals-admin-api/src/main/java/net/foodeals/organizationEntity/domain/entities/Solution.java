@@ -25,6 +25,11 @@ public class Solution extends AbstractEntity<UUID> {
     private String name;
 
     @ManyToMany(mappedBy = "solutions")
+    @Builder.Default
     private Set<OrganizationEntity> organizationEntities = new HashSet<>();
+
+    @ManyToMany(mappedBy = "solutions")
+    @Builder.Default
+    private Set<SubEntity> subEntities = new HashSet<>();
 
 }

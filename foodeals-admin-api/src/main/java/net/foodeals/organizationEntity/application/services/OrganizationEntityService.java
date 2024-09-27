@@ -116,7 +116,8 @@ public class OrganizationEntityService {
         organizationEntity.setContacts(contacts);
         organizationEntity = this.organizationEntityRepository.save(organizationEntity);
         switch (organizationEntity.getType()) {
-            case EntityType.PARTNER :
+            case EntityType.PARTNER_WITH_SB:
+            case EntityType.NORMAL_PARTNER:
                 organizationEntity = savePartner(createAnOrganizationEntityDto, organizationEntity);
                 break;
             case EntityType.DELIVERY_PARTNER :
@@ -296,7 +297,7 @@ public class OrganizationEntityService {
         String formattedDate = formatter.format(date);
         Payment payment = Payment.builder()
                 .organizationEntity(organizationEntity)
-                .partnerType(PartnerType.ORGANIZATION_ENTITY)
+                .partnerType(PartnerType.PARTNER)
                 .paymentStatus(PaymentStatus.IN_VALID)
                 .date(formattedDate)
                 .numberOfOrders(Long.valueOf(0))
@@ -346,6 +347,17 @@ public class OrganizationEntityService {
         organizationEntity.getContacts().add(manager1);
         organizationEntity.getContacts().add(manager2);
 
+        Role role  = this.roleService.findByName("MANAGER");
+        String pass1 = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+        UserAddress userAddress1 = new UserAddress(organizationEntity.getAddress().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
+        UserRequest userRequest1 = new UserRequest(manager1.getName(), manager1.getEmail(), manager1.getPhone(), pass1,  false, role.getId(), organizationEntity.getId(), userAddress1);
+        this.userService.createOrganizationEntityUser(userRequest1);
+
+        String pass2 = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+        UserAddress userAddress2 = new UserAddress(organizationEntity.getAddress().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
+        UserRequest userRequest2 = new UserRequest(manager2.getName(), manager2.getEmail(), manager2.getPhone(), pass2,  false, role.getId(), organizationEntity.getId(), userAddress2);
+        this.userService.createOrganizationEntityUser(userRequest2);
+
         OrganizationEntity finalOrganizationEntity = organizationEntity;
         subActivities.forEach(activity -> {
             activity.getOrganizationEntities().add(finalOrganizationEntity);
@@ -358,5 +370,10 @@ public class OrganizationEntityService {
         Contract contract = this.contractService.createAssociationContract(createAssociationDto.numberOfPoints(), organizationEntity);
         organizationEntity.setContract(contract);
         return this.organizationEntityRepository.save(organizationEntity). getId();
+    }
+
+
+    public Page<OrganizationEntity> getAssociations(Pageable pageable) {
+        return this.organizationEntityRepository.findByType(List.of(EntityType.ASSOCIATION, EntityType.FOOD_BANK), pageable);
     }
 }

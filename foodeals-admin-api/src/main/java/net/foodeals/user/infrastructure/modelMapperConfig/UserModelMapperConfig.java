@@ -74,6 +74,18 @@ public class UserModelMapperConfig {
             return new DeliveryPartnerUserDto(createdAt, user.getRole().getName(), "OFFLINE", city, region, solutions, userInfoDto);
         }, User.class, DeliveryPartnerUserDto.class);
 
+        modelMapper.addConverter(context -> {
+            final User user = context.getSource();
+            String city = user.getAddress().getCity().getName();
+            String region = user.getAddress().getRegion().getName();
+            UserInfoDto userInfoDto = new UserInfoDto(user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+            String roleName = user.getRole().getName();
+            LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
+            String createdAt = localDateTime.format(formatter);
+            return new AssociationsUsersDto(createdAt, roleName, city, region, userInfoDto);
+        }, User.class, AssociationsUsersDto.class);
+
         modelMapper.addMappings(new PropertyMap<Address, ClientAddressDto>() {
             @Override
             protected void configure() {
