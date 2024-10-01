@@ -52,11 +52,8 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
     private OrganizationEntity organizationEntity;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Activity mainActivity;
-
     @ManyToMany(cascade = CascadeType.ALL)
-    private Set<Activity> subActivities = new HashSet<>();
+    private Set<Activity> activities = new HashSet<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "subEntity", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -3,7 +3,7 @@ package net.foodeals.contract.application.DTo.upload;
 import lombok.Data;
 import net.foodeals.organizationEntity.application.dtos.requests.EntityAddressDto;
 import net.foodeals.organizationEntity.application.dtos.requests.EntityBankInformationDto;
-import net.foodeals.organizationEntity.application.dtos.requests.EntityContactDto;
+import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public class UpdateContractDto {
 
     private String commercialNumber; // valid
 
-    private EntityContactDto entityContactDto; // valid
+    private ContactDto contactDto; // valid
 
     private List<String> activities; // valid
 

@@ -10,9 +10,9 @@ import java.util.UUID;
 
 public interface ActivityService extends CrudService<Activity, UUID, ActivityRequest> {
 
-    Set<Activity> getActivitiesByName(List<String> subActivitiesNames);
+    Set<Activity> getActivitiesByName(List<String> activitiesNames);
 
-    Activity save(Activity mainActivity);
+    Activity save(Activity activity);
 
     Activity getActivityByName(String name);
 }

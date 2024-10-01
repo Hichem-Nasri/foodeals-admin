@@ -1,12 +1,10 @@
 package net.foodeals.organizationEntity.application.services;
 
-import net.foodeals.organizationEntity.application.dtos.requests.EntityContactDto;
+import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
 import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.repositories.ContactRepository;
 import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Service
 public class ContactsService {
@@ -21,23 +19,23 @@ public class ContactsService {
         this.contactRepository.softDelete(contact.getId());
     }
 
-    public Contact update(Contact contact, EntityContactDto entityContactDto) {
-        if (entityContactDto.getName() != null) {
-            contact.setName(entityContactDto.getName());
+    public Contact update(Contact contact, ContactDto contactDto) {
+        if (contactDto.getName() != null) {
+            contact.setName(contactDto.getName());
         }
-        if (entityContactDto.getEmail() != null) {
-            contact.setEmail(entityContactDto.getEmail());
+        if (contactDto.getEmail() != null) {
+            contact.setEmail(contactDto.getEmail());
         }
-        if (entityContactDto.getPhone() != null) {
-            contact.setPhone(entityContactDto.getPhone());
+        if (contactDto.getPhone() != null) {
+            contact.setPhone(contactDto.getPhone());
         }
         return this.contactRepository.save(contact);
     }
 
-    public Contact create(EntityContactDto entityContactDto, OrganizationEntity organizationEntity, Boolean isResponsible) {
-        Contact contact = Contact.builder().name(entityContactDto.getName())
-                .phone(entityContactDto.getPhone())
-                .email(entityContactDto.getEmail())
+    public Contact create(ContactDto contactDto, OrganizationEntity organizationEntity, Boolean isResponsible) {
+        Contact contact = Contact.builder().name(contactDto.getName())
+                .phone(contactDto.getPhone())
+                .email(contactDto.getEmail())
                 .isResponsible(isResponsible)
                 .organizationEntity(organizationEntity)
                 .build();

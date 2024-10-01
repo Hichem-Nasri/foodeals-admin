@@ -2,7 +2,6 @@ package net.foodeals.organizationEntity.application.dtos.responses;
 
 import lombok.Builder;
 import lombok.Data;
-import net.foodeals.organizationEntity.application.dtos.requests.EntityContactDto;
 import net.foodeals.organizationEntity.application.dtos.responses.enums.DistributionType;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.payment.application.dto.response.PartnerInfoDto;

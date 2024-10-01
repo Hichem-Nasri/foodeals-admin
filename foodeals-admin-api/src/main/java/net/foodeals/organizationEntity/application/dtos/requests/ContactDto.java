@@ -9,7 +9,7 @@ import net.foodeals.user.domain.valueObjects.Name;
 
 @Data
 @AllArgsConstructor
-public class EntityContactDto {
+public class ContactDto {
     @NotNull
     private Name name;
 

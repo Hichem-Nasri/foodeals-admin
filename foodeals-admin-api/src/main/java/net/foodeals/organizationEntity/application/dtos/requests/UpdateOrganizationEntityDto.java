@@ -4,7 +4,6 @@ import lombok.Data;
 import net.foodeals.contract.application.DTo.upload.SolutionsContractDto;
 
 import java.util.List;
-import java.util.UUID;
 
 @Data
 public class UpdateOrganizationEntityDto {
@@ -20,7 +19,7 @@ public class UpdateOrganizationEntityDto {
 
     private Integer managerId; // valid
 
-    private EntityContactDto entityContactDto; // valid
+    private ContactDto contactDto; // valid
 
     private List<String> activities; // valid
 

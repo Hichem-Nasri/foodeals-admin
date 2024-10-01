@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.user.domain.valueObjects.Name;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -31,8 +32,12 @@ public class Contact extends AbstractEntity<UUID> {
     private String phone;
 
     @ManyToOne
-    @JoinColumn(name = "organization_id", nullable = false)
+    @JoinColumn(name = "organization_id", nullable = true)
     private OrganizationEntity organizationEntity;
+
+    @ManyToOne
+    @JoinColumn(name = "prospect_id", nullable = true)
+    private Prospect prospect;
 
     private boolean isResponsible;
 
