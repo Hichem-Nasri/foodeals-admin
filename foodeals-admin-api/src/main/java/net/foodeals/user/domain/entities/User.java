@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.contract.domain.entities.UserContract;
+import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.delivery.domain.entities.Delivery;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
@@ -83,6 +84,14 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @JoinColumn(name = "address_id")
     private Address address;
+
+    @OneToMany(mappedBy = "lead")
+    private List<Prospect> managedProspects;
+
+    @OneToMany(mappedBy = "creator")
+    private List<Prospect> createdProspects;
+
+
 
     public User(Name name, String email, String phone, String password, Boolean isEmailVerified, Role role) {
         this.name = name;
@@ -185,6 +194,16 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     public User setAddress(Address st)
     {
         this.address = st;
+        return this;
+    }
+
+    public User setManagedProspects(ArrayList<Prospect> prospects) {
+        this.managedProspects = prospects;
+        return this;
+    }
+
+    public User setCreatedProspects(ArrayList<Prospect> prospects) {
+        this.managedProspects = prospects;
         return this;
     }
 }

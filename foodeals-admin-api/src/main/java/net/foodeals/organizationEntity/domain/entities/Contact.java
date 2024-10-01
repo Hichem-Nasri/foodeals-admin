@@ -35,10 +35,6 @@ public class Contact extends AbstractEntity<UUID> {
     @JoinColumn(name = "organization_id", nullable = true)
     private OrganizationEntity organizationEntity;
 
-    @ManyToOne
-    @JoinColumn(name = "prospect_id", nullable = true)
-    private Prospect prospect;
-
     private boolean isResponsible;
 
 }

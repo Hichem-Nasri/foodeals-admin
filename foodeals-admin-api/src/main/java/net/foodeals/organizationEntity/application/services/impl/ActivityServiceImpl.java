@@ -69,6 +69,12 @@ public class ActivityServiceImpl implements ActivityService {
     public Activity getActivityByName(String name) {
         return this.repository.findByName(name);
     }
+
+    @Override
+    public List<Activity> saveAll(Set<Activity> activities) {
+        return this.repository.saveAll(activities);
+    }
+
     @Override
     public Activity save(Activity activity) {
         return this.repository.save(activity);

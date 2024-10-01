@@ -1,8 +1,10 @@
 package net.foodeals.crm.domain.entities;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.organizationEntity.domain.entities.Activity;
@@ -16,23 +18,25 @@ import java.util.*;
 @Builder
 @Data
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Prospect extends AbstractEntity<UUID> {
 
     @Id
     @UuidGenerator
     private UUID id;
 
-    private String companyName;
+    private String name;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @Builder.Default
     private Set<Activity> activities = new HashSet<>();
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Address address;
 
     @Builder.Default
-    @OneToMany(mappedBy = "prospect", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contact> contacts = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.EAGER)

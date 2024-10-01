@@ -15,4 +15,6 @@ public interface ActivityService extends CrudService<Activity, UUID, ActivityReq
     Activity save(Activity activity);
 
     Activity getActivityByName(String name);
+
+    List<Activity> saveAll(Set<Activity> activities);
 }
