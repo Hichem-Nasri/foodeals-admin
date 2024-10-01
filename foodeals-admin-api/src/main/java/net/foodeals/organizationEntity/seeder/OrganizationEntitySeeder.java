@@ -3,9 +3,7 @@ package net.foodeals.organizationEntity.seeder;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import net.foodeals.common.annotations.Seeder;
-import net.foodeals.location.application.dtos.requests.AddressRequest;
 import net.foodeals.location.application.services.AddressService;
-import net.foodeals.location.domain.entities.Address;
 import net.foodeals.offer.application.services.DonationService;
 import net.foodeals.offer.domain.entities.Donation;
 import net.foodeals.offer.domain.entities.Donor;
@@ -14,21 +12,16 @@ import net.foodeals.offer.domain.enums.DonationReceiverType;
 import net.foodeals.offer.domain.enums.DonorType;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.requests.EntityAddressDto;
-import net.foodeals.organizationEntity.application.dtos.requests.EntityContactDto;
-import net.foodeals.organizationEntity.application.dtos.requests.SubEntityRequest;
-import net.foodeals.organizationEntity.application.dtos.responses.AssociationsDto;
+import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
 import net.foodeals.organizationEntity.application.services.SolutionService;
-import net.foodeals.organizationEntity.application.services.SubEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
-import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.organizationEntity.domain.repositories.SubEntityRepository;
 import net.foodeals.user.application.services.UserService;
-import net.foodeals.user.domain.entities.User;
 import net.foodeals.user.domain.valueObjects.Name;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -53,11 +46,11 @@ public class OrganizationEntitySeeder {
     public void createAssociation() {
 
         if (this.donationService.count() == 0) {
-            EntityContactDto entityContactDto1 = new EntityContactDto(new Name("test ", "test "), "t@gmail.com", "06412358976");
-            EntityContactDto entityContactDto2 = new EntityContactDto(new Name("test 1 ", "test 1"), "t1@gmail.com", "06412358975");
+            ContactDto contactDto1 = new ContactDto(new Name("test ", "test "), "t@gmail.com", "06412358976");
+            ContactDto contactDto2 = new ContactDto(new Name("test 1 ", "test 1"), "t1@gmail.com", "06412358975");
             EntityAddressDto entityAddressDto = new EntityAddressDto("address", "Casablanca", "maarif", "");
 
-            CreateAssociationDto associationsDto = new CreateAssociationDto("Test Company", List.of("Activity 1"), entityContactDto1, entityContactDto2, entityAddressDto, EntityType.FOOD_BANK, 10, List.of("pro_donate", "dlc"), "test ");
+            CreateAssociationDto associationsDto = new CreateAssociationDto("Test Company", List.of("Activity 1"), contactDto1, contactDto2, entityAddressDto, EntityType.FOOD_BANK, 10, List.of("pro_donate", "dlc"), "test ");
 
             UUID id = this.organizationEntityService.createAssociation(associationsDto, null, null);
             OrganizationEntity organizationEntity = this.organizationEntityService.getOrganizationEntityById(id);

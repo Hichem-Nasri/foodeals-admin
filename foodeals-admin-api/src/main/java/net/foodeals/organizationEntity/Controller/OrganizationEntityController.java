@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 @Controller
-@RequestMapping("v1/organizations")
+@RequestMapping("/api/v1/organizations")
 public class OrganizationEntityController {
     private final OrganizationEntityService organizationEntityService;
     private final OrganizationEntityModelMapper modelMapper;
@@ -32,7 +32,7 @@ public class OrganizationEntityController {
         this.modelMapper = modelMapper;
     }
 
-    @PostMapping("/OrganizationEntity/add")
+    @PostMapping("/partners/create")
     public ResponseEntity<UUID> addAnOrganizationEntity(@RequestBody CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
             return new ResponseEntity<>(this.organizationEntityService.createAnewOrganizationEntity(createAnOrganizationEntityDto), HttpStatus.CREATED);
     }
@@ -42,12 +42,12 @@ public class OrganizationEntityController {
         return new ResponseEntity<UUID>(this.organizationEntityService.createAssociation(createAssociationDto, logo, cover), HttpStatus.OK);
     }
 
-    @PutMapping("/OrganizationEntity/{id}")
+    @PutMapping("/partners/edit/{id}")
     public ResponseEntity<UUID> updateOrganizationEntity(@RequestBody UpdateOrganizationEntityDto updateOrganizationEntityDto, @PathVariable("id") UUID id) throws DocumentException, IOException {
             return new ResponseEntity<>(this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto), HttpStatus.OK);
     }
 
-    @GetMapping("/OrganizationEntity/{id}")
+    @GetMapping("/partners/{id}")
     @Transactional
     public ResponseEntity<OrganizationEntityDto> getOrganizationEntityById(@PathVariable("id") UUID id) {
         OrganizationEntity organizationEntity = this.organizationEntityService.getOrganizationEntityById(id);
@@ -55,7 +55,7 @@ public class OrganizationEntityController {
         return new ResponseEntity<OrganizationEntityDto>(organizationEntityDto, HttpStatus.OK);
     }
 
-    @GetMapping("/OrganizationEntities")
+    @GetMapping("/partners")
     @Transactional
     public ResponseEntity<Page<OrganizationEntityDto>> getOrganizationEntities(Pageable pageable) {
         Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getOrganizationEntities(pageable);
@@ -71,12 +71,12 @@ public class OrganizationEntityController {
     }
 
 
-    @PostMapping("/OrganizationEntity/{id}/validate")
+    @PostMapping("/partners/validate/{id}")
     public ResponseEntity<String> validateOrganizationEntity(@PathVariable("id") UUID id) {
         return new ResponseEntity<String>(this.organizationEntityService.validateOrganizationEntity(id), HttpStatus.OK);
     }
 
-    @GetMapping("/OrganizationEntity/{id}/Contract")
+    @GetMapping("/partners/contracts/{id}")
     public ResponseEntity<byte[]> getContractDocument(@PathVariable("id") UUID id) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);

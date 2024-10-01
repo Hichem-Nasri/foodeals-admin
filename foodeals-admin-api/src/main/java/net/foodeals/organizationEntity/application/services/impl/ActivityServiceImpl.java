@@ -61,8 +61,8 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
-    public Set<Activity> getActivitiesByName(List<String> subActivitiesNames) {
-        return this.repository.findByNameIn(subActivitiesNames);
+    public Set<Activity> getActivitiesByName(List<String>  activitiesNames) {
+        return this.repository.findByNameIn(activitiesNames);
     }
 
     @Override

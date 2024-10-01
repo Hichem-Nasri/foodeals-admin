@@ -3,6 +3,7 @@ package net.foodeals.organizationEntity.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.offer.domain.entities.Offer;
 import net.foodeals.product.domain.entities.ProductCategory;
 import org.hibernate.annotations.UuidGenerator;
@@ -31,15 +32,19 @@ public class Activity extends AbstractEntity<UUID> {
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ProductCategory> categories;
 
-    @ManyToMany(mappedBy = "subActivities",fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "activities",fetch = FetchType.LAZY)
     private List<SubEntity> subEntities;
 
-    @ManyToMany(mappedBy = "subActivities",fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "activities",fetch = FetchType.LAZY)
     @Builder.Default
     private Set<OrganizationEntity> organizationEntities = new HashSet<>();
 
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Offer> offers;
+
+    @ManyToMany(mappedBy = "activities",fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<Prospect> prospects = new HashSet<>();
 
     Activity() {
     }

@@ -94,9 +94,9 @@ public class OrganizationEntityService {
                 .city(city)
                 .region(region)
                 .build();
-        Contact contact = Contact.builder().name(createAnOrganizationEntityDto.getEntityContactDto().getName())
-                .email(createAnOrganizationEntityDto.getEntityContactDto().getEmail())
-                .phone(createAnOrganizationEntityDto.getEntityContactDto().getPhone())
+        Contact contact = Contact.builder().name(createAnOrganizationEntityDto.getContactDto().getName())
+                .email(createAnOrganizationEntityDto.getContactDto().getEmail())
+                .phone(createAnOrganizationEntityDto.getContactDto().getPhone())
                 .isResponsible(true)
                 .build();
         Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAnOrganizationEntityDto.getSolutions());
@@ -166,15 +166,10 @@ public class OrganizationEntityService {
                 .rib(createAnOrganizationEntityDto.getEntityBankInformationDto().getRib())
                 .build();
         organizationEntity.setBankInformation(bankInformation);
-        List<String> subActivitiesNames = createAnOrganizationEntityDto.getActivities().subList(1, createAnOrganizationEntityDto.getActivities().size());
-        Set<Activity> subActivities = this.activityService.getActivitiesByName(subActivitiesNames);
-        Activity mainActivity = this.activityService.getActivityByName(createAnOrganizationEntityDto.getActivities().get(0));
-        organizationEntity.setSubActivities(subActivities);
-        organizationEntity.setMainActivity(mainActivity);
+        Set<Activity> activities = this.activityService.getActivitiesByName(createAnOrganizationEntityDto.getActivities());
+        organizationEntity.setActivities(activities);
         organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
-        mainActivity.getOrganizationEntities().add(organizationEntity);
-        this.activityService.save(mainActivity);
-        subActivities.forEach(activity -> {
+        activities.forEach(activity -> {
             activity.getOrganizationEntities().add(organizationEntity);
             this.activityService.save(activity);
         });
@@ -218,30 +213,23 @@ public class OrganizationEntityService {
             this.solutionService.save(solution);
             return solution;
         }).toList();
-        if (organizationEntity.getMainActivity().getName() != updateOrganizationEntityDto.getActivities().get(0)) {
-            Activity mainActivity = this.activityService.getActivityByName(updateOrganizationEntityDto.getActivities().get(0));
-            organizationEntity.setMainActivity(mainActivity);
-            mainActivity.getOrganizationEntities().add(organizationEntity);
-            this.activityService.save(mainActivity);
-        }
-        List<String> subActivitiesNames = updateOrganizationEntityDto.getActivities().subList(1, updateOrganizationEntityDto.getActivities().size());
-        Set<Activity> subActivities = this.activityService.getActivitiesByName(subActivitiesNames);
-        Set<Activity> subActivitiesOfPartner = new HashSet<>(organizationEntity.getSubActivities());
-        subActivitiesOfPartner.stream().map((Activity activity) -> {
-            if (!subActivitiesNames.contains(activity.getName())) {
+        List<String> activitiesNames = updateOrganizationEntityDto.getActivities();
+        Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
+        Set<Activity> activitiesOfPartner = new HashSet<>(organizationEntity.getActivities());
+        activitiesOfPartner.stream().map((Activity activity) -> {
+            if (!activitiesNames.contains(activity.getName())) {
                 activity.getOrganizationEntities().remove(organizationEntity);
-                organizationEntity.getSubActivities().remove(activity);
+                organizationEntity.getActivities().remove(activity);
                 this.activityService.save(activity);
-            }
-            if (activity.getName().equals(organizationEntity.getMainActivity().getName())) {
-                organizationEntity.getSubActivities().remove(activity);
             }
             return activity;
         }).toList();
-        subActivities.stream().map(activity -> {
-            activity.getOrganizationEntities().add(organizationEntity);
-            organizationEntity.getSubActivities().add(activity);
-            this.activityService.save(activity);
+        activities.stream().map(activity -> {
+            if (!activitiesOfPartner.contains(activity)) {
+                activity.getOrganizationEntities().add(organizationEntity);
+                organizationEntity.getActivities().add(activity);
+                this.activityService.save(activity);
+            }
             return activity;
         }).toList();
 
@@ -249,8 +237,8 @@ public class OrganizationEntityService {
             organizationEntity.setCommercialNumber(updateOrganizationEntityDto.getCommercialNumber());
         }
         Contact contact = organizationEntity.getContacts().getFirst();
-        if (updateOrganizationEntityDto.getEntityContactDto() != null) {
-            contact = this.contactsService.update(contact, updateOrganizationEntityDto.getEntityContactDto());
+        if (updateOrganizationEntityDto.getContactDto() != null) {
+            contact = this.contactsService.update(contact, updateOrganizationEntityDto.getContactDto());
             organizationEntity.getContacts().set(0, contact);
         }
 
@@ -332,10 +320,10 @@ public class OrganizationEntityService {
     public UUID createAssociation(CreateAssociationDto createAssociationDto, MultipartFile logo, MultipartFile cover) {
         AddressRequest addressRequest = new AddressRequest(createAssociationDto.associationAddress().getAddress(), "", "", createAssociationDto.associationAddress().getCity(), createAssociationDto.associationAddress().getRegion(), createAssociationDto.associationAddress().getIframe());
         Address address = this.addressService.create(addressRequest);
-        Set<Activity> subActivities = this.activityService.getActivitiesByName(createAssociationDto.activities());
+        Set<Activity> activities = this.activityService.getActivitiesByName(createAssociationDto.activities());
         Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAssociationDto.solutions());
         OrganizationEntity organizationEntity = OrganizationEntity.builder().name(createAssociationDto.companyName())
-                .subActivities(subActivities)
+                .activities(activities)
                 .address(address)
                 .type(createAssociationDto.entityType())
                 .solutions(solutions)
@@ -359,7 +347,7 @@ public class OrganizationEntityService {
         this.userService.createOrganizationEntityUser(userRequest2);
 
         OrganizationEntity finalOrganizationEntity = organizationEntity;
-        subActivities.forEach(activity -> {
+        activities.forEach(activity -> {
             activity.getOrganizationEntities().add(finalOrganizationEntity);
             this.activityService.save(activity);
         });
