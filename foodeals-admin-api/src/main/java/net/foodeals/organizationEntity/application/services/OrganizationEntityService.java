@@ -2,12 +2,14 @@ package net.foodeals.organizationEntity.application.services;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.application.service.DeadlinesService;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.delivery.application.services.impl.CoveredZonesService;
 import net.foodeals.delivery.domain.entities.CoveredZones;
+import net.foodeals.location.application.dtos.requests.AddressRequest;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.RegionService;
@@ -16,6 +18,7 @@ import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Region;
 import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
@@ -34,13 +37,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Logger;
 
 @Service
+@Slf4j
 public class OrganizationEntityService {
 
     private final OrganizationEntityRepository organizationEntityRepository;
@@ -110,7 +116,8 @@ public class OrganizationEntityService {
         organizationEntity.setContacts(contacts);
         organizationEntity = this.organizationEntityRepository.save(organizationEntity);
         switch (organizationEntity.getType()) {
-            case EntityType.PARTNER :
+            case EntityType.PARTNER_WITH_SB:
+            case EntityType.NORMAL_PARTNER:
                 organizationEntity = savePartner(createAnOrganizationEntityDto, organizationEntity);
                 break;
             case EntityType.DELIVERY_PARTNER :
@@ -171,7 +178,7 @@ public class OrganizationEntityService {
             activity.getOrganizationEntities().add(organizationEntity);
             this.activityService.save(activity);
         });
-        Contract contract = this.contractService.createANewContract(createAnOrganizationEntityDto, organizationEntity);
+        Contract contract = this.contractService.createPartnerContract(createAnOrganizationEntityDto, organizationEntity);
         organizationEntity.setContract(contract);
         return this.organizationEntityRepository.save(organizationEntity);
     }
@@ -290,7 +297,7 @@ public class OrganizationEntityService {
         String formattedDate = formatter.format(date);
         Payment payment = Payment.builder()
                 .organizationEntity(organizationEntity)
-                .partnerType(PartnerType.ORGANIZATION_ENTITY)
+                .partnerType(PartnerType.PARTNER)
                 .paymentStatus(PaymentStatus.IN_VALID)
                 .date(formattedDate)
                 .numberOfOrders(Long.valueOf(0))
@@ -320,5 +327,53 @@ public class OrganizationEntityService {
 
     public Page<OrganizationEntity> getDeliveryPartners(Pageable pageable) {
         return this.organizationEntityRepository.findByType(EntityType.DELIVERY_PARTNER, pageable);
+    }
+
+    public UUID createAssociation(CreateAssociationDto createAssociationDto, MultipartFile logo, MultipartFile cover) {
+        AddressRequest addressRequest = new AddressRequest(createAssociationDto.associationAddress().getAddress(), "", "", createAssociationDto.associationAddress().getCity(), createAssociationDto.associationAddress().getRegion(), createAssociationDto.associationAddress().getIframe());
+        Address address = this.addressService.create(addressRequest);
+        Set<Activity> subActivities = this.activityService.getActivitiesByName(createAssociationDto.activities());
+        Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAssociationDto.solutions());
+        OrganizationEntity organizationEntity = OrganizationEntity.builder().name(createAssociationDto.companyName())
+                .subActivities(subActivities)
+                .address(address)
+                .type(createAssociationDto.entityType())
+                .solutions(solutions)
+                .commercialNumber(createAssociationDto.pv())
+                .build();
+        organizationEntity = this.organizationEntityRepository.save(organizationEntity);
+        Contact manager1 = this.contactsService.create(createAssociationDto.manager1(), organizationEntity, true);
+        Contact manager2 = this.contactsService.create(createAssociationDto.manager2(), organizationEntity, true);
+        organizationEntity.getContacts().add(manager1);
+        organizationEntity.getContacts().add(manager2);
+
+        Role role  = this.roleService.findByName("MANAGER");
+        String pass1 = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+        UserAddress userAddress1 = new UserAddress(organizationEntity.getAddress().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
+        UserRequest userRequest1 = new UserRequest(manager1.getName(), manager1.getEmail(), manager1.getPhone(), pass1,  false, role.getId(), organizationEntity.getId(), userAddress1);
+        this.userService.createOrganizationEntityUser(userRequest1);
+
+        String pass2 = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+        UserAddress userAddress2 = new UserAddress(organizationEntity.getAddress().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
+        UserRequest userRequest2 = new UserRequest(manager2.getName(), manager2.getEmail(), manager2.getPhone(), pass2,  false, role.getId(), organizationEntity.getId(), userAddress2);
+        this.userService.createOrganizationEntityUser(userRequest2);
+
+        OrganizationEntity finalOrganizationEntity = organizationEntity;
+        subActivities.forEach(activity -> {
+            activity.getOrganizationEntities().add(finalOrganizationEntity);
+            this.activityService.save(activity);
+        });
+        solutions.forEach(solution -> {
+            solution.getOrganizationEntities().add(finalOrganizationEntity);
+            this.solutionService.save(solution);
+        });
+        Contract contract = this.contractService.createAssociationContract(createAssociationDto.numberOfPoints(), organizationEntity);
+        organizationEntity.setContract(contract);
+        return this.organizationEntityRepository.save(organizationEntity). getId();
+    }
+
+
+    public Page<OrganizationEntity> getAssociations(Pageable pageable) {
+        return this.organizationEntityRepository.findByType(List.of(EntityType.ASSOCIATION, EntityType.FOOD_BANK), pageable);
     }
 }

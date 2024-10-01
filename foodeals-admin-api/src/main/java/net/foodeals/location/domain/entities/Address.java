@@ -51,4 +51,7 @@ public class Address extends AbstractEntity<UUID> {
 
     @OneToOne(mappedBy = "address")
     private SubEntity subEntity;
+
+    @Column(length = 2000)
+    private String iframe;
 }

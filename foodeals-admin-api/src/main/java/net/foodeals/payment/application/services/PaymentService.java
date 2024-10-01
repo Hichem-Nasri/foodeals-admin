@@ -48,7 +48,7 @@ public class PaymentService {
     @Transactional
     public CommissionPaymentDto toCommissionPaymentDto(Payment payment) {
         CommissionPaymentDto paymentDto = this.modelMapper.map(payment, CommissionPaymentDto.class);
-        OrganizationEntity organizationEntity = payment.getPartnerType() == PartnerType.ORGANIZATION_ENTITY ? payment.getOrganizationEntity()
+        OrganizationEntity organizationEntity = payment.getPartnerType() == PartnerType.PARTNER ? payment.getOrganizationEntity()
                     : payment.getSubEntity().getOrganizationEntity();
 
         Commission commission = this.commissionService.getCommissionByPartnerName(organizationEntity.getName());

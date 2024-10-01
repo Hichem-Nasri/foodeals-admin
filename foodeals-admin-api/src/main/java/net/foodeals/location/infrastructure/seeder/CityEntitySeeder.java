@@ -37,17 +37,14 @@ public class CityEntitySeeder {
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
     public void CitySeeder() {
-
-
         CountryRequest countryRequest = new CountryRequest("Morocco", "202410");
-        Country country = this.countryService.create(countryRequest);
+        if (this.countryService.count() == 0 ) {
+            Country country = this.countryService.create(countryRequest);
 
-        StateRequest stateRequest = new StateRequest("Casablanca-Settat", "102436", country.getId());
-        State state = this.stateService.create(stateRequest);
-        country.getStates().add(state);
-        this.countryService.save(country);
-
-        if (this.cityRepository.count() == 0) {
+            StateRequest stateRequest = new StateRequest("Casablanca-Settat", "102436", country.getId());
+            State state = this.stateService.create(stateRequest);
+            country.getStates().add(state);
+            this.countryService.save(country);
             City city1 = City.builder().name("Casablanca")
                     .state(state)
                     .code("20235")

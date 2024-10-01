@@ -10,6 +10,7 @@ import net.foodeals.product.domain.enums.ProductType;
 import net.foodeals.common.valueOjects.Price;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,4 +53,6 @@ public class Product extends AbstractEntity<UUID> {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BoxItem> boxItems;
+
+    private Date endDate;
 }

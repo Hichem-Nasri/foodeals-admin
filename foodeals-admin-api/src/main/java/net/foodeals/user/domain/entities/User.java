@@ -1,16 +1,12 @@
 package net.foodeals.user.domain.entities;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
-import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.delivery.domain.entities.Delivery;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
-import net.foodeals.offer.domain.entities.Offer;
 import net.foodeals.order.domain.entities.Order;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
@@ -99,6 +95,10 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
 
     public User() {
 
+    }
+
+    public void setSubEntity(SubEntity subEntity) {
+        this.subEntity = subEntity;
     }
 
     public static User create(Name name, String email, String phone, String password,

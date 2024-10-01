@@ -2,6 +2,8 @@ package net.foodeals.organizationEntity.Controller;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
+import net.foodeals.organizationEntity.application.dtos.responses.AssociationsDto;
 import net.foodeals.organizationEntity.application.dtos.responses.DeliveryPartnerDto;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
@@ -14,12 +16,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 @Controller
+@RequestMapping("v1/organizations")
 public class OrganizationEntityController {
     private final OrganizationEntityService organizationEntityService;
     private final OrganizationEntityModelMapper modelMapper;
@@ -32,6 +35,11 @@ public class OrganizationEntityController {
     @PostMapping("/OrganizationEntity/add")
     public ResponseEntity<UUID> addAnOrganizationEntity(@RequestBody CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
             return new ResponseEntity<>(this.organizationEntityService.createAnewOrganizationEntity(createAnOrganizationEntityDto), HttpStatus.CREATED);
+    }
+
+    @PostMapping(value = "/associations/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UUID> createAssociation(@RequestPart("createAssociationDto") CreateAssociationDto createAssociationDto, @RequestPart("logo") MultipartFile logo, @RequestPart("cover") MultipartFile cover) {
+        return new ResponseEntity<UUID>(this.organizationEntityService.createAssociation(createAssociationDto, logo, cover), HttpStatus.OK);
     }
 
     @PutMapping("/OrganizationEntity/{id}")
@@ -75,5 +83,12 @@ public class OrganizationEntityController {
         headers.add("Content-Disposition", "attachment; filename=contract.pdf");
 
         return new ResponseEntity<byte []>(this.organizationEntityService.getContractDocument(id), headers, HttpStatus.OK);
+    }
+
+    @GetMapping("/associations")
+    public ResponseEntity<Page<AssociationsDto>> getAssociations(Pageable pageable) {
+        Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getAssociations(pageable);
+        Page<AssociationsDto> associationsDtos = organizationEntities.map(this.modelMapper::mapToAssociation);
+        return new ResponseEntity<Page<AssociationsDto>>(associationsDtos, HttpStatus.OK);
     }
 }

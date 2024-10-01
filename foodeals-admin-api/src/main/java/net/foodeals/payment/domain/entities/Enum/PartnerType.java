@@ -1,6 +1,6 @@
 package net.foodeals.payment.domain.entities.Enum;
 
 public enum PartnerType {
-    ORGANIZATION_ENTITY,
+    PARTNER,
     SUB_ENTITY,
 }

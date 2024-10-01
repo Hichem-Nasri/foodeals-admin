@@ -1,13 +1,17 @@
 package net.foodeals.user.application.services.impl;
 
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
+import net.foodeals.common.services.EmailService;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.location.domain.repositories.AddressRepository;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
+import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
+import net.foodeals.user.application.dtos.requests.UserAddress;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.ClientDto;
 import net.foodeals.user.application.services.RoleService;
@@ -16,6 +20,7 @@ import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
 import net.foodeals.user.domain.exceptions.UserNotFoundException;
 import net.foodeals.user.domain.repositories.UserRepository;
+import org.apache.commons.lang.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +43,7 @@ class UserServiceImpl implements UserService {
     private final ModelMapper modelMapper;
     private final OrganizationEntityRepository organizationEntityRepository;
     private final AddressService addressService;
+    private final EmailService emailService;
 
     @Override
     public List<User> findAll() {
@@ -131,7 +137,17 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> getDeliveryPartnerUsers(Pageable pageable, UUID id) {
-        return this.repository.findByOrganizationEntity_Id(id, pageable);
+    public Page<User> getOrganizationUsers(Pageable pageable, UUID id) {
+                return this.repository.findByOrganizationEntity_Id(id, pageable);
+    }
+
+    @Override
+    public User createOrganizationEntityUser(UserRequest userRequest) {
+        User user = this.create(userRequest);
+//        String receiver = user.getEmail();
+//        String subject = "Foodeals account validation";
+//        String message = "You're account has been validated\n Your email : " + user.getEmail() + " \n" + " Your password : " + userRequest.password();
+//        this.emailService.sendEmail(receiver, subject, message);
+        return user;
     }
 }

@@ -31,7 +31,7 @@ public class Activity extends AbstractEntity<UUID> {
     @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ProductCategory> categories;
 
-    @ManyToMany(mappedBy = "activities",fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "subActivities",fetch = FetchType.LAZY)
     private List<SubEntity> subEntities;
 
     @ManyToMany(mappedBy = "subActivities",fetch = FetchType.LAZY)

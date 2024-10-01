@@ -3,6 +3,7 @@ package net.foodeals.user.infrastructure.interfaces.web;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.user.application.dtos.requests.UserRequest;
+import net.foodeals.user.application.dtos.responses.AssociationsUsersDto;
 import net.foodeals.user.application.dtos.responses.ClientDto;
 import net.foodeals.user.application.dtos.responses.DeliveryPartnerUserDto;
 import net.foodeals.user.application.dtos.responses.UserResponse;
@@ -81,8 +82,16 @@ public class UserController {
 
     @GetMapping("/delivery-partners/{id}")
     public ResponseEntity<Page<DeliveryPartnerUserDto>> getCompanyUsers(Pageable pageable, @PathVariable("id") UUID id) {
-        Page<User> users = this.service.getDeliveryPartnerUsers(pageable, id);
+        Page<User> users = this.service.getOrganizationUsers(pageable, id);
         Page<DeliveryPartnerUserDto> deliveyPartnerUsersDtos = users.map(user -> this.mapper.map(user, DeliveryPartnerUserDto.class));
         return new ResponseEntity<Page<DeliveryPartnerUserDto>>(deliveyPartnerUsersDtos, HttpStatus.OK);
     }
+
+    @GetMapping("/associations/{id}")
+    public ResponseEntity<Page<AssociationsUsersDto>> getAssociationUsers(Pageable pageable, @PathVariable("id") UUID id) {
+        Page<User> users = this.service.getOrganizationUsers(pageable, id);
+        Page<AssociationsUsersDto> associationsUsersDtoPage = users.map(user -> this.mapper.map(user, AssociationsUsersDto.class));
+        return new ResponseEntity<Page<AssociationsUsersDto>>(associationsUsersDtoPage, HttpStatus.OK);
+    }
+
 }

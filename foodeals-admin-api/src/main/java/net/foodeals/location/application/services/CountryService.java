@@ -12,4 +12,6 @@ public interface CountryService extends CrudService<Country, UUID, CountryReques
     Country findByName(String name);
 
     Country save(Country country);
+
+    public Long count();
 }

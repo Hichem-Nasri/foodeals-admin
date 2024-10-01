@@ -8,7 +8,12 @@ import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.delivery.domain.entities.CoveredZones;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
+import net.foodeals.offer.domain.entities.DonorInfo;
+import net.foodeals.offer.domain.entities.ReceiverInfo;
+import net.foodeals.offer.domain.enums.DonationReceiverType;
+import net.foodeals.offer.domain.enums.DonorType;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
+import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Payment;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
@@ -23,7 +28,7 @@ import java.util.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrganizationEntity extends AbstractEntity<UUID> {
+public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInfo, ReceiverInfo {
 
     @Id
     @GeneratedValue
@@ -38,9 +43,10 @@ public class OrganizationEntity extends AbstractEntity<UUID> {
     @Column(name = "cover_path")
     private String coverPath;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private EntityType type;
 
+    @Builder.Default
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubEntity> subEntities = new ArrayList<>();
 
@@ -92,4 +98,28 @@ public class OrganizationEntity extends AbstractEntity<UUID> {
     @Builder.Default
     @OneToMany(mappedBy = "organizationEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CoveredZones> coveredZones = new ArrayList<>();
+
+    @Override
+    public UUID getId() {
+        return this.id;
+    }
+
+    @Override
+    public DonationReceiverType getReceiverType() {
+        return switch (this.type) {
+            case EntityType.ASSOCIATION -> DonationReceiverType.ASSOCIATION;
+            case EntityType.FOOD_BANK -> DonationReceiverType.FOOD_BANK;
+            default -> null;
+        };
+    }
+
+    @Override
+    public DonorType getDonorType() {
+        return switch (this.type) {
+            case EntityType.PARTNER_WITH_SB -> DonorType.PARTNER_WITH_SB;
+            case EntityType.NORMAL_PARTNER -> DonorType.NORMAL_PARTNER;
+            case EntityType.FOOD_BANK -> DonorType.FOOD_BANK;
+            default -> null;
+        };
+    }
 }
