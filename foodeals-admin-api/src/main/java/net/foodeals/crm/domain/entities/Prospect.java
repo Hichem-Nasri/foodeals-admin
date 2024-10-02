@@ -10,6 +10,7 @@ import net.foodeals.location.domain.entities.Address;
 import net.foodeals.organizationEntity.domain.entities.Activity;
 import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
+import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -49,4 +50,12 @@ public class Prospect extends AbstractEntity<UUID> {
 
     @Enumerated(EnumType.STRING)
     private ProspectStatus status;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Event> events = new ArrayList<>();
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @Builder.Default
+    private Set<Solution> solutions = new HashSet<>();
 }

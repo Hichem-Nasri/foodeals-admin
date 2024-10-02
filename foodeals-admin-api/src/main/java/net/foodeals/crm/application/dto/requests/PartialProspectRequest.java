@@ -7,13 +7,14 @@ import org.springframework.lang.Nullable;
 import java.util.List;
 
 
-public record ProspectPartialRequest(
+public record PartialProspectRequest(
         @Nullable String companyName,
         @Nullable List<String> activities,
         @Nullable ContactDto responsible,
         @Nullable Integer powered_by,
         @Nullable Integer manager_id,
         @Nullable AddressDto address,
-        @Nullable ProspectStatus status
-) {
+        @Nullable ProspectStatus status,
+        @Nullable List<String> solutions
+        ) {
 }

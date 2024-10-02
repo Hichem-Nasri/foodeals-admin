@@ -1,12 +1,18 @@
 package net.foodeals.crm.application.services.implementation;
 
 import lombok.AllArgsConstructor;
-import net.foodeals.crm.application.dto.requests.ProspectPartialRequest;
+import net.foodeals.crm.application.dto.requests.EventRequest;
+import net.foodeals.crm.application.dto.requests.PartialEventRequest;
+import net.foodeals.crm.application.dto.requests.PartialProspectRequest;
 import net.foodeals.crm.application.dto.requests.ProspectRequest;
+import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
+import net.foodeals.crm.application.services.EventService;
 import net.foodeals.crm.application.services.ProspectService;
+import net.foodeals.crm.domain.entities.Event;
 import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
+import net.foodeals.crm.domain.repositories.EventRepository;
 import net.foodeals.crm.domain.repositories.ProspectRepository;
 import net.foodeals.location.application.dtos.requests.AddressRequest;
 import net.foodeals.location.application.services.AddressService;
@@ -24,13 +30,12 @@ import net.foodeals.user.domain.entities.User;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -44,6 +49,7 @@ public final class ProspectServiceImp implements ProspectService {
     private final ModelMapper modelMapper;
     private final CityService cityService;
     private final RegionService regionService;
+    private final EventService eventService;
 
     @Override
     public List<ProspectResponse> findAll() {
@@ -61,7 +67,7 @@ public final class ProspectServiceImp implements ProspectService {
     }
 
     @Override
-    public ProspectResponse partialUpdate(UUID id, ProspectPartialRequest dto) {
+    public ProspectResponse partialUpdate(UUID id, PartialProspectRequest dto) {
             Prospect prospect = this.prospectRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + id.toString()));
 
@@ -126,6 +132,79 @@ public final class ProspectServiceImp implements ProspectService {
             Prospect updatedProspect = this.prospectRepository.save(prospect);
 
             return this.modelMapper.map(updatedProspect, ProspectResponse.class);
+    }
+
+    @Override
+    public EventResponse createEvent(UUID id, EventRequest eventRequest) {
+        Prospect prospect = this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + id.toString()));
+
+        Event event = this.eventService.create(eventRequest);
+        if (prospect.getEvents() == null) {
+            prospect.setEvents(new ArrayList<>(List.of(event)));
+        } else {
+            prospect.getEvents().add(event);
+        }
+        this.prospectRepository.save(prospect);
+        return this.modelMapper.map(event, EventResponse.class);
+    }
+
+    @Override
+    public Page<EventResponse> getEvents(UUID id, Pageable pageable) {
+        Prospect prospect = this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + id.toString()));
+
+        List<Event> nonDeletedEvents = prospect.getEvents() != null
+                ? prospect.getEvents().stream()
+                .filter(event -> event.getDeletedAt() == null)
+                .collect(Collectors.toList())
+                : new ArrayList<>();
+
+        Page<Event> events = new PageImpl<>(nonDeletedEvents, pageable, nonDeletedEvents.size());
+        return events.map(event -> this.modelMapper.map(event, EventResponse.class));
+    }
+
+    @Override
+    public EventResponse getEventById(UUID prospectId, UUID eventId) {
+        Prospect prospect = this.prospectRepository.findById(prospectId).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + prospectId.toString()));
+        Optional<Event> event = prospect.getEvents().stream().filter(eventItem -> eventItem.getId().equals(eventId)).findFirst();
+        if (event.isEmpty()) {
+            throw new ResourceNotFoundException("Event not found with id: " + eventId.toString());
+        }
+        return this.modelMapper.map(event.get(), EventResponse.class);
+    }
+
+    @Override
+    public EventResponse updateEvent(UUID prospectId, UUID eventId, EventRequest dto) {
+        Prospect prospect = this.prospectRepository.findById(prospectId).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + prospectId.toString()));
+        Optional<Event> event = prospect.getEvents().stream().filter(eventItem -> eventItem.getId().equals(eventId)).findFirst();
+        if (event.isEmpty()) {
+            throw new ResourceNotFoundException("Event not found with id: " + eventId.toString());
+        }
+
+        Event updatedEvent = this.eventService.update(eventId, dto);
+        return this.modelMapper.map(updatedEvent, EventResponse.class);
+    }
+
+    @Override
+    public EventResponse partialUpdateEvent(UUID prospectId, UUID eventId, PartialEventRequest dto) {
+        Prospect prospect = this.prospectRepository.findById(prospectId).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + prospectId.toString()));
+        Optional<Event> event = prospect.getEvents().stream().filter(eventItem -> eventItem.getId().equals(eventId)).findFirst();
+        if (event.isEmpty()) {
+            throw new ResourceNotFoundException("Event not found with id: " + eventId.toString());
+        }
+
+        Event updatedEvent = this.eventService.partialUpdate(eventId, dto);
+        return this.modelMapper.map(updatedEvent, EventResponse.class);
+    }
+
+    @Override
+    public void deleteEvent(UUID prospectId, UUID eventId) {
+        Prospect prospect = this.prospectRepository.findById(prospectId).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + prospectId.toString()));
+        Optional<Event> event = prospect.getEvents().stream().filter(eventItem -> eventItem.getId().equals(eventId)).findFirst();
+        if (event.isEmpty()) {
+            throw new ResourceNotFoundException("Event not found with id: " + eventId.toString());
+        }
+
+        this.eventService.delete(eventId);
     }
 
     @Override
@@ -228,6 +307,7 @@ public final class ProspectServiceImp implements ProspectService {
 
     @Override
     public void delete(UUID id) {
+        Prospect prospect = this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + id.toString()));
         this.prospectRepository.softDelete(id);
     }
 }

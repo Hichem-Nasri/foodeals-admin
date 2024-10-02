@@ -3,16 +3,16 @@ package net.foodeals.crm.infrastructure.modelMapperConfig;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import net.foodeals.crm.application.dto.requests.AddressDto;
+import net.foodeals.crm.application.dto.requests.EventRequest;
 import net.foodeals.crm.application.dto.responses.CreatorInfoDto;
+import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ManagerInfoDto;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
-import net.foodeals.crm.application.services.ProspectService;
+import net.foodeals.crm.domain.entities.Event;
 import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
 import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
-import net.foodeals.organizationEntity.application.dtos.responses.ResponsibleInfoDto;
 import net.foodeals.organizationEntity.domain.entities.Contact;
-import net.foodeals.user.application.dtos.responses.UserInfoDto;
 import net.foodeals.user.domain.entities.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -21,10 +21,12 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @AllArgsConstructor
-public class modelMapperConf {
+public class ProspectModelMapper {
     private final ModelMapper modelMapper;
 
     @Transactional
@@ -68,9 +70,13 @@ public class modelMapperConf {
             ManagerInfoDto managerInfoDto = this.modelMapper.map(lead, ManagerInfoDto.class);
 
             ProspectStatus status =  prospect.getStatus();
-
-
-            return new ProspectResponse(prospect.getId(), date.toString(), prospect.getName(), category, contactInfo, addressDto, creatorInfoDto, managerInfoDto, "", status);
+            List<EventResponse> eventResponses = prospect.getEvents() != null
+                    ? prospect.getEvents().stream()
+                    .filter(event -> event.getDeletedAt() == null)
+                    .map((Event event) -> this.modelMapper.map(event, EventResponse.class))
+                    .toList()
+                    : null;
+            return new ProspectResponse(prospect.getId(), date.toString(), prospect.getName(), category, contactInfo, addressDto, creatorInfoDto, managerInfoDto, "", status, eventResponses, null);
         }, Prospect.class, ProspectResponse.class);
     }
 }

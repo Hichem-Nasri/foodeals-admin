@@ -2,8 +2,11 @@ package net.foodeals.crm.infrastructure.controllers;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import net.foodeals.crm.application.dto.requests.ProspectPartialRequest;
+import net.foodeals.crm.application.dto.requests.EventRequest;
+import net.foodeals.crm.application.dto.requests.PartialEventRequest;
+import net.foodeals.crm.application.dto.requests.PartialProspectRequest;
 import net.foodeals.crm.application.dto.requests.ProspectRequest;
+import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
 import net.foodeals.crm.application.services.ProspectService;
 import org.modelmapper.ModelMapper;
@@ -44,7 +47,7 @@ public final class ProspectController {
     }
 
     @PatchMapping("/prospects/{id}")
-    public ResponseEntity<ProspectResponse> update(@PathVariable UUID id, @RequestBody ProspectPartialRequest prospectRequest) {
+    public ResponseEntity<ProspectResponse> update(@PathVariable UUID id, @RequestBody PartialProspectRequest prospectRequest) {
         return new ResponseEntity<>(this.prospectService.partialUpdate(id, prospectRequest), HttpStatus.OK);
     }
 
@@ -52,6 +55,37 @@ public final class ProspectController {
     @DeleteMapping("/prospects/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         this.prospectService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/prospects/{id}/events/create")
+    public ResponseEntity<EventResponse> createEvent(@PathVariable("id") UUID id, @RequestBody EventRequest eventRequest) {
+        return new ResponseEntity<>(this.prospectService.createEvent(id, eventRequest), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/prospects/{id}/events")
+    public ResponseEntity<Page<EventResponse>> getEvents(@PathVariable("id") UUID id, Pageable pageable) {
+        return new ResponseEntity<Page<EventResponse>>(this.prospectService.getEvents(id, pageable), HttpStatus.OK);
+    }
+
+    @GetMapping("/prospects/{prospectId}/events/{eventId}")
+    public ResponseEntity<EventResponse> getEventById(@PathVariable("prospectId") UUID prospectId,@PathVariable("eventId") UUID eventId) {
+        return new ResponseEntity<EventResponse>(this.prospectService.getEventById(prospectId, eventId), HttpStatus.OK);
+    }
+
+    @PutMapping("/prospects/{prospectId}/events/{eventId}")
+    public ResponseEntity<EventResponse> updateEvent(@PathVariable("prospectId") UUID prospectId,@PathVariable("eventId") UUID eventId, @RequestBody EventRequest eventRequest) {
+        return new ResponseEntity<EventResponse>(this.prospectService.updateEvent(prospectId, eventId, eventRequest), HttpStatus.OK);
+    }
+
+    @PatchMapping("/prospects/{prospectId}/events/{eventId}")
+    public ResponseEntity<EventResponse> partialUpdateEvent(@PathVariable("prospectId") UUID prospectId,@PathVariable("eventId") UUID eventId, @RequestBody PartialEventRequest eventRequest) {
+        return new ResponseEntity<EventResponse>(this.prospectService.partialUpdateEvent(prospectId, eventId, eventRequest), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/prospects/{prospectId}/events/{eventId}")
+    public ResponseEntity<Void> deleteEvent(@PathVariable("prospectId") UUID prospectId,@PathVariable("eventId") UUID eventId) {
+        this.prospectService.deleteEvent(prospectId, eventId);
         return ResponseEntity.noContent().build();
     }
 }
