@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.contract.domain.entities.UserContract;
+import net.foodeals.crm.domain.entities.Event;
+import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.delivery.domain.entities.Delivery;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
@@ -84,6 +86,18 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @JoinColumn(name = "address_id")
     private Address address;
 
+    @OneToMany(mappedBy = "lead")
+    private List<Prospect> managedProspects;
+
+    @OneToMany(mappedBy = "creator")
+    private List<Prospect> createdProspects;
+
+
+    @OneToMany(mappedBy = "lead")
+    private List<Event> events;
+
+
+
     public User(Name name, String email, String phone, String password, Boolean isEmailVerified, Role role) {
         this.name = name;
         this.email = email;
@@ -91,6 +105,10 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
         this.password = password;
         this.isEmailVerified = isEmailVerified;
         this.role = role;
+    }
+
+    public List<Event> getEvents() {
+        return events;
     }
 
     public User() {
@@ -185,6 +203,21 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     public User setAddress(Address st)
     {
         this.address = st;
+        return this;
+    }
+
+    public User setManagedProspects(ArrayList<Prospect> prospects) {
+        this.managedProspects = prospects;
+        return this;
+    }
+
+    public User setCreatedProspects(ArrayList<Prospect> prospects) {
+        this.managedProspects = prospects;
+        return this;
+    }
+
+    public User setEvents(ArrayList<Event> events) {
+        this.events = events;
         return this;
     }
 }

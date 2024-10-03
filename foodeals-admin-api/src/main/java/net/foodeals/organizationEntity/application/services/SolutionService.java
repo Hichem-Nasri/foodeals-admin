@@ -28,4 +28,8 @@ public class SolutionService {
     public Solution findByName(String solution) {
         return this.solutionRepository.findByName(solution);
     }
+
+    public List<Solution> saveAll(Set<Solution> solutions) {
+        return this.solutionRepository.saveAll(solutions);
+    }
 }

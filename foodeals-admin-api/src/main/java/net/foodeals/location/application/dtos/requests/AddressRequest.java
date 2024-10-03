@@ -8,10 +8,10 @@ import java.util.UUID;
 
 public record AddressRequest(
         @NotBlank String address,
-        @NotBlank String extraAddress,
-        @NotBlank String zip,
+        @NotNull String extraAddress,
+        @NotNull String zip,
         @NotNull String cityName,
         @NotNull String regionName,
-        @NotBlank String iframe
+        @NotNull String iframe
         ) {
 }

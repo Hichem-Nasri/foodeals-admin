@@ -3,6 +3,7 @@ package net.foodeals.organizationEntity.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.crm.domain.entities.Prospect;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.*;
@@ -32,4 +33,7 @@ public class Solution extends AbstractEntity<UUID> {
     @Builder.Default
     private Set<SubEntity> subEntities = new HashSet<>();
 
+    @ManyToMany(mappedBy = "solutions")
+    @Builder.Default
+    private Set<Prospect> prospects = new HashSet<>();
 }

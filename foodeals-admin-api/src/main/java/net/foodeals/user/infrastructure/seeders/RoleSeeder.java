@@ -20,17 +20,17 @@ public class RoleSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (roleRepository.count() == 0) {
-            List<Role> roles = roleRepository.saveAll(
-                    List.of(
-                            Role.create(UUID.fromString("d7d7a9c5-b153-4526-ac16-05f19bf97270"), "ADMIN"),
-                            Role.create(UUID.randomUUID(), "SUPER_ADMIN"),
-                            Role.create(UUID.randomUUID(), "MANAGER"),
-                            Role.create(UUID.randomUUID(), "SALES_MANAGER"),
-                            Role.create(UUID.randomUUID(), "CLIENT"),
-                            Role.create(UUID.randomUUID(), "DELIVERY_MAN")
-                    )
-            );
+        List<Role> roles =                     List.of(
+                Role.create(UUID.fromString("d7d7a9c5-b153-4526-ac16-05f19bf97270"), "ADMIN"),
+                Role.create(UUID.randomUUID(), "SUPER_ADMIN"),
+                Role.create(UUID.randomUUID(), "MANAGER"),
+                Role.create(UUID.randomUUID(), "SALES_MANAGER"),
+                Role.create(UUID.randomUUID(), "CLIENT"),
+                Role.create(UUID.randomUUID(), "DELIVERY_MAN"),
+                Role.create(UUID.randomUUID(), "LEAD")
+        );
+        if (roleRepository.count() != roles.size()) {
+            roles = roleRepository.saveAll(roles);
 
             // merge the updated entity
             roles.forEach(role -> {
