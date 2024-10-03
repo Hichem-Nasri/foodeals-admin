@@ -23,8 +23,10 @@ import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Region;
 import net.foodeals.organizationEntity.application.services.ActivityService;
 import net.foodeals.organizationEntity.application.services.ContactsService;
+import net.foodeals.organizationEntity.application.services.SolutionService;
 import net.foodeals.organizationEntity.domain.entities.Activity;
 import net.foodeals.organizationEntity.domain.entities.Contact;
+import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -50,6 +52,7 @@ public final class ProspectServiceImp implements ProspectService {
     private final CityService cityService;
     private final RegionService regionService;
     private final EventService eventService;
+    private final SolutionService solutionService;
 
     @Override
     public List<ProspectResponse> findAll() {
@@ -113,6 +116,18 @@ public final class ProspectServiceImp implements ProspectService {
                 activities.forEach(activity -> activity.getProspects().add(prospect));
                 this.activityService.saveAll(activities);
             }
+
+        if (dto.solutions() != null) {
+            Set<Solution> solutions = this.solutionService.getSolutionsByNames(dto.solutions());
+            prospect.getSolutions().forEach((Solution solution) -> {
+                if (!solutions.contains(solution)) {
+                    solution.getProspects().remove(prospect);
+                }
+            });
+            prospect.setSolutions(solutions);
+            solutions.forEach(solution -> solution.getProspects().add(prospect));
+            this.solutionService.saveAll(solutions);
+        }
 
             if (dto.address() != null) {
                 Address existingAddress = prospect.getAddress();
@@ -250,6 +265,14 @@ public final class ProspectServiceImp implements ProspectService {
         });
         prospect.getContacts().add(contact);
 
+        Set<Solution> solutions = this.solutionService.getSolutionsByNames(dto.solutions());
+
+        for (Solution solution : solutions) {
+            solution.getProspects().add(prospect);
+        }
+        this.solutionService.saveAll(solutions);
+        prospect.setSolutions(solutions);
+
         AddressRequest addressRequest = new AddressRequest(dto.address().address(), "", "", dto.address().city(), dto.address().region(), "");
         Address address = this.addressService.create(addressRequest);
 
@@ -257,6 +280,7 @@ public final class ProspectServiceImp implements ProspectService {
 
         this.prospectRepository.save(prospect);
         this.activityService.saveAll(activities);
+        this.solutionService.saveAll(solutions);
 
         return this.modelMapper.map(this.prospectRepository.save(prospect), ProspectResponse.class);
     }
@@ -292,6 +316,18 @@ public final class ProspectServiceImp implements ProspectService {
         prospect.setActivities(activities);
         activities.forEach(activity -> activity.getProspects().add(prospect));
 
+// Solutions
+        Set<Solution> solutions = this.solutionService.getSolutionsByNames(dto.solutions());
+        prospect.getSolutions().forEach((Solution solution) -> {
+            if (!solutions.contains(solution)) {
+                solution.getProspects().remove(prospect);
+            }
+        });
+        for (Solution solution : solutions) {
+            solution.getProspects().add(prospect);
+        }
+        prospect.setSolutions(solutions);
+
         Address existingAddress = prospect.getAddress();
         City city = this.cityService.findByName(dto.address().city());
         Region region =  this.regionService.findByName(dto.address().region());
@@ -301,6 +337,7 @@ public final class ProspectServiceImp implements ProspectService {
 
         Prospect updatedProspect = this.prospectRepository.save(prospect);
         this.activityService.saveAll(activities);
+        this.solutionService.saveAll(solutions);
 
         return this.modelMapper.map(updatedProspect, ProspectResponse.class);
     }

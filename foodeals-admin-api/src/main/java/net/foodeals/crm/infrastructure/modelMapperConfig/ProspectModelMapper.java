@@ -13,6 +13,7 @@ import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
 import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
 import net.foodeals.organizationEntity.domain.entities.Contact;
+import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.user.domain.entities.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
@@ -69,6 +71,10 @@ public class ProspectModelMapper {
             CreatorInfoDto creatorInfoDto = this.modelMapper.map(creator, CreatorInfoDto.class);
             ManagerInfoDto managerInfoDto = this.modelMapper.map(lead, ManagerInfoDto.class);
 
+            List<String> solutionNames = prospect.getSolutions().stream()
+                    .map(Solution::getName)
+                    .collect(Collectors.toList());
+
             ProspectStatus status =  prospect.getStatus();
             List<EventResponse> eventResponses = prospect.getEvents() != null
                     ? prospect.getEvents().stream()
@@ -76,7 +82,7 @@ public class ProspectModelMapper {
                     .map((Event event) -> this.modelMapper.map(event, EventResponse.class))
                     .toList()
                     : null;
-            return new ProspectResponse(prospect.getId(), date.toString(), prospect.getName(), category, contactInfo, addressDto, creatorInfoDto, managerInfoDto, "", status, eventResponses, null);
+            return new ProspectResponse(prospect.getId(), date.toString(), prospect.getName(), category, contactInfo, addressDto, creatorInfoDto, managerInfoDto, "", status, eventResponses, solutionNames);
         }, Prospect.class, ProspectResponse.class);
     }
 }
