@@ -8,6 +8,7 @@ import net.foodeals.crm.application.dto.requests.PartialProspectRequest;
 import net.foodeals.crm.application.dto.requests.ProspectRequest;
 import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
+import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
 import net.foodeals.crm.application.services.ProspectService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -87,5 +88,10 @@ public final class ProspectController {
     public ResponseEntity<Void> deleteEvent(@PathVariable("prospectId") UUID prospectId,@PathVariable("eventId") UUID eventId) {
         this.prospectService.deleteEvent(prospectId, eventId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/prospects/statistics")
+    public ResponseEntity<ProspectStatisticDto> statistics() {
+        return new ResponseEntity<ProspectStatisticDto>(this.prospectService.statistics(), HttpStatus.OK);
     }
 }

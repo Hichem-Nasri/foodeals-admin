@@ -150,4 +150,9 @@ class UserServiceImpl implements UserService {
 //        this.emailService.sendEmail(receiver, subject, message);
         return user;
     }
+
+    @Override
+    public Integer countByRole(Role role) {
+        return this.repository.countByRoleAndDeletedAtIsNull(role);
+    }
 }

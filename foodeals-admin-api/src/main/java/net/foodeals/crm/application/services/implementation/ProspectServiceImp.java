@@ -7,6 +7,7 @@ import net.foodeals.crm.application.dto.requests.PartialProspectRequest;
 import net.foodeals.crm.application.dto.requests.ProspectRequest;
 import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
+import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
 import net.foodeals.crm.application.services.EventService;
 import net.foodeals.crm.application.services.ProspectService;
 import net.foodeals.crm.domain.entities.Event;
@@ -27,7 +28,9 @@ import net.foodeals.organizationEntity.application.services.SolutionService;
 import net.foodeals.organizationEntity.domain.entities.Activity;
 import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.entities.Solution;
+import net.foodeals.user.application.services.RoleService;
 import net.foodeals.user.application.services.UserService;
+import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -53,6 +56,7 @@ public final class ProspectServiceImp implements ProspectService {
     private final RegionService regionService;
     private final EventService eventService;
     private final SolutionService solutionService;
+    private final RoleService roleService;
 
     @Override
     public List<ProspectResponse> findAll() {
@@ -220,6 +224,12 @@ public final class ProspectServiceImp implements ProspectService {
         }
 
         this.eventService.delete(eventId);
+    }
+
+    @Override
+    public ProspectStatisticDto statistics() {
+        Role role = this.roleService.findByName("LEAD");
+        return new ProspectStatisticDto(this.prospectRepository.countByLeadIsNotNullAndStatusAndDeletedAtIsNull(ProspectStatus.IN_PROGRESS), this.prospectRepository.countByStatusAndDeletedAtIsNull(ProspectStatus.CANCELED), this.prospectRepository.countByStatusAndDeletedAtIsNull(ProspectStatus.IN_PROGRESS), this.userService.countByRole(role));
     }
 
     @Override

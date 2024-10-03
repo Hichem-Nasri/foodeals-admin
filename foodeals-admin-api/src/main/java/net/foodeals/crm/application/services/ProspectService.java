@@ -7,6 +7,7 @@ import net.foodeals.crm.application.dto.requests.PartialProspectRequest;
 import net.foodeals.crm.application.dto.requests.ProspectRequest;
 import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
+import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,4 +29,6 @@ public interface ProspectService extends CrudService<ProspectResponse, UUID, Pro
     EventResponse partialUpdateEvent(UUID prospectId, UUID eventId, PartialEventRequest eventRequest);
 
     void deleteEvent(UUID prospectId, UUID eventId);
+
+    ProspectStatisticDto statistics();
 }

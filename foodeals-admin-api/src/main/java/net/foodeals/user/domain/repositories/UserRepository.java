@@ -1,6 +1,7 @@
 package net.foodeals.user.domain.repositories;
 
 import net.foodeals.common.contracts.BaseRepository;
+import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,4 +24,6 @@ public interface UserRepository extends BaseRepository<User, Integer> {
     Optional<User> findByEmailWithRoleAndAuthorities(@Param("email") String email);
 
     Page<User> findByOrganizationEntity_Id(UUID organizationId, Pageable pageable);
+
+    Integer countByRoleAndDeletedAtIsNull(Role role);
 }
