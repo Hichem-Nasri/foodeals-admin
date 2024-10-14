@@ -65,7 +65,7 @@ public class UserModelMapperConfig {
         modelMapper.addConverter(context -> {
             final User user = context.getSource();
             List<String> solutions = user.getOrganizationEntity().getSolutions().stream().map(solution -> solution.getName()).toList();
-            String city = user.getAddress().getCity().getName();
+            String city = user.getAddress().getRegion().getCity().getName();
             String region = user.getAddress().getRegion().getName();
             UserInfoDto userInfoDto = new UserInfoDto(user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
@@ -76,7 +76,7 @@ public class UserModelMapperConfig {
 
         modelMapper.addConverter(context -> {
             final User user = context.getSource();
-            String city = user.getAddress().getCity().getName();
+            String city = user.getAddress().getRegion().getCity().getName();
             String region = user.getAddress().getRegion().getName();
             UserInfoDto userInfoDto = new UserInfoDto(user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
             String roleName = user.getRole().getName();
@@ -90,9 +90,9 @@ public class UserModelMapperConfig {
             @Override
             protected void configure() {
                 map(source.getAddress(), destination.getAddress());
-                map(source.getCity().getName(), destination.getCity());
-                map(source.getCity().getState().getName(), destination.getState());
-                map(source.getCity().getState().getCountry().getName(), destination.getCountry());
+                map(source.getRegion().getCity().getName(), destination.getCity());
+                map(source.getRegion().getName(), destination.getRegion());
+                map(source.getRegion().getCity().getCountry().getName(), destination.getCountry());
             }
         });
     }

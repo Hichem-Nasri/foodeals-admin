@@ -11,6 +11,7 @@ import net.foodeals.order.domain.repositories.TransactionRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,6 +35,11 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Page<Transaction> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
+    }
+
+    @Override
+    public Page<Transaction> findAll(Pageable pageable) {
+        return null;
     }
 
     @Override

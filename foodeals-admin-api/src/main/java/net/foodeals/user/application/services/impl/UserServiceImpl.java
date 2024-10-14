@@ -56,6 +56,11 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<User> findAll(Pageable pageable) {
+        return null;
+    }
+
+    @Override
     public User findById(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));

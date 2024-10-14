@@ -4,8 +4,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.location.application.dtos.requests.CityRequest;
 import net.foodeals.location.application.dtos.responses.CityResponse;
+import net.foodeals.location.application.dtos.responses.RegionResponse;
 import net.foodeals.location.application.services.CityService;
+import net.foodeals.location.domain.repositories.RegionRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,11 +24,9 @@ public class CityController {
     private final ModelMapper mapper;
 
     @GetMapping
-    public ResponseEntity<List<CityResponse>> getAll(
-            @RequestParam(defaultValue = "0") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize
-    ) {
-        final List<CityResponse> responses = service.findAll(pageNum, pageSize)
+    public ResponseEntity<List<CityResponse>> getAll(Pageable pageable
+                                                     ) {
+        final List<CityResponse> responses = service.findAll(pageable)
                 .stream()
                 .map(city -> mapper.map(city, CityResponse.class))
                 .toList();
@@ -44,7 +45,7 @@ public class CityController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<CityResponse> update(@PathVariable UUID id, @RequestBody @Valid CityRequest request) {
         final CityResponse response = mapper.map(service.update(id, request), CityResponse.class);
         return ResponseEntity.ok(response);
@@ -54,5 +55,14 @@ public class CityController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/regions")
+    public ResponseEntity<List<RegionResponse>> getRegions(@PathVariable("id") UUID id) {
+        final List<RegionResponse> responses = service.getRegions(id)
+                .stream()
+                .map(region -> mapper.map(region, RegionResponse.class))
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 }

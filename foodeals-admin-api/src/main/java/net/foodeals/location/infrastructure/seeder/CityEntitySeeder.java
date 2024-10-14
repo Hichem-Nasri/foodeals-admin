@@ -2,12 +2,9 @@ package net.foodeals.location.infrastructure.seeder;
 
 import jakarta.transaction.Transactional;
 import net.foodeals.location.application.dtos.requests.CountryRequest;
-import net.foodeals.location.application.dtos.requests.StateRequest;
 import net.foodeals.location.application.services.CountryService;
-import net.foodeals.location.application.services.StateService;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Country;
-import net.foodeals.location.domain.entities.State;
 import net.foodeals.location.domain.repositories.CityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -25,8 +22,6 @@ public class CityEntitySeeder {
     private final CityRepository cityRepository;
 
     @Autowired
-    private StateService stateService;
-    @Autowired
     private CountryService countryService;
 
 
@@ -34,29 +29,25 @@ public class CityEntitySeeder {
         this.cityRepository = cityRepository;
     }
 
-    @Transactional
-    @EventListener(ApplicationReadyEvent.class)
-    public void CitySeeder() {
-        CountryRequest countryRequest = new CountryRequest("Morocco", "202410");
-        if (this.countryService.count() == 0 ) {
-            Country country = this.countryService.create(countryRequest);
-
-            StateRequest stateRequest = new StateRequest("Casablanca-Settat", "102436", country.getId());
-            State state = this.stateService.create(stateRequest);
-            country.getStates().add(state);
-            this.countryService.save(country);
-            City city1 = City.builder().name("Casablanca")
-                    .state(state)
-                    .code("20235")
-                    .build();
-            City city2 = City.builder().name("Settat")
-                    .state(state)
-                    .code("20243")
-                    .build();
-            this.cityRepository.saveAllAndFlush(List.of(city2, city1));
-            state.getCities().add(city1);
-            state.getCities().add(city2);
-            this.stateService.save(state);
-        }
-    }
+//    @Transactional
+//    @EventListener(ApplicationReadyEvent.class)
+//    public void CitySeeder() {
+//        if (this.countryService.count() == 0 ) {
+//            CountryRequest countryRequest = new CountryRequest("morocco");
+//            Country country = this.countryService.create(countryRequest);
+//            this.countryService.save(country);
+//            City city1 = City.builder().name("casablanca")
+//                    .country(country)
+//                    .code("20235")
+//                    .build();
+//            City city2 = City.builder().name("settat")
+//                    .country(country)
+//                    .code("20243")
+//                    .build();
+//            this.cityRepository.saveAllAndFlush(List.of(city2, city1));
+//            country.getCities().add(city1);
+//            country.getCities().add(city2);
+//            this.countryService.save(country);
+//        }
+//    }
 }

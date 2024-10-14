@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,10 +61,11 @@ public class ProspectModelMapper {
 
             ContactDto contactInfo = new ContactDto(contact.getName(), contact.getEmail(), contact.getPhone());
 
-            String city = prospect.getAddress().getCity().getName();
+            String country = prospect.getAddress().getRegion().getCity().getCountry().getName();
+            String city = prospect.getAddress().getRegion().getCity().getName();
             String region =  prospect.getAddress().getRegion().getName();
             String address =  prospect.getAddress().getAddress();
-            AddressDto addressDto = new AddressDto(city, address, region);
+            AddressDto addressDto = new AddressDto(country, city, address, region, null);
 
             final User creator = prospect.getCreator();
             final User lead = prospect.getLead();
@@ -76,13 +78,14 @@ public class ProspectModelMapper {
                     .collect(Collectors.toList());
 
             ProspectStatus status =  prospect.getStatus();
-            List<EventResponse> eventResponses = prospect.getEvents() != null
+            List<EventResponse> eventResponses = prospect.getEvents().size() != 0
                     ? prospect.getEvents().stream()
                     .filter(event -> event.getDeletedAt() == null)
+                    .sorted(Comparator.comparing(Event::getCreatedAt).reversed())
                     .map((Event event) -> this.modelMapper.map(event, EventResponse.class))
                     .toList()
                     : null;
-            return new ProspectResponse(prospect.getId(), date.toString(), prospect.getName(), category, contactInfo, addressDto, creatorInfoDto, managerInfoDto, "", status, eventResponses, solutionNames);
+            return new ProspectResponse(prospect.getId(), date.toString(), prospect.getName(), category, contactInfo, addressDto, creatorInfoDto, managerInfoDto, status, eventResponses, solutionNames);
         }, Prospect.class, ProspectResponse.class);
     }
 }

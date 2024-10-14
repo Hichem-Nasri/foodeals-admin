@@ -8,6 +8,7 @@ import net.foodeals.organizationEntity.domain.entities.Activity;
 import net.foodeals.organizationEntity.domain.exceptions.ActivityNotFoundException;
 import net.foodeals.organizationEntity.domain.repositories.ActivityRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +29,11 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Page<Activity> findAll(Integer pageNumber, Integer pageSize) {
+        return null;
+    }
+
+    @Override
+    public Page<Activity> findAll(Pageable pageable) {
         return null;
     }
 

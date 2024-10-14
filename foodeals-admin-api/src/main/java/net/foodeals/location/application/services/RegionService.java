@@ -1,41 +1,11 @@
 package net.foodeals.location.application.services;
 
-import net.foodeals.location.domain.entities.City;
+import net.foodeals.common.contracts.CrudService;
+import net.foodeals.location.application.dtos.requests.RegionRequest;
+import net.foodeals.location.application.dtos.responses.RegionResponse;
 import net.foodeals.location.domain.entities.Region;
-import net.foodeals.location.domain.repositories.RegionRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
-@Service
-public class RegionService {
-    private final RegionRepository regionRepository;
-    private final CityService cityService;
-
-
-    public RegionService(RegionRepository regionRepository, CityService cityService) {
-        this.regionRepository = regionRepository;
-        this.cityService = cityService;
-    }
-
-    public Region findByName(String name) {
-        return this.regionRepository.findByName(name);
-    }
-
-    public Region create(String cityName, String regionName) {
-        City city = this.cityService.findByName(cityName);
-        Region region = Region.builder().name(regionName)
-                .city(city)
-                .build();
-        this.regionRepository.save(region);
-        city.getRegions().add(region);
-        this.cityService.save(city);
-        return region;
-    }
-
-    public Region findById(UUID uuid) {
-        return this.regionRepository.findById(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Region with Id : " + uuid + " not found"));
-    }
+public interface RegionService extends CrudService<Region, UUID, RegionRequest> {
 }

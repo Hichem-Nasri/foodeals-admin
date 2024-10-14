@@ -2,7 +2,7 @@ package net.foodeals.order.infrastructure.modelMapperConfig;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import net.foodeals.location.application.dtos.responses.AddressResponse;
+//import net.foodeals.location.application.dtos.responses.AddressResponse;
 import net.foodeals.offer.application.dtos.responses.OfferResponse;
 import net.foodeals.order.application.dtos.responses.CouponResponse;
 import net.foodeals.order.application.dtos.responses.OrderResponse;
@@ -44,7 +44,7 @@ public class OrderModelMapperConfig {
                     order.getStatus(),
                     mapper.map(order.getClient(), UserResponse.class),
                     mapper.map(order.getOffer(), OfferResponse.class),
-                    mapper.map(order.getShippingAddress(), AddressResponse.class),
+//                    mapper.map(order.getShippingAddress(), AddressResponse.class),
                     mapper.map(order.getCoupon(), CouponResponse.class),
                     order.getTransactions().stream()
                             .map(transaction -> mapper.map(transaction, TransactionResponse.class))

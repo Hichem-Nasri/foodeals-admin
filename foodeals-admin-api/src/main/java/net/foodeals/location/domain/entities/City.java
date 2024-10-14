@@ -27,14 +27,8 @@ public class City extends AbstractEntity<UUID> {
 
     private String name;
 
-    private String code;
-
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private State state;
-
-    @OneToMany(mappedBy = "city", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<Address> addresses;
+    private Country country;
 
     @OneToMany(mappedBy = "city", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private  List<Region> regions = new ArrayList<>();

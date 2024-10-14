@@ -7,9 +7,8 @@ import net.foodeals.common.valueOjects.Coordinates;
 import java.util.UUID;
 
 public record AddressRequest(
+        @NotBlank String country,
         @NotBlank String address,
-        @NotNull String extraAddress,
-        @NotNull String zip,
         @NotNull String cityName,
         @NotNull String regionName,
         @NotNull String iframe

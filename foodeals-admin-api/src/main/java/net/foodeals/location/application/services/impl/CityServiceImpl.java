@@ -4,14 +4,16 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.location.application.dtos.requests.CityRequest;
 import net.foodeals.location.application.services.CityService;
-import net.foodeals.location.application.services.StateService;
+import net.foodeals.location.application.services.CountryService;
 import net.foodeals.location.domain.entities.City;
-import net.foodeals.location.domain.entities.State;
+import net.foodeals.location.domain.entities.Country;
+import net.foodeals.location.domain.entities.Region;
 import net.foodeals.location.domain.exceptions.CityNotFoundException;
 import net.foodeals.location.domain.repositories.CityRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +26,7 @@ class CityServiceImpl implements CityService {
 
     private final ModelMapper modelMapper;
     private final CityRepository repository;
-    private final StateService stateService;
+    private final CountryService countryService;
 
 
     @Override
@@ -38,6 +40,11 @@ class CityServiceImpl implements CityService {
     }
 
     @Override
+    public Page<City> findAll(Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
+    @Override
     public City findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new CityNotFoundException(id));
@@ -45,20 +52,27 @@ class CityServiceImpl implements CityService {
 
     @Override
     public City create(CityRequest request) {
-        State state = stateService.findById(request.stateId());
-        City city = modelMapper.map(request, City.class);
-        city.setState(state);
+        Country country = countryService.findByName(request.country().toLowerCase());
+        City city = City.builder().name(request.name().toLowerCase()).build();
+        city.setCountry(country);
+        country.getCities().add(city);
+        this.countryService.save(country);
         return repository.save(city);
     }
 
     @Override
     public City update(UUID id, CityRequest request) {
-        State state = stateService.findById(request.stateId());
+        Country country = countryService.findByName(request.country().toLowerCase());
         City existingCity = repository.findById(id)
                 .orElseThrow(() -> new CityNotFoundException(id));
 
-        modelMapper.map(request, existingCity);
-        existingCity.setState(state);
+        if (!country.getName().equals(existingCity.getCountry().getName())) {
+            Country country1 = existingCity.getCountry();
+            country1.getCities().remove(existingCity);
+            existingCity.setCountry(country);
+            country.getCities().add(existingCity);
+        }
+        existingCity.setName(request.name().toLowerCase());
         return repository.save(existingCity);
     }
 
@@ -72,11 +86,18 @@ class CityServiceImpl implements CityService {
 
     @Override
     public City findByName(String name) {
-        return this.repository.findByName(name);
+        return this.repository.findByName(name.toLowerCase());
     }
 
     @Override
     public City save(City city) {
         return this.repository.saveAndFlush(city);
+    }
+
+    @Override
+    public List<Region> getRegions(UUID id) {
+        City city = repository.findById(id)
+                .orElseThrow(() -> new CityNotFoundException(id));
+        return city.getRegions();
     }
 }

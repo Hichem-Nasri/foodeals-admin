@@ -1,7 +1,7 @@
 package net.foodeals.order.application.dtos.responses;
 
 import net.foodeals.common.valueOjects.Price;
-import net.foodeals.location.application.dtos.responses.AddressResponse;
+//import net.foodeals.location.application.dtos.responses.AddressResponse;
 import net.foodeals.offer.application.dtos.responses.OfferResponse;
 import net.foodeals.order.domain.enums.OrderStatus;
 import net.foodeals.order.domain.enums.OrderType;
@@ -17,7 +17,7 @@ public record OrderResponse(
         OrderStatus status,
         UserResponse client,
         OfferResponse offer,
-        AddressResponse shippingAddress,
+//        AddressResponse shippingAddress,
         CouponResponse coupon,
         List<TransactionResponse> transactions
 

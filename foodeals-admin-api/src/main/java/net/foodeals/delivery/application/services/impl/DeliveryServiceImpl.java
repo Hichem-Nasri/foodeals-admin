@@ -15,6 +15,7 @@ import net.foodeals.user.domain.entities.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,6 +42,11 @@ class DeliveryServiceImpl implements DeliveryService {
     @Override
     public Page<Delivery> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
+    }
+
+    @Override
+    public Page<Delivery> findAll(Pageable pageable) {
+        return null;
     }
 
     @Override

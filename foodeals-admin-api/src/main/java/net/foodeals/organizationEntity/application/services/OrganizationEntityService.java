@@ -12,9 +12,11 @@ import net.foodeals.delivery.domain.entities.CoveredZones;
 import net.foodeals.location.application.dtos.requests.AddressRequest;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
-import net.foodeals.location.application.services.RegionService;
+import net.foodeals.location.application.services.CountryService;
+import net.foodeals.location.application.services.impl.RegionServiceImpl;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.location.domain.entities.City;
+import net.foodeals.location.domain.entities.Country;
 import net.foodeals.location.domain.entities.Region;
 import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
@@ -43,7 +45,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Logger;
 
 @Service
 @Slf4j
@@ -52,7 +53,7 @@ public class OrganizationEntityService {
     private final OrganizationEntityRepository organizationEntityRepository;
     private final ContractService contractService;
     private final CityService cityService;
-    private final RegionService regionService;
+    private final RegionServiceImpl regionServiceImpl;
     private final ActivityService activityService;
     private final SolutionService solutionService;
     private final BankInformationService bankInformationService;
@@ -62,12 +63,13 @@ public class OrganizationEntityService {
     private final RoleService roleService;
     private final EmailService emailService;
     private final CoveredZonesService coveredZonesService;
+    private final CountryService countryService;
 
-    public OrganizationEntityService(OrganizationEntityRepository organizationEntityRepository, ContractService contractService, CityService cityService, RegionService regionService, ActivityService activityService, SolutionService solutionService, BankInformationService bankInformationService, AddressService addressService, ContactsService contactsService, UserService userService, RoleService roleService, EmailService emailService, DeadlinesService deadlinesService, CoveredZonesService coveredZonesService) {
+    public OrganizationEntityService(OrganizationEntityRepository organizationEntityRepository, ContractService contractService, CityService cityService, RegionServiceImpl regionServiceImpl, ActivityService activityService, SolutionService solutionService, BankInformationService bankInformationService, AddressService addressService, ContactsService contactsService, UserService userService, RoleService roleService, EmailService emailService, DeadlinesService deadlinesService, CoveredZonesService coveredZonesService, CountryService countryService) {
         this.organizationEntityRepository = organizationEntityRepository;
         this.contractService = contractService;
         this.cityService = cityService;
-        this.regionService = regionService;
+        this.regionServiceImpl = regionServiceImpl;
         this.activityService = activityService;
         this.solutionService = solutionService;
         this.bankInformationService = bankInformationService;
@@ -77,6 +79,7 @@ public class OrganizationEntityService {
         this.roleService = roleService;
         this.emailService = emailService;
         this.coveredZonesService = coveredZonesService;
+        this.countryService = countryService;
     }
 
     public OrganizationEntity save(OrganizationEntity organizationEntity) {
@@ -88,12 +91,8 @@ public class OrganizationEntityService {
     }
 
     public UUID createAnewOrganizationEntity(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
-        City city = this.cityService.findByName(createAnOrganizationEntityDto.getEntityAddressDto().getCity());
-        Region region = this.regionService.findByName(createAnOrganizationEntityDto.getEntityAddressDto().getRegion());
-        Address address = Address.builder().address(createAnOrganizationEntityDto.getEntityAddressDto().getAddress())
-                .city(city)
-                .region(region)
-                .build();
+        AddressRequest addressRequest = new AddressRequest(createAnOrganizationEntityDto.getEntityAddressDto().getCountry(), createAnOrganizationEntityDto.getEntityAddressDto().getAddress(), createAnOrganizationEntityDto.getEntityAddressDto().getCity(), createAnOrganizationEntityDto.getEntityAddressDto().getRegion(), createAnOrganizationEntityDto.getEntityAddressDto().getIframe());
+        Address address = this.addressService.create(addressRequest);
         Contact contact = Contact.builder().name(createAnOrganizationEntityDto.getContactDto().getName())
                 .email(createAnOrganizationEntityDto.getContactDto().getEmail())
                 .phone(createAnOrganizationEntityDto.getContactDto().getPhone())
@@ -136,10 +135,9 @@ public class OrganizationEntityService {
                 regionsNames.forEach(regionName -> {
                     CoveredZones coveredZone = CoveredZones.builder().organizationEntity(organizationEntity)
                             .build();
-                    Region region = this.regionService.findByName(regionName);
-                    if (region == null) {
-                        region = this.regionService.create(coveredZonesDto.getCity(), regionName);
-                    }
+                    Country country = this.countryService.findByName(coveredZonesDto.getCountry());
+                    City city = country.getCities().stream().filter(c -> c.getName().equals(coveredZonesDto.getCity().toLowerCase())).findFirst().get();
+                    Region region = city.getRegions().stream().filter(r -> r.getName().equals(regionName.toLowerCase())).findFirst().get();
                     coveredZone.setRegion(region);
                     this.coveredZonesService.save(coveredZone);
                     organizationEntity.getCoveredZones().add(coveredZone);
@@ -150,7 +148,7 @@ public class OrganizationEntityService {
 
         Role role  = this.roleService.findByName("MANAGER");
         String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
+        UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
         UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId(), organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
         //        String receiver = manager.getEmail();
@@ -277,7 +275,7 @@ public class OrganizationEntityService {
 
         Role role  = this.roleService.findByName("MANAGER");
         String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
+        UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
         UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId(), organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
         SimpleDateFormat formatter = new SimpleDateFormat("M/y");
@@ -318,7 +316,7 @@ public class OrganizationEntityService {
     }
 
     public UUID createAssociation(CreateAssociationDto createAssociationDto, MultipartFile logo, MultipartFile cover) {
-        AddressRequest addressRequest = new AddressRequest(createAssociationDto.associationAddress().getAddress(), "", "", createAssociationDto.associationAddress().getCity(), createAssociationDto.associationAddress().getRegion(), createAssociationDto.associationAddress().getIframe());
+        AddressRequest addressRequest = new AddressRequest(createAssociationDto.associationAddress().getCountry(), createAssociationDto.associationAddress().getAddress(), createAssociationDto.associationAddress().getCity(), createAssociationDto.associationAddress().getRegion(), createAssociationDto.associationAddress().getIframe());
         Address address = this.addressService.create(addressRequest);
         Set<Activity> activities = this.activityService.getActivitiesByName(createAssociationDto.activities());
         Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAssociationDto.solutions());
@@ -337,12 +335,12 @@ public class OrganizationEntityService {
 
         Role role  = this.roleService.findByName("MANAGER");
         String pass1 = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserAddress userAddress1 = new UserAddress(organizationEntity.getAddress().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
+        UserAddress userAddress1 = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
         UserRequest userRequest1 = new UserRequest(manager1.getName(), manager1.getEmail(), manager1.getPhone(), pass1,  false, role.getId(), organizationEntity.getId(), userAddress1);
         this.userService.createOrganizationEntityUser(userRequest1);
 
         String pass2 = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserAddress userAddress2 = new UserAddress(organizationEntity.getAddress().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
+        UserAddress userAddress2 = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
         UserRequest userRequest2 = new UserRequest(manager2.getName(), manager2.getEmail(), manager2.getPhone(), pass2,  false, role.getId(), organizationEntity.getId(), userAddress2);
         this.userService.createOrganizationEntityUser(userRequest2);
 

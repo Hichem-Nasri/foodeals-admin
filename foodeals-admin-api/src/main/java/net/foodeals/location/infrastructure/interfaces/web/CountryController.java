@@ -3,9 +3,11 @@ package net.foodeals.location.infrastructure.interfaces.web;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.location.application.dtos.requests.CountryRequest;
+import net.foodeals.location.application.dtos.responses.CityResponse;
 import net.foodeals.location.application.dtos.responses.CountryResponse;
 import net.foodeals.location.application.services.CountryService;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,11 +23,9 @@ public class CountryController {
     private final ModelMapper mapper;
 
     @GetMapping
-    public ResponseEntity<List<CountryResponse>> getAll(
-            @RequestParam(defaultValue = "0") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize
-    ) {
-        final List<CountryResponse> responses = service.findAll(pageNum, pageSize)
+    public ResponseEntity<List<CountryResponse>> getAll(Pageable pageable
+                                                        ) {
+        final List<CountryResponse> responses = service.findAll(pageable)
                 .stream()
                 .map(country -> mapper.map(country, CountryResponse.class))
                 .toList();
@@ -44,7 +44,7 @@ public class CountryController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<CountryResponse> update(@PathVariable UUID id, @RequestBody @Valid CountryRequest request) {
         final CountryResponse response = mapper.map(service.update(id, request), CountryResponse.class);
         return ResponseEntity.ok(response);
@@ -54,5 +54,15 @@ public class CountryController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/cities")
+    public ResponseEntity<List<CityResponse>> getCities(@PathVariable("id") UUID id
+    ) {
+        final List<CityResponse> responses = service.getCities(id)
+                .stream()
+                .map(city -> mapper.map(city, CityResponse.class))
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 }

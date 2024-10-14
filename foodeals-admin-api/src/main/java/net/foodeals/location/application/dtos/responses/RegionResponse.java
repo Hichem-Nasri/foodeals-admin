@@ -2,5 +2,8 @@ package net.foodeals.location.application.dtos.responses;
 
 import java.util.UUID;
 
-public record CityResponse(UUID id, String name) {
+public record RegionResponse(
+        UUID id,
+        String name
+) {
 }

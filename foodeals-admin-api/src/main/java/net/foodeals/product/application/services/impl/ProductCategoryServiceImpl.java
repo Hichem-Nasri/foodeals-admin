@@ -11,6 +11,7 @@ import net.foodeals.product.domain.exceptions.ProductCategoryNotFoundException;
 import net.foodeals.product.domain.repositories.ProductCategoryRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,6 +36,11 @@ class ProductCategoryServiceImpl implements ProductCategoryService {
     @Override
     public Page<ProductCategory> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
+    }
+
+    @Override
+    public Page<ProductCategory> findAll(Pageable pageable) {
+        return null;
     }
 
     @Override

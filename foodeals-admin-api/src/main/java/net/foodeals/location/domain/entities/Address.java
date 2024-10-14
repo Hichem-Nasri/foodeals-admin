@@ -29,16 +29,8 @@ public class Address extends AbstractEntity<UUID> {
 
     private String address;
 
-    @Column(name = "extra_address")
-    private String extraAddress;
-
-    private String zip;
-
     @Embedded
     private Coordinates coordinates;
-
-    @ManyToOne
-    private City city;
 
     @ManyToOne
     private Region region;
