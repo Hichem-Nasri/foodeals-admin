@@ -47,7 +47,7 @@ public class SubEntityModelMapperCnf {
                 responsibleInfoDto.setEmail(user.getEmail());
             });
             List<String> solutions = subEntitie.getSolutions().stream().map(solution -> solution.getName()).toList();
-            String city = subEntitie.getAddress().getCity().getName();
+            String city = subEntitie.getAddress().getRegion().getCity().getName();
 //            ContractStatus contractStatus = subEntitie.getContract().getContractStatus();
             Integer users = subEntitie.getUsers().size();
             SubEntityType subEntityType = subEntitie.getType();

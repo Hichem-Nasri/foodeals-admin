@@ -9,7 +9,7 @@ import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.contract.domain.repositories.ContractRepository;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
-import net.foodeals.location.application.services.RegionService;
+import net.foodeals.location.application.services.impl.RegionServiceImpl;
 import net.foodeals.location.domain.repositories.CityRepository;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
@@ -29,7 +29,6 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class ContractService {
@@ -44,11 +43,11 @@ public class ContractService {
     private final CommissionService commissionService;
     private final SubscriptionService subscriptionService;
     private final BankInformationService bankInformationService;
-    private final RegionService regionService;
+    private final RegionServiceImpl regionServiceImpl;
     private final UserService userService;
     private final UserContractService userContractService;
 
-    public ContractService(ContractRepository contractRepository, CityRepository cityRepository, CityService cityService, ActivityService activityService, SolutionService solutionService, SolutionContractService solutionContractService, AddressService addressService, ContactsService contactsService, CommissionService commissionService, SubscriptionService subscriptionService, BankInformationService bankInformationService, RegionService regionService, UserService userService, UserContractService userContractService) {
+    public ContractService(ContractRepository contractRepository, CityRepository cityRepository, CityService cityService, ActivityService activityService, SolutionService solutionService, SolutionContractService solutionContractService, AddressService addressService, ContactsService contactsService, CommissionService commissionService, SubscriptionService subscriptionService, BankInformationService bankInformationService, RegionServiceImpl regionServiceImpl, UserService userService, UserContractService userContractService) {
         this.contractRepository = contractRepository;
         this.cityService = cityService;
         this.activityService = activityService;
@@ -59,7 +58,7 @@ public class ContractService {
         this.commissionService = commissionService;
         this.subscriptionService = subscriptionService;
         this.bankInformationService = bankInformationService;
-        this.regionService = regionService;
+        this.regionServiceImpl = regionServiceImpl;
         this.userService = userService;
         this.userContractService = userContractService;
     }

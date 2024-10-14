@@ -4,12 +4,15 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.location.application.dtos.requests.CountryRequest;
 import net.foodeals.location.application.services.CountryService;
+import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Country;
 import net.foodeals.location.domain.exceptions.CountryNotFoundException;
 import net.foodeals.location.domain.repositories.CountryRepository;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,6 +36,11 @@ class CountryServiceImpl implements CountryService {
     }
 
     @Override
+    public Page<Country> findAll(Pageable pageable) {
+        return repository.findAll(pageable);
+    }
+
+    @Override
     public Country findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new CountryNotFoundException(id));
@@ -40,7 +48,8 @@ class CountryServiceImpl implements CountryService {
 
     @Override
     public Country create(CountryRequest request) {
-        Country country = modelMapper.map(request, Country.class);
+        Country country = Country.builder().name(request.name().toLowerCase())
+                .build();
         return repository.saveAndFlush(country);
     }
 
@@ -49,7 +58,7 @@ class CountryServiceImpl implements CountryService {
         Country existingCountry = repository.findById(id)
                 .orElseThrow(() -> new CountryNotFoundException(id));
 
-        modelMapper.map(request, existingCountry);
+        existingCountry.setName(request.name().toLowerCase());
         return repository.save(existingCountry);
     }
 
@@ -63,12 +72,12 @@ class CountryServiceImpl implements CountryService {
 
     @Override
     public int countTotalCitiesByCountryName(String name) {
-        return this.repository.countTotalCitiesByCountryName(name);
+        return this.repository.countTotalCitiesByCountryName(name.toLowerCase());
     }
 
     @Override
     public Country findByName(String name) {
-        return this.repository.findByName(name);
+        return this.repository.findByName(name.toLowerCase());
     }
 
     @Override
@@ -79,6 +88,13 @@ class CountryServiceImpl implements CountryService {
     @Override
     public Long count() {
         return this.repository.count();
+    }
+
+    @Override
+    public List<City> getCities(UUID id) {
+        Country existingCountry = repository.findById(id)
+                .orElseThrow(() -> new CountryNotFoundException(id));
+        return existingCountry.getCities();
     }
 }
 

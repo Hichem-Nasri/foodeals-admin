@@ -44,44 +44,44 @@ public class OrganizationEntitySeeder {
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void createAssociation() {
-
-        if (this.donationService.count() == 0) {
-            ContactDto contactDto1 = new ContactDto(new Name("test ", "test "), "t@gmail.com", "06412358976");
-            ContactDto contactDto2 = new ContactDto(new Name("test 1 ", "test 1"), "t1@gmail.com", "06412358975");
-            EntityAddressDto entityAddressDto = new EntityAddressDto("address", "Casablanca", "maarif", "");
-
-            CreateAssociationDto associationsDto = new CreateAssociationDto("Test Company", List.of("Activity 1"), contactDto1, contactDto2, entityAddressDto, EntityType.FOOD_BANK, 10, List.of("pro_donate", "dlc"), "test ");
-
-            UUID id = this.organizationEntityService.createAssociation(associationsDto, null, null);
-            OrganizationEntity organizationEntity = this.organizationEntityService.getOrganizationEntityById(id);
-
-
-            SubEntity subEntity2 = SubEntity.builder().name(null)
-                    .organizationEntity(organizationEntity)
-                    .type(SubEntityType.FOOD_BANK_SB)
-                    .address(organizationEntity.getAddress())
-                    .build();
-
-            organizationEntity.getSubEntities().addAll(List.of(subEntity2));
-            this.subEntityRepository.save(subEntity2);
-            this.organizationEntityService.save(organizationEntity);
-
-            Donation donation1 = Donation.builder().donor(new Donor(organizationEntity.getId(), DonorType.FOOD_BANK))
-                    .build();
-            Donation donation2 = Donation.builder().receiver(new Receiver(organizationEntity.getId(), DonationReceiverType.FOOD_BANK))
-                    .build();
-
-            Donation donation3 = Donation.builder().donor(new Donor(subEntity2.getId(), DonorType.FOOD_BANK_ASSOCIATION))
-                    .build();
-            Donation donation4 = Donation.builder().receiver(new Receiver(subEntity2.getId(), DonationReceiverType.FOOD_BANK_ASSOCIATION))
-                    .build();
-
-            this.donationService.saveAll(List.of(donation1, donation2, donation3, donation4));
-
-            System.out.println("organization id -> " + organizationEntity.getId());
-        } else {
-            System.out.println("------------------------------------------------------");
-            this.organizationEntityRepository.findAll().forEach(o -> System.out.println("organization id ->  " + o.getId()));
-        }
+//
+//        if (this.donationService.count() == 0) {
+//            ContactDto contactDto1 = new ContactDto(new Name("test ", "test "), "t@gmail.com", "06412358976");
+//            ContactDto contactDto2 = new ContactDto(new Name("test 1 ", "test 1"), "t1@gmail.com", "06412358975");
+//            EntityAddressDto entityAddressDto = new EntityAddressDto("address", "casablanca", "maarif", "");
+//
+//            CreateAssociationDto associationsDto = new CreateAssociationDto("morocco", "Test Company", List.of("Activity 1"), contactDto1, contactDto2, entityAddressDto, EntityType.FOOD_BANK, 10, List.of("pro_donate", "dlc"), "test ");
+//
+//            UUID id = this.organizationEntityService.createAssociation(associationsDto, null, null);
+//            OrganizationEntity organizationEntity = this.organizationEntityService.getOrganizationEntityById(id);
+//
+//
+//            SubEntity subEntity2 = SubEntity.builder().name(null)
+//                    .organizationEntity(organizationEntity)
+//                    .type(SubEntityType.FOOD_BANK_SB)
+//                    .address(organizationEntity.getAddress())
+//                    .build();
+//
+//            organizationEntity.getSubEntities().addAll(List.of(subEntity2));
+//            this.subEntityRepository.save(subEntity2);
+//            this.organizationEntityService.save(organizationEntity);
+//
+//            Donation donation1 = Donation.builder().donor(new Donor(organizationEntity.getId(), DonorType.FOOD_BANK))
+//                    .build();
+//            Donation donation2 = Donation.builder().receiver(new Receiver(organizationEntity.getId(), DonationReceiverType.FOOD_BANK))
+//                    .build();
+//
+//            Donation donation3 = Donation.builder().donor(new Donor(subEntity2.getId(), DonorType.FOOD_BANK_ASSOCIATION))
+//                    .build();
+//            Donation donation4 = Donation.builder().receiver(new Receiver(subEntity2.getId(), DonationReceiverType.FOOD_BANK_ASSOCIATION))
+//                    .build();
+//
+//            this.donationService.saveAll(List.of(donation1, donation2, donation3, donation4));
+//
+//            System.out.println("organization id -> " + organizationEntity.getId());
+//        } else {
+//            System.out.println("------------------------------------------------------");
+//            this.organizationEntityRepository.findAll().forEach(o -> System.out.println("organization id ->  " + o.getId()));
+//        }
     }
 }

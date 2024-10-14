@@ -80,7 +80,7 @@ public class OrganizationEntityModelMapper {
                 responsibleInfoDto.setEmail(user.getEmail());
             });
             List<String> solutions = organizationEntity.getSolutions().stream().map(solution -> solution.getName()).toList();
-            String city = organizationEntity.getAddress().getCity().getName();
+            String city = organizationEntity.getAddress().getRegion().getCity().getName();
             ContractStatus contractStatus = organizationEntity.getContract().getContractStatus();
             Integer users = organizationEntity.getUsers().size();
             Integer subEntities = this.subEntityService.countByOrganizationEntity_IdAndType(organizationEntity.getId(), SubEntityType.FOOD_BANK_SB);
@@ -146,7 +146,7 @@ public class OrganizationEntityModelMapper {
         List<String> solutionsNames = organizationEntity.getSolutions().stream().map(solution -> solution.getName()).toList();
         deliveryPartnerDto.setSolutions(solutionsNames);
         int numberOfCoveredCities = organizationEntity.getCoveredZones().stream().map(coveredZone -> coveredZone.getRegion().getCity().getName()).collect(Collectors.toSet()).size();
-        int totalNumberOfCities = this.countryService.countTotalCitiesByCountryName(organizationEntity.getAddress().getCity().getState().getCountry().getName());
+        int totalNumberOfCities = this.countryService.countTotalCitiesByCountryName(organizationEntity.getAddress().getRegion().getCity().getCountry().getName());
 
         DistributionType distribution = totalNumberOfCities == numberOfCoveredCities ? DistributionType.EVERYWHERE : DistributionType.MULTI_CITY;
         deliveryPartnerDto.setDistribution(distribution);

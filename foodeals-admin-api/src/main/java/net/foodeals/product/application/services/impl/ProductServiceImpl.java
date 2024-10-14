@@ -12,6 +12,7 @@ import net.foodeals.product.domain.repositories.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,6 +38,11 @@ class ProductServiceImpl implements ProductService {
     @Override
     public Page<Product> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
+    }
+
+    @Override
+    public Page<Product> findAll(Pageable pageable) {
+        return null;
     }
 
     @Override

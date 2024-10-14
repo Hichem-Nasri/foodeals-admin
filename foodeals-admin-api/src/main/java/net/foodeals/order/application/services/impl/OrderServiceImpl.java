@@ -17,6 +17,7 @@ import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,6 +44,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<Order> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
+    }
+
+    @Override
+    public Page<Order> findAll(Pageable pageable) {
+        return null;
     }
 
     @Override

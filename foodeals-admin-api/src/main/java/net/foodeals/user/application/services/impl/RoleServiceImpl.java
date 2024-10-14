@@ -11,6 +11,7 @@ import net.foodeals.user.domain.exceptions.RoleNotFoundException;
 import net.foodeals.user.domain.repositories.RoleRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +32,11 @@ class RoleServiceImpl implements RoleService {
 
     @Override
     public Page<Role> findAll(Integer pageNumber, Integer pageSize) {
+        return null;
+    }
+
+    @Override
+    public Page<Role> findAll(Pageable pageable) {
         return null;
     }
 

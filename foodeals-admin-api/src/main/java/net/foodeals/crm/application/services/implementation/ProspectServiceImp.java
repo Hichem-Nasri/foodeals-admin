@@ -13,12 +13,11 @@ import net.foodeals.crm.application.services.ProspectService;
 import net.foodeals.crm.domain.entities.Event;
 import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
-import net.foodeals.crm.domain.repositories.EventRepository;
 import net.foodeals.crm.domain.repositories.ProspectRepository;
 import net.foodeals.location.application.dtos.requests.AddressRequest;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
-import net.foodeals.location.application.services.RegionService;
+import net.foodeals.location.application.services.impl.RegionServiceImpl;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Region;
@@ -53,7 +52,7 @@ public final class ProspectServiceImp implements ProspectService {
     private final UserService userService;
     private final ModelMapper modelMapper;
     private final CityService cityService;
-    private final RegionService regionService;
+    private final RegionServiceImpl regionServiceImpl;
     private final EventService eventService;
     private final SolutionService solutionService;
     private final RoleService roleService;
@@ -135,17 +134,8 @@ public final class ProspectServiceImp implements ProspectService {
 
             if (dto.address() != null) {
                 Address existingAddress = prospect.getAddress();
-                if (dto.address().address() != null) {
-                    existingAddress.setAddress(dto.address().address());
-                }
-                if (dto.address().city() != null) {
-                    City city = this.cityService.findByName(dto.address().city());
-                    existingAddress.setCity(city);
-                }
-                if (dto.address().region() != null) {
-                    Region region = this.regionService.findByName(dto.address().region());
-                    existingAddress.setRegion(region);
-                }
+                AddressRequest addressRequest = new AddressRequest(dto.address().country(), dto.address().address(),  dto.address().city(),  dto.address().region(),  dto.address().iframe());
+                this.addressService.update(existingAddress.getId(), addressRequest);
             }
 
             Prospect updatedProspect = this.prospectRepository.save(prospect);
@@ -158,11 +148,7 @@ public final class ProspectServiceImp implements ProspectService {
         Prospect prospect = this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + id.toString()));
 
         Event event = this.eventService.create(eventRequest);
-        if (prospect.getEvents() == null) {
-            prospect.setEvents(new ArrayList<>(List.of(event)));
-        } else {
-            prospect.getEvents().add(event);
-        }
+        prospect.getEvents().add(event);
         this.prospectRepository.save(prospect);
         return this.modelMapper.map(event, EventResponse.class);
     }
@@ -283,7 +269,7 @@ public final class ProspectServiceImp implements ProspectService {
         this.solutionService.saveAll(solutions);
         prospect.setSolutions(solutions);
 
-        AddressRequest addressRequest = new AddressRequest(dto.address().address(), "", "", dto.address().city(), dto.address().region(), "");
+        AddressRequest addressRequest = new AddressRequest(dto.address().country(), dto.address().address(),  dto.address().city(), dto.address().region(), dto.address().iframe());
         Address address = this.addressService.create(addressRequest);
 
         prospect.setAddress(address);
@@ -339,11 +325,8 @@ public final class ProspectServiceImp implements ProspectService {
         prospect.setSolutions(solutions);
 
         Address existingAddress = prospect.getAddress();
-        City city = this.cityService.findByName(dto.address().city());
-        Region region =  this.regionService.findByName(dto.address().region());
-        existingAddress.setAddress(dto.address().address());
-        existingAddress.setCity(city);
-        existingAddress.setRegion(region);
+        AddressRequest addressRequest = new AddressRequest(dto.address().country(), dto.address().address(),  dto.address().city(),  dto.address().region(),  dto.address().iframe());
+        this.addressService.update(existingAddress.getId(), addressRequest);
 
         Prospect updatedProspect = this.prospectRepository.save(prospect);
         this.activityService.saveAll(activities);

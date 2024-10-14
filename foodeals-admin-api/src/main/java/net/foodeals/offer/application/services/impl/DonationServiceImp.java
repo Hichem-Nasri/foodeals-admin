@@ -29,6 +29,11 @@ public class DonationServiceImp implements DonationService {
     }
 
     @Override
+    public Page<Donation> findAll(Pageable pageable) {
+        return null;
+    }
+
+    @Override
     public Donation findById(UUID uuid) {
         return null;
     }

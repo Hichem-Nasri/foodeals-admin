@@ -40,6 +40,11 @@ public class SubEntityServiceImpl implements SubEntityService {
         return null;
     }
 
+    @Override
+    public Page<SubEntityResponse> findAll(Pageable pageable) {
+        return null;
+    }
+
 
     @Override
     public SubEntityResponse findById(UUID uuid) {

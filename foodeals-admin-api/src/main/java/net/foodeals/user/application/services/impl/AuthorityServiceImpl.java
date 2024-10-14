@@ -10,6 +10,7 @@ import net.foodeals.user.domain.repositories.AuthorityRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +32,11 @@ class AuthorityServiceImpl implements AuthorityService {
     @Override
     public Page<Authority> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
+    }
+
+    @Override
+    public Page<Authority> findAll(Pageable pageable) {
+        return null;
     }
 
     @Override
