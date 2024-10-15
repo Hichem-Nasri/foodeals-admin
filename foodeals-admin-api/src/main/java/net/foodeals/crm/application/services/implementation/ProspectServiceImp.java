@@ -36,6 +36,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -235,7 +237,9 @@ public final class ProspectServiceImp implements ProspectService {
 
         final User manager = this.userService.findById(dto.manager_id());
 
-        final User creator = this.userService.findById(dto.powered_by());
+        final String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        final User creator = this.userService.findByEmail(email);
 
         prospect.setLead(manager);
         prospect.setCreator(creator);
