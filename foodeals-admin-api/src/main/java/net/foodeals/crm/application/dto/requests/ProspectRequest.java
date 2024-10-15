@@ -10,4 +10,4 @@ import org.springframework.lang.Nullable;
 import java.util.List;
 import java.util.UUID;
 
-public record ProspectRequest(@NotBlank  String companyName, @NotNull List<String> activities, @NotNull ContactDto responsible, @NotNull Integer powered_by, @NotNull Integer manager_id, @NotNull AddressDto address, ProspectStatus status, @Nullable List<String> solutions) {}
+public record ProspectRequest(@NotBlank  String companyName, @NotNull List<String> activities, @NotNull ContactDto responsible, @NotNull Integer manager_id, @NotNull AddressDto address, ProspectStatus status, @Nullable List<String> solutions) {}
