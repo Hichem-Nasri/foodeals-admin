@@ -215,7 +215,7 @@ public final class ProspectServiceImp implements ProspectService {
     @Override
     public ProspectStatisticDto statistics() {
         Role role = this.roleService.findByName("LEAD");
-        return new ProspectStatisticDto(this.prospectRepository.countByLeadIsNotNullAndStatusAndDeletedAtIsNull(ProspectStatus.IN_PROGRESS), this.prospectRepository.countByStatusAndDeletedAtIsNull(ProspectStatus.CANCELED), this.prospectRepository.countByStatusAndDeletedAtIsNull(ProspectStatus.IN_PROGRESS), this.userService.countByRole(role));
+        return new ProspectStatisticDto(this.prospectRepository.countDistinctLeadsByStatus(ProspectStatus.IN_PROGRESS), this.prospectRepository.countByStatusAndDeletedAtIsNull(ProspectStatus.CANCELED), this.prospectRepository.countByStatusAndDeletedAtIsNull(ProspectStatus.IN_PROGRESS), this.userService.countByRole(role));
     }
 
     @Override
