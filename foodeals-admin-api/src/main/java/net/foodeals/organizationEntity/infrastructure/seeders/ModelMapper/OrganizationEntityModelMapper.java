@@ -6,6 +6,9 @@ import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.delivery.application.services.DeliveryService;
 import net.foodeals.location.application.services.CountryService;
 import net.foodeals.offer.application.services.DonationService;
+import net.foodeals.offer.application.services.OfferService;
+import net.foodeals.order.application.services.OrderService;
+import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
 import net.foodeals.organizationEntity.application.dtos.responses.AssociationsDto;
 import net.foodeals.organizationEntity.application.dtos.responses.DeliveryPartnerDto;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
@@ -49,19 +52,14 @@ public class OrganizationEntityModelMapper {
     private DonationService donationService;
     @Autowired
     private SubEntityService subEntityService;
+    @Autowired
+    private OfferService offerService;
+
 
 
     @PostConstruct
     private void postConstruct() {
         // Configure ModelMapper for simple property mappings
-        mapper.addMappings(new PropertyMap<OrganizationEntity, OrganizationEntityDto>() {
-            @Override
-            protected void configure() {
-                map(source.getAvatarPath(), destination.getAvatarPath());
-                map(source.getName(), destination.getName());
-                map(source.getContract().getContractStatus(), destination.getContractStatus());
-            }
-        });
 
         mapper.addConverter(mappingContext -> {
             OrganizationEntity organizationEntity = mappingContext.getSource();
@@ -90,29 +88,45 @@ public class OrganizationEntityModelMapper {
             Integer associations = this.subEntityService.countByOrganizationEntity_IdAndType(organizationEntity.getId(), SubEntityType.FOOD_BANK_ASSOCIATION);
             return new AssociationsDto(date.toString(), partnerInfoDto, responsibleInfoDto, users, donations, recovered, subEntities, associations, contractStatus, city, solutions, entityType);
         }, OrganizationEntity.class, AssociationsDto.class);
+
+        mapper.addConverter(mappingContext -> {
+            OrganizationEntity organizationEntity = mappingContext.getSource();
+            OrganizationEntityDto organizationEntityDto = new OrganizationEntityDto();
+            organizationEntityDto.setContractStatus(organizationEntity.getContract().getContractStatus());
+
+            OffsetDateTime dateTime = OffsetDateTime.parse(organizationEntity.getCreatedAt().toString());
+            LocalDate date = dateTime.toLocalDate();
+
+            organizationEntityDto.setCreatedAt(date.toString());
+            organizationEntityDto.setId(organizationEntity.getId());
+            Optional<Contact> firstContact = Optional.ofNullable(organizationEntity.getContacts())
+                    .flatMap(list -> list.stream().findFirst());
+            firstContact.ifPresent(contact -> {
+                ContactDto contactDto = new ContactDto(contact.getName(), contact.getEmail(), contact.getPhone());
+                organizationEntityDto.setContactDto(contactDto);
+            });
+            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getName(), organizationEntity.getAvatarPath());
+            organizationEntityDto.setPartnerInfoDto(partnerInfoDto);
+            Long offers = this.offerService.countByPublisherId(organizationEntity.getId());
+            Long orders = this.offerService.countOrdersByPublisherInfoId(organizationEntity.getId());
+            Long users = Long.valueOf(organizationEntity.getUsers().size());
+            Long subEntities = Long.valueOf(organizationEntity.getSubEntities().size());
+            EntityType type = organizationEntity.getType();
+            String city = organizationEntity.getAddress().getRegion().getCity().getName();
+            List<String> solutions = organizationEntity.getSolutions().stream().map(s -> s.getName()).toList();
+            organizationEntityDto.setOffers(offers);
+            organizationEntityDto.setOrders(orders);
+            organizationEntityDto.setUsers(users);
+            organizationEntityDto.setSubEntities(subEntities);
+            organizationEntityDto.setType(type);
+            organizationEntityDto.setCity(city);
+            organizationEntityDto.setSolutions(solutions);
+            return  organizationEntityDto;
+        }, OrganizationEntity.class, OrganizationEntityDto.class);
     }
 
     public OrganizationEntityDto mapOrganizationEntity(OrganizationEntity source) {
-        OrganizationEntityDto destination = mapper.map(source, OrganizationEntityDto.class);
-
-        OffsetDateTime dateTime = OffsetDateTime.parse(source.getCreatedAt().toString());
-        LocalDate date = dateTime.toLocalDate();
-
-        destination.setCreatedAt(date.toString());
-
-        Optional<Contact> firstContact = Optional.ofNullable(source.getContacts())
-                .flatMap(list -> list.stream().findFirst());
-//        Optional<User> manager = Optional.ofNullable(source.getContract().getUserContracts().getUser());
-//
-//        manager.ifPresent(salesManger -> {
-//            destination.setManager(salesManger.getName().firstName() + " " + salesManger.getName().lastName());
-//        });
-        firstContact.ifPresent(contact -> {
-            destination.setEmail(contact.getEmail());
-            destination.setPhone(contact.getPhone());
-        });
-
-        return destination;
+        return this.mapper.map(source, OrganizationEntityDto.class);
     }
 
     public DeliveryPartnerDto mapDeliveryPartners(OrganizationEntity organizationEntity) {
