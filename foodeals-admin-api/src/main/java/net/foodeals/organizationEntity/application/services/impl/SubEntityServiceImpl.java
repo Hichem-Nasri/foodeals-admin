@@ -31,6 +31,11 @@ public class SubEntityServiceImpl implements SubEntityService {
     }
 
     @Override
+    public Page<SubEntity> partnerSubEntities(Pageable pageable, UUID id) {
+        return this.subEntityRepository.findByOrganizationEntity_Id(id, pageable);
+    }
+
+    @Override
     public List<SubEntityResponse> findAll() {
         return List.of();
     }

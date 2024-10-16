@@ -18,4 +18,6 @@ public interface SubEntityService extends CrudService<SubEntityResponse, UUID, S
     Integer countByOrganizationEntity_IdAndType(UUID organizationId, SubEntityType type);
 
     Page<SubEntity> getFoodBankSubEntities(Pageable pageable, UUID id);
+
+    Page<SubEntity> partnerSubEntities(Pageable pageable, UUID id);
 }

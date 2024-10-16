@@ -49,7 +49,7 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     private EntityType type;
 
     @Builder.Default
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubEntity> subEntities = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL)
