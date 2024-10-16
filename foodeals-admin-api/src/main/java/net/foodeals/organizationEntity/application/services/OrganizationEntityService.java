@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.application.services;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
@@ -48,6 +49,7 @@ import java.util.*;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class OrganizationEntityService {
 
     private final OrganizationEntityRepository organizationEntityRepository;
@@ -64,23 +66,7 @@ public class OrganizationEntityService {
     private final EmailService emailService;
     private final CoveredZonesService coveredZonesService;
     private final CountryService countryService;
-
-    public OrganizationEntityService(OrganizationEntityRepository organizationEntityRepository, ContractService contractService, CityService cityService, RegionServiceImpl regionServiceImpl, ActivityService activityService, SolutionService solutionService, BankInformationService bankInformationService, AddressService addressService, ContactsService contactsService, UserService userService, RoleService roleService, EmailService emailService, DeadlinesService deadlinesService, CoveredZonesService coveredZonesService, CountryService countryService) {
-        this.organizationEntityRepository = organizationEntityRepository;
-        this.contractService = contractService;
-        this.cityService = cityService;
-        this.regionServiceImpl = regionServiceImpl;
-        this.activityService = activityService;
-        this.solutionService = solutionService;
-        this.bankInformationService = bankInformationService;
-        this.addressService = addressService;
-        this.contactsService = contactsService;
-        this.userService = userService;
-        this.roleService = roleService;
-        this.emailService = emailService;
-        this.coveredZonesService = coveredZonesService;
-        this.countryService = countryService;
-    }
+    private final FeatureService featureService;
 
     public OrganizationEntity save(OrganizationEntity organizationEntity) {
         return this.organizationEntityRepository.save(organizationEntity);
@@ -166,10 +152,16 @@ public class OrganizationEntityService {
         organizationEntity.setBankInformation(bankInformation);
         Set<Activity> activities = this.activityService.getActivitiesByName(createAnOrganizationEntityDto.getActivities());
         organizationEntity.setActivities(activities);
+        Set<Features> features = this.featureService.findFeaturesByNames(createAnOrganizationEntityDto.getFeatures());
+        organizationEntity.setActivities(activities);
         organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
         activities.forEach(activity -> {
             activity.getOrganizationEntities().add(organizationEntity);
             this.activityService.save(activity);
+        });
+        features.forEach(feature -> {
+            feature.getOrganizationEntities().add(organizationEntity);
+            this.featureService.save(feature);
         });
         Contract contract = this.contractService.createPartnerContract(createAnOrganizationEntityDto, organizationEntity);
         organizationEntity.setContract(contract);

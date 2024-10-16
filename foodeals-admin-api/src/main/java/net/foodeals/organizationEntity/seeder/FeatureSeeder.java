@@ -1,7 +1,6 @@
 package net.foodeals.organizationEntity.seeder;
 
 import jakarta.transaction.Transactional;
-import net.foodeals.organizationEntity.application.services.FeaturesService;
 import net.foodeals.organizationEntity.domain.entities.Features;
 import net.foodeals.organizationEntity.domain.repositories.FeatureRepository;
 import org.springframework.boot.context.event.ApplicationReadyEvent;

@@ -47,9 +47,6 @@ public class Contract extends AbstractEntity<UUID> {
     private Integer maxNumberOfSubEntities;
 
     @JsonIgnore
-    private Integer maxNumberOfAccounts;
-
-    @JsonIgnore
     private Float minimumReduction;
 
     @OneToOne(mappedBy = "contract", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
@@ -60,4 +57,6 @@ public class Contract extends AbstractEntity<UUID> {
 
     @Enumerated(EnumType.STRING)
     private ContractStatus contractStatus;
+
+    private boolean subscriptionPayedBySubEntities;
 }

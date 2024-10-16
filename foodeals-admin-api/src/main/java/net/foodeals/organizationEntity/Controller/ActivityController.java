@@ -5,6 +5,8 @@ import net.foodeals.organizationEntity.application.dtos.responses.ActivityRespon
 import net.foodeals.organizationEntity.application.services.ActivityService;
 import net.foodeals.organizationEntity.domain.entities.Activity;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -26,10 +28,10 @@ public class ActivityController {
     }
 
     @GetMapping("/Activities")
-    public ResponseEntity<List<ActivityResponseDto>> getAllActivities() {
-        List<Activity> activities = this.activityService.findAll();
-        List<ActivityResponseDto> activityResponses = activities.stream().map(activity -> this.modelMapper.map(activity, ActivityResponseDto.class)).toList();
-        return new ResponseEntity<List<ActivityResponseDto>>(activityResponses, HttpStatus.OK);
+    public ResponseEntity<Page<ActivityResponseDto>> getAllActivities(Pageable pageable) {
+        Page<Activity> activities = this.activityService.findAll(pageable);
+        Page<ActivityResponseDto> activityResponses = activities.map(activity -> this.modelMapper.map(activity, ActivityResponseDto.class));
+        return new ResponseEntity<Page<ActivityResponseDto>>(activityResponses, HttpStatus.OK);
     }
 
     @GetMapping("/Activity/{id}")
@@ -54,9 +56,9 @@ public class ActivityController {
     }
 
     @DeleteMapping("/Activity/{id}")
-    public ResponseEntity<String> deleteAnActivity(@PathVariable("id") UUID id) {
+    public ResponseEntity<?> deleteAnActivity(@PathVariable("id") UUID id) {
         this.activityService.delete(id);
-        return new ResponseEntity<String>("Activity has been deleted", HttpStatus.OK);
+        return ResponseEntity.noContent().build();
     }
 }
 

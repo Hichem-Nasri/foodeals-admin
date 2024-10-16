@@ -68,10 +68,10 @@ public class ContractService {
         UserContract userContract = UserContract.builder().user(user).build();
         Contract contract = Contract.builder().name(createAnOrganizationEntityDto.getEntityName())
                 .maxNumberOfSubEntities(createAnOrganizationEntityDto.getMaxNumberOfSubEntities())
-                .maxNumberOfAccounts(createAnOrganizationEntityDto.getMaxNumberOfAccounts())
                 .minimumReduction(createAnOrganizationEntityDto.getMinimumReduction())
                 .contractStatus(ContractStatus.IN_PROGRESS)
                 .singleSubscription(createAnOrganizationEntityDto.getOneSubscription())
+                .subscriptionPayedBySubEntities(createAnOrganizationEntityDto.getSubscriptionPayedBySubEntities())
                 .userContracts(userContract)
                 .build();
         userContract.setContract(contract);
@@ -220,10 +220,6 @@ public class ContractService {
     public byte[] update(Contract contract, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
         if (updateOrganizationEntityDto.getMaxNumberOfSubEntities() != null) {
             contract.setMaxNumberOfSubEntities(updateOrganizationEntityDto.getMaxNumberOfSubEntities());
-        }
-
-        if (updateOrganizationEntityDto.getMaxNumberOfAccounts() != null) {
-            contract.setMaxNumberOfAccounts(updateOrganizationEntityDto.getMaxNumberOfAccounts());
         }
 
         if (updateOrganizationEntityDto.getMinimumReduction() != null) {

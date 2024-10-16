@@ -11,7 +11,9 @@ public class CreateAnOrganizationEntityDto {
 
     private EntityType entityType;
 
-    private String entityName; // valid
+    private String entityName;
+
+    private Boolean subscriptionPayedBySubEntities;
 
     private EntityAddressDto entityAddressDto; // valid
 
