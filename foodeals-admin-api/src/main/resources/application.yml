@@ -31,7 +31,7 @@ app:
     jwt:
       secret-key: 883e807d7ee46bfd82464d697b0e6455d32b8406c6ee3a36e4a97de7ab976196
       # 1 day
-      expiration: 86400000
+      expiration: 604800000
       refresh-token:
         # 7 days
         expiration: 604800000

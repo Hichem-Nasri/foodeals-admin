@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -45,7 +46,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Activity create(ActivityRequest dto) {
-        Activity activity = Activity.builder().name(dto.name()).build();
+        Activity activity = Activity.builder().name(dto.name().toLowerCase()).build();
         return this.repository.save(activity);
     }
 
@@ -54,8 +55,8 @@ public class ActivityServiceImpl implements ActivityService {
         Activity activity = repository.findById(id)
                 .orElseThrow(() -> new ActivityNotFoundException(id));
 
-        activity.setName(dto.name());
-        return activity;
+        activity.setName(dto.name().toLowerCase());
+        return this.repository.save(activity);
     }
 
     @Override
@@ -68,12 +69,12 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Set<Activity> getActivitiesByName(List<String>  activitiesNames) {
-        return this.repository.findByNameIn(activitiesNames);
+        return this.repository.findByNameIn(activitiesNames.stream().map(String::toLowerCase).collect(Collectors.toList()));
     }
 
     @Override
     public Activity getActivityByName(String name) {
-        return this.repository.findByName(name);
+        return this.repository.findByName(name.toLowerCase());
     }
 
     @Override
