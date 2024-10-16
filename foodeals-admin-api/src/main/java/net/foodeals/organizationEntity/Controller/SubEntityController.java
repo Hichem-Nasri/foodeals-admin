@@ -3,6 +3,7 @@ package net.foodeals.organizationEntity.Controller;
 import lombok.AllArgsConstructor;
 import net.foodeals.organizationEntity.application.dtos.responses.AssociationsSubEntitiesDto;
 import net.foodeals.organizationEntity.application.dtos.responses.AssociationsDto;
+import net.foodeals.organizationEntity.application.dtos.responses.PartnerSubEntityDto;
 import net.foodeals.organizationEntity.application.services.SubEntityService;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import org.modelmapper.ModelMapper;
@@ -27,5 +28,12 @@ public class SubEntityController {
         Page<SubEntity> subEntities = this.subEntityService.getFoodBankSubEntities(pageable, id);
         Page<AssociationsSubEntitiesDto> associationsSubEntitiesDtos = subEntities.map(subEntity -> this.mapper.map(subEntity, AssociationsSubEntitiesDto.class));
         return new ResponseEntity<Page<AssociationsSubEntitiesDto>>(associationsSubEntitiesDtos, HttpStatus.OK);
+    }
+
+    @GetMapping("/partners/{id}")
+    public ResponseEntity<Page<PartnerSubEntityDto>> partnerSubEntities(Pageable pageable, @PathVariable("id") UUID id) {
+        Page<SubEntity> subEntities = this.subEntityService.partnerSubEntities(pageable, id);
+        Page<PartnerSubEntityDto> partnerSubEntityDtos = subEntities.map(subEntity -> this.mapper.map(subEntity, PartnerSubEntityDto.class));
+        return new ResponseEntity<Page<PartnerSubEntityDto>>(partnerSubEntityDtos, HttpStatus.OK);
     }
 }

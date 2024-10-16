@@ -10,16 +10,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
-public class OrganizationEntityDto {
+public class PartnerSubEntityDto {
     private UUID id;
 
     private Long offers;
 
     private Long orders;
+
     private Long users;
 
-    private Long subEntities;
-    private EntityType type;
+    private String reference;
+
     private String city;
 
     private List<String> solutions;
@@ -27,8 +28,6 @@ public class OrganizationEntityDto {
     private String createdAt;
 
     private PartnerInfoDto partnerInfoDto;
-
-    private ContractStatus contractStatus;
 
     private ContactDto contactDto;
 }

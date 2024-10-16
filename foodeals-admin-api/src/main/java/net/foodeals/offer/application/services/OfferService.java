@@ -7,4 +7,6 @@ import net.foodeals.offer.domain.entities.Offer;
 import java.util.UUID;
 
 public interface OfferService extends CrudService<Offer, UUID, OfferRequest> {
+    Long countByPublisherId(UUID id);
+    Long countOrdersByPublisherInfoId(UUID publisherId);
 }

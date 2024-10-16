@@ -8,9 +8,11 @@ import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.offer.domain.entities.DonorInfo;
+import net.foodeals.offer.domain.entities.PublisherI;
 import net.foodeals.offer.domain.entities.ReceiverInfo;
 import net.foodeals.offer.domain.enums.DonationReceiverType;
 import net.foodeals.offer.domain.enums.DonorType;
+import net.foodeals.offer.domain.enums.PublisherType;
 import net.foodeals.order.domain.entities.Coupon;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
@@ -28,7 +30,7 @@ import java.util.*;
 @Setter
 @Builder
 @AllArgsConstructor
-public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, ReceiverInfo {
+public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, ReceiverInfo, PublisherI {
 
     @Id
     @GeneratedValue
@@ -51,6 +53,10 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
     private OrganizationEntity organizationEntity;
+
+    @Builder.Default
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Contact> contacts = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL)
     private Set<Activity> activities = new HashSet<>();
@@ -80,6 +86,8 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     @ManyToMany(cascade = CascadeType.ALL)
     private Set<Solution> solutions = new HashSet<>();
 
+    private String reference;
+
     public SubEntity() {
     }
 
@@ -87,6 +95,14 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     public UUID getId() {
         return this.id;
     }
+
+    @Override
+    public PublisherType getPublisherType() {
+        return switch (this.type) {
+            case SubEntityType.PARTNER_SB -> PublisherType.PARTNER_SB;
+            case SubEntityType.FOOD_BANK_SB -> PublisherType.FOOD_BANK_SB;
+            default -> null;
+        };    }
 
     @Override
     public DonationReceiverType getReceiverType() {

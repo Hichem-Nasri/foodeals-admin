@@ -9,9 +9,11 @@ import net.foodeals.delivery.domain.entities.CoveredZones;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.offer.domain.entities.DonorInfo;
+import net.foodeals.offer.domain.entities.PublisherI;
 import net.foodeals.offer.domain.entities.ReceiverInfo;
 import net.foodeals.offer.domain.enums.DonationReceiverType;
 import net.foodeals.offer.domain.enums.DonorType;
+import net.foodeals.offer.domain.enums.PublisherType;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Payment;
@@ -28,7 +30,7 @@ import java.util.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInfo, ReceiverInfo {
+public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInfo, ReceiverInfo, PublisherI {
 
     @Id
     @GeneratedValue
@@ -47,7 +49,7 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     private EntityType type;
 
     @Builder.Default
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubEntity> subEntities = new ArrayList<>();
 
     @ManyToMany(cascade = CascadeType.ALL)
@@ -116,6 +118,16 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
             case EntityType.PARTNER_WITH_SB -> DonorType.PARTNER_WITH_SB;
             case EntityType.NORMAL_PARTNER -> DonorType.NORMAL_PARTNER;
             case EntityType.FOOD_BANK -> DonorType.FOOD_BANK;
+            default -> null;
+        };
+    }
+
+    @Override
+    public PublisherType getPublisherType() {
+        return switch (this.type) {
+            case EntityType.PARTNER_WITH_SB -> PublisherType.PARTNER_WITH_SB;
+            case EntityType.NORMAL_PARTNER -> PublisherType.NORMAL_PARTNER;
+            case EntityType.FOOD_BANK -> PublisherType.FOOD_BANK;
             default -> null;
         };
     }

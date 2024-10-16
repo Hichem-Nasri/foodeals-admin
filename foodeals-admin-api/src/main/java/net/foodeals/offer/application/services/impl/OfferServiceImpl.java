@@ -136,4 +136,14 @@ class OfferServiceImpl implements OfferService {
 
         offerRepository.softDelete(id);
     }
+
+    @Override
+    public Long countByPublisherId(UUID id) {
+        return offerRepository.countByPublisherInfoId(id);
+    }
+
+    @Override
+    public Long countOrdersByPublisherInfoId(UUID publisherId) {
+        return offerRepository.countOrdersByPublisherInfoId(publisherId);
+    }
 }
