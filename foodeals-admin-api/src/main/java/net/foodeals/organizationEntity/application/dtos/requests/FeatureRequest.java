@@ -1,4 +1,7 @@
 package net.foodeals.organizationEntity.application.dtos.requests;
 
-public record FeatureRequest(String name) {
+import net.foodeals.processors.annotations.Processable;
+
+public record FeatureRequest(
+        @Processable String name) {
 }

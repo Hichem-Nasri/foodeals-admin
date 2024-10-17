@@ -1,15 +1,19 @@
 package net.foodeals.organizationEntity.application.dtos.requests;
 
 import lombok.Data;
+import net.foodeals.processors.annotations.Processable;
 
 import java.util.List;
 
 @Data
 public class CoveredZonesDto {
 
+    @Processable
     private String country;
 
+    @Processable
     private String city;
 
+    @Processable
     private List<String> regions;
 }

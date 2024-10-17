@@ -1,4 +1,10 @@
 package net.foodeals.user.application.dtos.requests;
 
-public record UserAddress(String country, String city, String region) {
+import net.foodeals.processors.annotations.Processable;
+
+public record UserAddress(
+        @Processable String country,
+        @Processable String city,
+        @Processable String region
+) {
 }

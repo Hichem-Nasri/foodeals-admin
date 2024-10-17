@@ -23,6 +23,7 @@ import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
@@ -76,7 +77,7 @@ public class OrganizationEntityService {
         this.organizationEntityRepository.softDelete(organizationEntity.getId());
     }
 
-    public UUID createAnewOrganizationEntity(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
+    public OrganizationEntity createAnewOrganizationEntity(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
         AddressRequest addressRequest = new AddressRequest(createAnOrganizationEntityDto.getEntityAddressDto().getCountry(), createAnOrganizationEntityDto.getEntityAddressDto().getAddress(), createAnOrganizationEntityDto.getEntityAddressDto().getCity(), createAnOrganizationEntityDto.getEntityAddressDto().getRegion(), createAnOrganizationEntityDto.getEntityAddressDto().getIframe());
         Address address = this.addressService.create(addressRequest);
         Contact contact = Contact.builder().name(createAnOrganizationEntityDto.getContactDto().getName())
@@ -110,7 +111,7 @@ public class OrganizationEntityService {
                 break;
             default:
         }
-        return organizationEntity.getId();
+        return organizationEntity;
     }
 
     private OrganizationEntity saveDeliveryPartner(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) {
@@ -169,40 +170,58 @@ public class OrganizationEntityService {
     }
 
     @Transactional
-    public UUID updateOrganizationEntity(UUID id, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
+    public OrganizationEntity updateOrganizationEntity(UUID id, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
 
         OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
 
         if (organizationEntity == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "organization Entity not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "organization Entity not found with id " + id.toString());
         }
 
         Contract contract = organizationEntity.getContract();
 
-        if (updateOrganizationEntityDto.getEntityName() != null) {
-            organizationEntity.setName(updateOrganizationEntityDto.getEntityName());
-        }
+        Contact contact = organizationEntity.getContacts().getFirst();
+        contact = this.contactsService.update(contact, updateOrganizationEntityDto.getContactDto());
+
+        organizationEntity.setName(updateOrganizationEntityDto.getEntityName());
         Address address = organizationEntity.getAddress();
-        if (updateOrganizationEntityDto.getEntityAddressDto() != null) {
-            address = this.addressService.updateContractAddress(address, updateOrganizationEntityDto.getEntityAddressDto());
-            organizationEntity.setAddress(address);
-        }
+        address = this.addressService.updateContractAddress(address, updateOrganizationEntityDto.getEntityAddressDto());
         Set<Solution> solutions = this.solutionService.getSolutionsByNames(updateOrganizationEntityDto.getSolutions());
         Set<Solution> partnerSolutions = new HashSet<>(organizationEntity.getSolutions());
+        OrganizationEntity finalOrganizationEntity = organizationEntity;
         partnerSolutions.stream().map((Solution solution) -> {
                     if (!updateOrganizationEntityDto.getSolutions().contains(solution.getName())) {
-                        solution.getOrganizationEntities().remove(organizationEntity);
-                        organizationEntity.getSolutions().remove(solution);
+                        solution.getOrganizationEntities().remove(finalOrganizationEntity);
+                        finalOrganizationEntity.getSolutions().remove(solution);
                         this.solutionService.save(solution);
                     }
                     return solution;
                 }).toList();
+        OrganizationEntity finalOrganizationEntity1 = organizationEntity;
         solutions.stream().map(solution -> {
-            solution.getOrganizationEntities().add(organizationEntity);
-            organizationEntity.getSolutions().add(solution);
+            solution.getOrganizationEntities().add(finalOrganizationEntity1);
+            finalOrganizationEntity1.getSolutions().add(solution);
             this.solutionService.save(solution);
             return solution;
         }).toList();
+        switch (organizationEntity.getType()) {
+            case EntityType.PARTNER_WITH_SB:
+            case EntityType.NORMAL_PARTNER:
+                organizationEntity = updatePartner(updateOrganizationEntityDto, organizationEntity);
+                break;
+            case EntityType.DELIVERY_PARTNER :
+                organizationEntity = updateDeliveryPartner(updateOrganizationEntityDto, organizationEntity);
+                break;
+            default:
+        }
+        return organizationEntity;
+    }
+
+    private OrganizationEntity updateDeliveryPartner(UpdateOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) {
+        return  null;
+    }
+
+    private OrganizationEntity updatePartner(UpdateOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
         List<String> activitiesNames = updateOrganizationEntityDto.getActivities();
         Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
         Set<Activity> activitiesOfPartner = new HashSet<>(organizationEntity.getActivities());
@@ -223,24 +242,16 @@ public class OrganizationEntityService {
             return activity;
         }).toList();
 
-        if (updateOrganizationEntityDto.getCommercialNumber() != null) {
-            organizationEntity.setCommercialNumber(updateOrganizationEntityDto.getCommercialNumber());
-        }
-        Contact contact = organizationEntity.getContacts().getFirst();
-        if (updateOrganizationEntityDto.getContactDto() != null) {
-            contact = this.contactsService.update(contact, updateOrganizationEntityDto.getContactDto());
-            organizationEntity.getContacts().set(0, contact);
-        }
-
+        organizationEntity.setCommercialNumber(updateOrganizationEntityDto.getCommercialNumber());
         if (updateOrganizationEntityDto.getEntityBankInformationDto() != null) {
             BankInformation bankInformation = organizationEntity.getBankInformation();
             bankInformation = this.bankInformationService.update(bankInformation, updateOrganizationEntityDto.getEntityBankInformationDto());
             organizationEntity.setBankInformation(bankInformation);
         }
+        Contract contract = organizationEntity.getContract();
         this.organizationEntityRepository.save(organizationEntity);
-        contact.setOrganizationEntity(organizationEntity);
         this.contractService.update(contract, updateOrganizationEntityDto);
-        return organizationEntity.getId();
+        return this.organizationEntityRepository.save(organizationEntity);
     }
 
     public OrganizationEntity getOrganizationEntityById(UUID id) {
