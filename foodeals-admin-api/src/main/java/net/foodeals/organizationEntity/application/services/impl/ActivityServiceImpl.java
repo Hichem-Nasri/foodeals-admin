@@ -7,6 +7,7 @@ import net.foodeals.organizationEntity.application.services.ActivityService;
 import net.foodeals.organizationEntity.domain.entities.Activity;
 import net.foodeals.organizationEntity.domain.exceptions.ActivityNotFoundException;
 import net.foodeals.organizationEntity.domain.repositories.ActivityRepository;
+import net.foodeals.processors.classes.DtoProcessor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 public class ActivityServiceImpl implements ActivityService {
 
     private final ActivityRepository repository;
+    private final DtoProcessor dtoProcessor;
 
     @Override
     public List<Activity> findAll() {

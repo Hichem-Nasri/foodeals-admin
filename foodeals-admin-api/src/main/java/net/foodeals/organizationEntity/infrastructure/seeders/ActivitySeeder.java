@@ -18,10 +18,10 @@ public class ActivitySeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         if (repository.count() == 0) {
             repository.saveAll(List.of(
-                    Activity.create("Activity 1"),
-                    Activity.create("Activity 2"),
-                    Activity.create("Activity 3"),
-                    Activity.create("Activity 4")
+                    Activity.create("Activity 1".toLowerCase()),
+                    Activity.create("Activity 2".toLowerCase()),
+                    Activity.create("Activity 3".toLowerCase()),
+                    Activity.create("Activity 4".toLowerCase())
             ));
         }
     }

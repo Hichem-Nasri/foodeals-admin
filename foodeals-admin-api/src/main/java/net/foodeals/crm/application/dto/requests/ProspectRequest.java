@@ -19,6 +19,7 @@ public record ProspectRequest(
         @NotNull Integer manager_id,
         @NotNull AddressDto address,
         ProspectStatus status,
-        @Nullable @Processable List<String> solutions
+        @Nullable @Processable List<String> solutions,
+        @Nullable EventRequest event
 ) {
 }

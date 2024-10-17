@@ -48,7 +48,7 @@ class RoleServiceImpl implements RoleService {
 
     @Override
     public Role findByName(String name) {
-        return repository.findByName(name)
+        return repository.findByName(name.toUpperCase())
                 .orElseThrow(() -> new RoleNotFoundException(name));
     }
 

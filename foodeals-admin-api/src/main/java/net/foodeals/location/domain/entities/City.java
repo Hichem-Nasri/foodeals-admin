@@ -30,6 +30,7 @@ public class City extends AbstractEntity<UUID> {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Country country;
 
+    @Builder.Default
     @OneToMany(mappedBy = "city", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private  List<Region> regions = new ArrayList<>();
 }
