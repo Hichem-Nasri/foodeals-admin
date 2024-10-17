@@ -98,18 +98,12 @@ class AddressServiceImpl implements AddressService {
 
     @Transactional
     public Address updateContractAddress(Address address, EntityAddressDto entityAddressDto) {
-        if (entityAddressDto.getAddress() != null) {
             address.setAddress(entityAddressDto.getAddress());
-        }
-        if (entityAddressDto.getIframe() != null) {
             address.setIframe(entityAddressDto.getIframe());
-        }
-        if (entityAddressDto.getCountry() != null) {
             Country country = this.countryService.findByName(entityAddressDto.getCountry().toLowerCase());
             City city = country.getCities().stream().filter(c -> c.getName().equals(entityAddressDto.getCity().toLowerCase())).findFirst().get();
             Region region = city.getRegions().stream().filter(r -> r.getName().equals(entityAddressDto.getRegion().toLowerCase())).findFirst().get();
             address.setRegion(region);
-        }
 
         return this.repository.save(address);
     }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class SolutionService {
@@ -18,7 +19,7 @@ public class SolutionService {
     }
 
     public Set<Solution> getSolutionsByNames(List<String> solutionsNames) {
-        return this.solutionRepository.findByNameIn(solutionsNames);
+        return this.solutionRepository.findByNameIn(solutionsNames.stream().map(String::toLowerCase).collect(Collectors.toList()));
     }
 
     public Solution save(Solution solution) {
@@ -26,7 +27,7 @@ public class SolutionService {
     }
 
     public Solution findByName(String solution) {
-        return this.solutionRepository.findByName(solution);
+        return this.solutionRepository.findByName(solution.toLowerCase());
     }
 
     public List<Solution> saveAll(Set<Solution> solutions) {

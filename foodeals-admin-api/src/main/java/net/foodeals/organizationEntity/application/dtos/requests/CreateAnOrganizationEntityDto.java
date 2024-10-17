@@ -3,6 +3,7 @@ package net.foodeals.organizationEntity.application.dtos.requests;
 import lombok.Data;
 import net.foodeals.contract.application.DTo.upload.SolutionsContractDto;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
+import net.foodeals.processors.annotations.Processable;
 
 import java.util.List;
 
@@ -17,8 +18,10 @@ public class CreateAnOrganizationEntityDto {
 
     private EntityAddressDto entityAddressDto; // valid
 
+    @Processable
     private List<String> solutions;
 
+    @Processable
     private List<String> features;
 
     private String commercialNumber;
@@ -27,7 +30,8 @@ public class CreateAnOrganizationEntityDto {
 
     private ContactDto contactDto; // valid
 
-    private List<String> activities; // valid
+    @Processable
+    private List<String> activities;
 
     private Integer maxNumberOfSubEntities; // valid
 

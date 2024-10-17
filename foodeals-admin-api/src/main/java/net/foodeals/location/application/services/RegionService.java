@@ -8,4 +8,5 @@ import net.foodeals.location.domain.entities.Region;
 import java.util.UUID;
 
 public interface RegionService extends CrudService<Region, UUID, RegionRequest> {
+    Long count();
 }

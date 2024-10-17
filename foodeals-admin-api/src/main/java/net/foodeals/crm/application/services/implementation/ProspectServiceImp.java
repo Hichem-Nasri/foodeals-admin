@@ -241,6 +241,11 @@ public final class ProspectServiceImp implements ProspectService {
 
         final User creator = this.userService.findByEmail(email);
 
+        if (dto.event() != null) {
+            Event event = this.eventService.create(dto.event());
+            prospect.getEvents().add(event);
+        }
+
         prospect.setLead(manager);
         prospect.setCreator(creator);
 

@@ -92,4 +92,9 @@ public class RegionServiceImpl implements RegionService {
 
         this.regionRepository.softDelete(region.getId());
     }
+
+    @Override
+    public Long count() {
+        return this.regionRepository.count();
+    }
 }

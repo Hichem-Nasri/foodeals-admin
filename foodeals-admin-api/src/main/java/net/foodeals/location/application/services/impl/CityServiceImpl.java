@@ -100,4 +100,9 @@ class CityServiceImpl implements CityService {
                 .orElseThrow(() -> new CityNotFoundException(id));
         return city.getRegions();
     }
+
+    @Override
+    public Long count() {
+        return this.repository.count();
+    }
 }

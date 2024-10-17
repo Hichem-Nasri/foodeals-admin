@@ -15,4 +15,6 @@ public interface CityService extends CrudService<City, UUID, CityRequest> {
     City save(City city);
 
     List<Region> getRegions(UUID id);
+
+    Long count();
 }

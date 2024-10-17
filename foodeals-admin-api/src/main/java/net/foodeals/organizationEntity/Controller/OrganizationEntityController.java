@@ -33,8 +33,8 @@ public class OrganizationEntityController {
     }
 
     @PostMapping("/partners/create")
-    public ResponseEntity<UUID> addAnOrganizationEntity(@RequestBody CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
-            return new ResponseEntity<>(this.organizationEntityService.createAnewOrganizationEntity(createAnOrganizationEntityDto), HttpStatus.CREATED);
+    public ResponseEntity<OrganizationEntityDto> addAnOrganizationEntity(@RequestBody CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
+            return new ResponseEntity<>(this.modelMapper.mapOrganizationEntity(this.organizationEntityService.createAnewOrganizationEntity(createAnOrganizationEntityDto)), HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/associations/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -43,8 +43,8 @@ public class OrganizationEntityController {
     }
 
     @PutMapping("/partners/edit/{id}")
-    public ResponseEntity<UUID> updateOrganizationEntity(@RequestBody UpdateOrganizationEntityDto updateOrganizationEntityDto, @PathVariable("id") UUID id) throws DocumentException, IOException {
-            return new ResponseEntity<>(this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto), HttpStatus.OK);
+    public ResponseEntity<OrganizationEntityDto> updateOrganizationEntity(@RequestBody UpdateOrganizationEntityDto updateOrganizationEntityDto, @PathVariable("id") UUID id) throws DocumentException, IOException {
+            return new ResponseEntity<>(this.modelMapper.mapOrganizationEntity(this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto)), HttpStatus.OK);
     }
 
     @GetMapping("/partners/{id}")

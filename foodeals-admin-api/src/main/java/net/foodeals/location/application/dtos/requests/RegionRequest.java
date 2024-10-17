@@ -1,9 +1,11 @@
 package net.foodeals.location.application.dtos.requests;
 
 import jakarta.validation.constraints.NotBlank;
+import net.foodeals.processors.annotations.Processable;
 
-import java.util.UUID;
-
-public record RegionRequest(@NotBlank String country, @NotBlank String city,
-                            @NotBlank String name) {
+public record RegionRequest(
+        @NotBlank @Processable String country,
+        @NotBlank @Processable String city,
+        @NotBlank @Processable String name
+) {
 }

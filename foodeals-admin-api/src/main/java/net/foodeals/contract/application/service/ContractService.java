@@ -2,6 +2,7 @@ package net.foodeals.contract.application.service;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import net.foodeals.contract.application.DTo.upload.SolutionsContractDto;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.contract.domain.entities.SolutionContract;
 import net.foodeals.contract.domain.entities.UserContract;
@@ -29,6 +30,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ContractService {
@@ -85,40 +87,66 @@ public class ContractService {
     }
 
     public byte[] generateContract(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws IOException, DocumentException {
-        String templatePath = "contract.html";
-//        String subActivities =  createAnOrganizationEntityDto.getActivities().subList(1, createAnOrganizationEntityDto.getActivities().size())
-//                .stream().collect(Collectors.joining(" , "));
-//
-//        LocalDate currentDate = LocalDate.now();
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH);
-//        String formattedDate = currentDate.format(formatter);
-//
+        System.out.println(createAnOrganizationEntityDto.getActivities().getFirst());
+        String templatePath = "resources/contract.html";
+       String activities =  createAnOrganizationEntityDto.getActivities()
+                  .stream().collect(Collectors.joining(" , "));
+        String features = createAnOrganizationEntityDto.getFeatures().stream().filter(f -> f.equals("seller_pro") || f.equals("buyer_pro")).collect(Collectors.joining(" , "));
+        SolutionsContractDto proMarket = createAnOrganizationEntityDto.getSolutionsContractDto().
+                stream().filter(s -> s.getSolution().equals("pro_market"))
+                .findFirst()
+                .orElse(null);
+
+        SolutionsContractDto proDonate = createAnOrganizationEntityDto.getSolutionsContractDto()
+                .stream()
+                .filter(s -> s.getSolution().equals("pro_donate"))
+                .findFirst()
+                .orElse(null);
+
+        SolutionsContractDto proDlc = createAnOrganizationEntityDto.getSolutionsContractDto()
+                .stream()
+                .filter(s -> s.getSolution().equals("pro_dlc"))
+                .findFirst()
+                .orElse(null);
+
+
+
+        LocalDate currentDate = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH);
+        String formattedDate = currentDate.format(formatter);
+
         Map<String, String> placeholders = new HashMap<>();
-//        placeholders.put("[raison sociale du partenaire]", createAnOrganizationEntityDto.getEntityName());
-//        placeholders.put("[Adresse du partenaire]", createAnOrganizationEntityDto.getEntityAddressDto().getAddress());
-//        placeholders.put("[numéro du registre de commerce]", createAnOrganizationEntityDto.getCommercialNumber());
-//        placeholders.put("[nom du gérant/responsable]", createAnOrganizationEntityDto.getEntityContactDto().getName().firstName() + " " + createAnOrganizationEntityDto.getEntityContactDto().getName().lastName());
-//        placeholders.put("[Catégorie]", createAnOrganizationEntityDto.getActivities().get(0));
-//        placeholders.put("[sous-catégorie]", subActivities);
-//        placeholders.put("[nombre de points de vente]", createAnOrganizationEntityDto.getMaxNumberOfSubEntities().toString());
-//        placeholders.put("[nombre maximum de comptes autorisés]", createAnOrganizationEntityDto.getMaxNumberOfAccounts().toString());
-//        placeholders.put("[taux de réduction]", "15%");
-//        placeholders.put("[Taux de commission/carte]", "2.5%");
-//        placeholders.put("[Taux de commission/espèce]", "3%");
-//        placeholders.put("[montant de l'abonnement]", "500 MAD");
-//        placeholders.put("[le nombre d'échéances]", "12");
-//        placeholders.put("[nom du bénéficiaire]", createAnOrganizationEntityDto.getEntityBankInformationDto().getBeneficiaryName());
-//        placeholders.put("[Banque]", createAnOrganizationEntityDto.getEntityBankInformationDto().getBankName());
-//        placeholders.put("[RIB]", createAnOrganizationEntityDto.getEntityBankInformationDto().getRib());
-//        placeholders.put("[date]", formattedDate);
-//        placeholders.put("[nom du signataire]", createAnOrganizationEntityDto.getEntityContactDto().getName().firstName() + " " + createAnOrganizationEntityDto.getEntityContactDto().getName().lastName());
-//        placeholders.put("[responsibility]", "Manager");
+        placeholders.put("[raison sociale du partenaire]", createAnOrganizationEntityDto.getEntityName());
+        placeholders.put("[Adresse du partenaire]", createAnOrganizationEntityDto.getEntityAddressDto().getAddress());
+        placeholders.put("[numéro du registre de commerce]", createAnOrganizationEntityDto.getCommercialNumber());
+        placeholders.put("[nom du gérant/responsable]", createAnOrganizationEntityDto.getContactDto().getName().firstName() + " " + createAnOrganizationEntityDto.getContactDto().getName().lastName());
+        placeholders.put("[type]", activities);
+        placeholders.put("[type du partenaire (Vendeur Pro / Acheteur pro)]", features);
+        placeholders.put("[nombre de magasins]", createAnOrganizationEntityDto.getMaxNumberOfSubEntities().toString() + " magasin(s)");
+        placeholders.put("[nombre maximum de comptes autorisés]", "avec un maximum de " + createAnOrganizationEntityDto.getMaxNumberOfAccounts().toString() + " comptes");
+        placeholders.put("[taux de réduction]", createAnOrganizationEntityDto.getMinimumReduction().toString());
+        placeholders.put("[Taux de commission/carte]", proMarket != null ? proMarket.getContractCommissionDto().getWithCard().toString() : "");
+        placeholders.put("[Taux de commission/espèce]", proMarket != null ? proMarket.getContractCommissionDto().getWithCash().toString() : "");
+        placeholders.put("[montant de l'abonnement pro_donate]", proDonate != null  ? proDonate.getContractSubscriptionDto().getAnnualPayment().toString()  + "dh": "");
+        placeholders.put("[le nombre d’échéances pro_donate]", proDonate != null  ? proDonate.getContractSubscriptionDto().getNumberOfDueDates().toString() : "");
+
+        placeholders.put("[montant de l'abonnement pro_market]", proMarket != null ? proMarket.getContractSubscriptionDto().getAnnualPayment().toString() + "dh" : "");
+        placeholders.put("[le nombre d’échéances pro_market]", proMarket != null ? proMarket.getContractSubscriptionDto().getNumberOfDueDates().toString() :  "");
+
+        placeholders.put("[montant de l'abonnement pro_dlc]", proDlc != null  ? proDlc.getContractSubscriptionDto().getAnnualPayment().toString() + "dh" : "");
+        placeholders.put("[le nombre d’échéances pro_dlc]", proDlc != null  ? proDlc.getContractSubscriptionDto().getNumberOfDueDates().toString()  : "");
+        placeholders.put("[nom du bénéficiaire]", createAnOrganizationEntityDto.getEntityBankInformationDto().getBeneficiaryName());
+        placeholders.put("[Banque]", createAnOrganizationEntityDto.getEntityBankInformationDto().getBankName());
+        placeholders.put("[RIB]", createAnOrganizationEntityDto.getEntityBankInformationDto().getRib());
+        placeholders.put("[date]", formattedDate);
+        placeholders.put("[nom du signataire]", createAnOrganizationEntityDto.getContactDto().getName().firstName() + " " + createAnOrganizationEntityDto.getContactDto().getName().lastName());
+        placeholders.put("[status]", "Manager");
 
         String template = new String(Files.readAllBytes(Paths.get(templatePath)));
 
-//        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-//            template = template.replace(entry.getKey(), entry.getValue());
-//        }
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            template = template.replace(entry.getKey(), entry.getValue());
+        }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ITextRenderer renderer = new ITextRenderer();
@@ -189,7 +217,7 @@ public class ContractService {
 //        placeholders.put("[Taux de commission/carte]", "2.5%");
 //        placeholders.put("[Taux de commission/espèce]", "3%");
 //        placeholders.put("[montant de l'abonnement]", "500 MAD");
-//        placeholders.put("[le nombre d'échéances]", "12");
+//        placeholders.put("[le le nombre d’échéances]", "12");
 //        placeholders.put("[nom du bénéficiaire]", contract.getOrganizationEntity().getBankInformation().getBeneficiaryName());
 //        placeholders.put("[Banque]", contract.getOrganizationEntity().getBankInformation().getBankName());
 //        placeholders.put("[RIB]", contract.getOrganizationEntity().getBankInformation().getRib());
@@ -217,7 +245,7 @@ public class ContractService {
     }
 
     @Transactional
-    public byte[] update(Contract contract, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
+    public void update(Contract contract, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
         if (updateOrganizationEntityDto.getMaxNumberOfSubEntities() != null) {
             contract.setMaxNumberOfSubEntities(updateOrganizationEntityDto.getMaxNumberOfSubEntities());
         }
@@ -226,15 +254,14 @@ public class ContractService {
             contract.setMinimumReduction(updateOrganizationEntityDto.getMinimumReduction());
         }
 
-//        if (updateOrganizationEntityDto.getManagerId() != null && updateOrganizationEntityDto.getManagerId() != contract.getUserContracts().getUser().getId()) {
-//            this.userContractService.updateUserContract(contract.getUserContracts(), updateOrganizationEntityDto);
-//        }
+        if (updateOrganizationEntityDto.getManagerId() != null && updateOrganizationEntityDto.getManagerId() != contract.getUserContracts().getUser().getId()) {
+            this.userContractService.updateUserContract(contract.getUserContracts(), updateOrganizationEntityDto);
+        }
 
         this.solutionContractService.update(contract, updateOrganizationEntityDto);
         byte[] document = this.updateDocument(contract);
         contract.setDocument(document);
         this.contractRepository.save(contract);
-        return document;
     }
 
     public byte[] getContractDocument(UUID id) {

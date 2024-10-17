@@ -43,10 +43,10 @@ public class UserContractService {
     }
 
     public UserContract updateUserContract(UserContract userContract, UpdateOrganizationEntityDto updateOrganizationEntityDto) {
-        if (userContract.getUser().getId() != updateOrganizationEntityDto.getManagerId()) {
+        User oldUser = userContract.getUser();
+        oldUser.getUserContracts().remove(userContract);
             User user = this.userService.findById(updateOrganizationEntityDto.getManagerId());
             userContract.setUser(user);
-        }
         return this.userContractRepository.save(userContract);
     }
 }
