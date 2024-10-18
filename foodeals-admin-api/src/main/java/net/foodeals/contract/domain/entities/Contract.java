@@ -60,5 +60,5 @@ public class Contract extends AbstractEntity<UUID> {
 
     private Integer maxNumberOfAccounts;
 
-    private boolean subscriptionPayedBySubEntities;
+    private boolean commissionPayedBySubEntities;
 }

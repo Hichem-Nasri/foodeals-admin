@@ -8,6 +8,7 @@ import net.foodeals.organizationEntity.application.dtos.responses.DeliveryPartne
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityFormData;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.infrastructure.seeders.ModelMapper.OrganizationEntityModelMapper;
@@ -45,6 +46,14 @@ public class OrganizationEntityController {
     @PutMapping("/partners/edit/{id}")
     public ResponseEntity<OrganizationEntityDto> updateOrganizationEntity(@RequestBody UpdateOrganizationEntityDto updateOrganizationEntityDto, @PathVariable("id") UUID id) throws DocumentException, IOException {
             return new ResponseEntity<>(this.modelMapper.mapOrganizationEntity(this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto)), HttpStatus.OK);
+    }
+
+    @GetMapping("/partners/form-data/{id}")
+    @Transactional
+    public ResponseEntity<OrganizationEntityFormData> getFormData(@PathVariable("id") UUID id) {
+        OrganizationEntity organizationEntity = this.organizationEntityService.getOrganizationEntityById(id);
+        OrganizationEntityFormData organizationEntityDto = this.modelMapper.convertToFormData(organizationEntity);
+        return new ResponseEntity<OrganizationEntityFormData>(organizationEntityDto, HttpStatus.OK);
     }
 
     @GetMapping("/partners/{id}")

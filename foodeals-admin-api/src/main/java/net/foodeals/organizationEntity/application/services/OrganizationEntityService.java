@@ -24,6 +24,7 @@ import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganiz
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityFormData;
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;

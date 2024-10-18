@@ -13,7 +13,7 @@ public class UpdateOrganizationEntityDto {
 
     private String entityName;
 
-    private Boolean subscriptionPayedBySubEntities;
+    private Boolean commissionPayedBySubEntities;
 
     private EntityAddressDto entityAddressDto; // valid
 

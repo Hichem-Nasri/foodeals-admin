@@ -75,7 +75,7 @@ public class ContractService {
                 .maxNumberOfAccounts(createAnOrganizationEntityDto.getMaxNumberOfAccounts())
                 .contractStatus(ContractStatus.IN_PROGRESS)
                 .singleSubscription(createAnOrganizationEntityDto.getOneSubscription())
-                .subscriptionPayedBySubEntities(createAnOrganizationEntityDto.getSubscriptionPayedBySubEntities())
+                .commissionPayedBySubEntities(createAnOrganizationEntityDto.getCommissionPayedBySubEntities())
                 .userContracts(userContract)
                 .build();
         userContract.setContract(contract);
