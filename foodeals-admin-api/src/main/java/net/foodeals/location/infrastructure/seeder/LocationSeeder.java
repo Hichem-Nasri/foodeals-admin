@@ -32,19 +32,21 @@ public class LocationSeeder {
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
     public void seedData() {
-        if (this.countryService.count() == 0) {
+        if (!this.countryService.existsByName("morocco")) {
             CountryRequest countryRequest = new CountryRequest("Morocco");
             this.countryService.create(countryRequest);
             System.out.println("Country created");
         }
 
-        if (this.cityService.count() == 0) {
+// Check if city exists and create if not
+        if (!this.cityService.existsByName("casablanca")) {
             CityRequest cityRequest = new CityRequest("Morocco", "Casablanca");
             this.cityService.create(cityRequest);
             System.out.println("City created");
         }
 
-        if (this.regionService.count() == 0) {
+// Check if region exists and create if not
+        if (!this.regionService.existsByName("maarif")) {
             RegionRequest regionRequest = new RegionRequest("Morocco", "Casablanca", "Maarif");
             this.regionService.create(regionRequest);
             entityManager.flush();

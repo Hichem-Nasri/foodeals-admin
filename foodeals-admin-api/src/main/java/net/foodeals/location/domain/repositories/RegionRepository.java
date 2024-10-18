@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface RegionRepository extends BaseRepository<Region, UUID> {
     Region findByName(String name);
+    boolean existsByName(String name);
 }

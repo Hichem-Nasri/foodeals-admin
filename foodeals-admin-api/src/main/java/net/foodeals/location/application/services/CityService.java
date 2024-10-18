@@ -17,4 +17,6 @@ public interface CityService extends CrudService<City, UUID, CityRequest> {
     List<Region> getRegions(UUID id);
 
     Long count();
+
+    boolean existsByName(String name);
 }

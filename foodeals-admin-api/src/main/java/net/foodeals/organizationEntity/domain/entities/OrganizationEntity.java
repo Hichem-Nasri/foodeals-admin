@@ -52,14 +52,14 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubEntity> subEntities = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Activity> activities = new HashSet<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "organizationEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<User> users = new ArrayList<>();
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Solution> solutions = new HashSet<>();
 
     @Builder.Default
@@ -82,8 +82,7 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Contract contract;
 
-    @Builder.Default
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Features> features = new HashSet<>();
 
     @Builder.Default

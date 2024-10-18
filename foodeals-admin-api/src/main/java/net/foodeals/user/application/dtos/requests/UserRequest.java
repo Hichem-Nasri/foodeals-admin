@@ -14,7 +14,7 @@ public record UserRequest(
         @NotBlank String phone,
         @NotBlank String password,
         Boolean isEmailVerified,
-        @NotNull UUID roleId,
+        @NotNull String roleName,
         @Nullable UUID organizationEntityId,
         @Nullable UserAddress userAddress
 ) {

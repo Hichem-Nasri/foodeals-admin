@@ -96,5 +96,10 @@ class CountryServiceImpl implements CountryService {
                 .orElseThrow(() -> new CountryNotFoundException(id));
         return existingCountry.getCities();
     }
+
+    @Override
+    public boolean existsByName(String name) {
+        return repository.existsByName(name);
+    }
 }
 

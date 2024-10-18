@@ -15,6 +15,6 @@ public record RegisterRequest(
         @NotBlank String phone,
         @NotBlank String password,
         Boolean isEmailVerified,
-        @NotNull UUID roleId
+        @NotNull String roleName
 ) implements AuthRequest {
 }

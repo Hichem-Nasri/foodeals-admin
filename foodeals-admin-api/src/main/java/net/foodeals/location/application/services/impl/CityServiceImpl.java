@@ -105,4 +105,9 @@ class CityServiceImpl implements CityService {
     public Long count() {
         return this.repository.count();
     }
+
+    @Override
+    public boolean existsByName(String name) {
+        return repository.existsByName(name);
+    }
 }

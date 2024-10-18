@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface SolutionRepository extends JpaRepository<Solution, UUID> {
     Set<Solution> findByNameIn(List<String> solutionsNames);
     Solution    findByName(String name);
+
+    boolean existsByName(String name);
 }

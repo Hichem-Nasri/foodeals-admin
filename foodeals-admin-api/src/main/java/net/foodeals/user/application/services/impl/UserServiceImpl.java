@@ -99,7 +99,7 @@ class UserServiceImpl implements UserService {
     }
 
     private User mapRelationsAndEncodePassword(User user, UserRequest request) {
-        final Role role = roleService.findById(request.roleId());
+        final Role role = roleService.findByName(request.roleName());
         user.setRole(role)
                 .setPassword(passwordEncoder.encode(user.getPassword()));
         if (request.userAddress() != null) {

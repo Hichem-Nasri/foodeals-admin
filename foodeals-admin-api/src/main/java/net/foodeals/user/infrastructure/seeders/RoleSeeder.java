@@ -20,7 +20,7 @@ public class RoleSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        List<Role> roles =                     List.of(
+        List<Role> roles = List.of(
                 Role.create(UUID.fromString("d7d7a9c5-b153-4526-ac16-05f19bf97270"), "ADMIN"),
                 Role.create(UUID.randomUUID(), "SUPER_ADMIN"),
                 Role.create(UUID.randomUUID(), "MANAGER"),
@@ -29,19 +29,12 @@ public class RoleSeeder implements CommandLineRunner {
                 Role.create(UUID.randomUUID(), "DELIVERY_MAN"),
                 Role.create(UUID.randomUUID(), "LEAD")
         );
-        if (roleRepository.count() != roles.size()) {
-            roles = roleRepository.saveAll(roles);
 
-            // merge the updated entity
-            roles.forEach(role -> {
-                System.out.flush();
-                System.out.println("name -> " + role.getName() + " id -> "  + role.getId());
-            });
-
-            System.out.println("roles seeded");
-        } else {
-            System.out.println("------------------------------------------------------");
-            this.roleRepository.findAll().forEach(role ->  System.out.println("name -> " + role.getName() + " id -> " + role.getId()));
+        for (Role role : roles) {
+            if (!roleRepository.existsByName(role.getName())) {
+                roleRepository.save(role);
+            }
+            System.out.println("Role " + role.getName() + " " + role.getId());
         }
     }
 }

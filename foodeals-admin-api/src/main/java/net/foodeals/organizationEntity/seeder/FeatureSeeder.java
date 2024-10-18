@@ -22,16 +22,13 @@ public class FeatureSeeder {
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
     public void featureSeeder() {
-        if (this.featureRepository.count() == 0) {
-            Features feature = Features.builder().name("f1").build();
-            Features f2 = Features.builder().name("f2").build();
-            Features f3 = Features.builder().name("f3").build();
-            List<Features> featuresList = new ArrayList<>();
-            featuresList.add(feature);
-            featuresList.add(f2);
-            featuresList.add(f3);
-
-            this.featureRepository.saveAll(featuresList);
+        if (!this.featureRepository.existsByName("seller_pro")) {
+            Features features = Features.builder().name("seller_pro").build();
+            this.featureRepository.save(features);
+        }
+        if (!this.featureRepository.existsByName("buyer_pro")) {
+            Features f2 = Features.builder().name("buyer_pro").build();
+            this.featureRepository.save(f2);
         }
     }
 }

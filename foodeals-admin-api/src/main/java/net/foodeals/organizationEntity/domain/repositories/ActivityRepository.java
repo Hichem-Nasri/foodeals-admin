@@ -11,4 +11,6 @@ public interface ActivityRepository extends JpaRepository<Activity, UUID> {
 
     Set<Activity> findByNameIn(List<String> activitiesNames);
     Activity findByName(String name);
+
+    boolean existsByName(String s);
 }

@@ -27,7 +27,7 @@ public class UserContract extends AbstractEntity<UUID> {
     @JoinColumn(name = "user_id", nullable = false )
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "contract_id", nullable = false)
     private Contract contract;
 

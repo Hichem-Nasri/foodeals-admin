@@ -27,14 +27,25 @@ public class ActivityEntitySeeder {
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
     public void ActivitySeeder() {
-        if (this.activityRepository.count() == 0) {
-            Activity activity = Activity.builder().name("Activity 1")
+        if (!this.activityRepository.existsByName("Activity 1")) {
+            Activity activity1 = Activity.builder()
+                    .name("Activity 1")
                     .build();
-            Activity activity1 = Activity.builder().name("Activity 2")
+            this.activityRepository.save(activity1);
+        }
+
+        if (!this.activityRepository.existsByName("Activity 2")) {
+            Activity activity2 = Activity.builder()
+                    .name("Activity 2")
                     .build();
-            Activity activity2 = Activity.builder().name("Activity 3")
+            this.activityRepository.save(activity2);
+        }
+
+        if (!this.activityRepository.existsByName("Activity 3")) {
+            Activity activity3 = Activity.builder()
+                    .name("Activity 3")
                     .build();
-            this.activityRepository.saveAll(List.of(activity1, activity2, activity));
+            this.activityRepository.save(activity3);
         }
     }
 }

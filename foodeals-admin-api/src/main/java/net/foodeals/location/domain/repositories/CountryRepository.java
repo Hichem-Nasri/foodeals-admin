@@ -12,4 +12,5 @@ public interface CountryRepository extends BaseRepository<Country, UUID> {
     int countTotalCitiesByCountryName(@Param("countryName") String countryName);
 
     Country findByName(String name);
+    boolean existsByName(String name);
 }

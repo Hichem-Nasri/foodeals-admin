@@ -5,6 +5,7 @@ import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -23,5 +24,6 @@ public class Features extends AbstractEntity<UUID> {
     private String name;
 
     @ManyToMany(mappedBy = "features")
-    private Set<OrganizationEntity> organizationEntities;
+    @Builder.Default
+    private Set<OrganizationEntity> organizationEntities = new HashSet<>();
 }
