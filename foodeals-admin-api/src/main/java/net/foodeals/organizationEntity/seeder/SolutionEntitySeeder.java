@@ -27,14 +27,24 @@ public class SolutionEntitySeeder {
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
     public void SolutionSeeder() {
-        if (this.solutionRepository.count() == 0) {
-            Solution solution = Solution.builder().name("pro_market")
+        if (!this.solutionRepository.existsByName("pro_market")) {
+            Solution solution = Solution.builder()
+                    .name("pro_market")
                     .build();
-            Solution solution2 = Solution.builder().name("pro_donate")
+            this.solutionRepository.save(solution);
+        }
+        if (!this.solutionRepository.existsByName("pro_donate")) {
+            Solution solution2 = Solution.builder()
+                    .name("pro_donate")
                     .build();
-            Solution solution3 = Solution.builder().name("dlc")
+            this.solutionRepository.save(solution2);
+        }
+
+        if (!this.solutionRepository.existsByName("pro_dlc")) {
+            Solution solution3 = Solution.builder()
+                    .name("pro_dlc")
                     .build();
-            this.solutionRepository.saveAllAndFlush(List.of(solution, solution2, solution3));
+            this.solutionRepository.save(solution3);
         }
     }
 }

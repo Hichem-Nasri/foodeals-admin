@@ -9,4 +9,7 @@ import java.util.UUID;
 
 public interface FeatureRepository extends BaseRepository<Features, UUID> {
     Set<Features> findByNameIn(List<String> features);
+
+    boolean existsByName(String name);
 }
+

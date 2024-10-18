@@ -58,5 +58,7 @@ public class Contract extends AbstractEntity<UUID> {
     @Enumerated(EnumType.STRING)
     private ContractStatus contractStatus;
 
+    private Integer maxNumberOfAccounts;
+
     private boolean subscriptionPayedBySubEntities;
 }

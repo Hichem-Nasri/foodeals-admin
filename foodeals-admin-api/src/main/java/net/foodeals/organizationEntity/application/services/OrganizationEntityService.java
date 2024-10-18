@@ -30,6 +30,7 @@ import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRep
 import net.foodeals.payment.domain.entities.Payment;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
+import net.foodeals.processors.classes.DtoProcessor;
 import net.foodeals.user.application.dtos.requests.UserAddress;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.services.RoleService;
@@ -47,6 +48,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -68,6 +70,7 @@ public class OrganizationEntityService {
     private final CoveredZonesService coveredZonesService;
     private final CountryService countryService;
     private final FeatureService featureService;
+    private final DtoProcessor dtoProcessor;
 
     public OrganizationEntity save(OrganizationEntity organizationEntity) {
         return this.organizationEntityRepository.save(organizationEntity);
@@ -78,6 +81,12 @@ public class OrganizationEntityService {
     }
 
     public OrganizationEntity createAnewOrganizationEntity(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
+        try {
+            dtoProcessor.processDto(createAnOrganizationEntityDto);
+        } catch(Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "internal server error ");
+        }
+
         AddressRequest addressRequest = new AddressRequest(createAnOrganizationEntityDto.getEntityAddressDto().getCountry(), createAnOrganizationEntityDto.getEntityAddressDto().getAddress(), createAnOrganizationEntityDto.getEntityAddressDto().getCity(), createAnOrganizationEntityDto.getEntityAddressDto().getRegion(), createAnOrganizationEntityDto.getEntityAddressDto().getIframe());
         Address address = this.addressService.create(addressRequest);
         Contact contact = Contact.builder().name(createAnOrganizationEntityDto.getContactDto().getName())
@@ -136,7 +145,7 @@ public class OrganizationEntityService {
         Role role  = this.roleService.findByName("MANAGER");
         String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
         UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
-        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId(), organizationEntity.getId(), userAddress);
+        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, "MANAGER", organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
         //        String receiver = manager.getEmail();
 //        String subject = "Foodeals account validation";
@@ -152,9 +161,9 @@ public class OrganizationEntityService {
                 .build();
         organizationEntity.setBankInformation(bankInformation);
         Set<Activity> activities = this.activityService.getActivitiesByName(createAnOrganizationEntityDto.getActivities());
-        organizationEntity.setActivities(activities);
         Set<Features> features = this.featureService.findFeaturesByNames(createAnOrganizationEntityDto.getFeatures());
         organizationEntity.setActivities(activities);
+        organizationEntity.setFeatures(features);
         organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
         activities.forEach(activity -> {
             activity.getOrganizationEntities().add(organizationEntity);
@@ -171,6 +180,11 @@ public class OrganizationEntityService {
 
     @Transactional
     public OrganizationEntity updateOrganizationEntity(UUID id, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
+        try {
+            dtoProcessor.processDto(updateOrganizationEntityDto);
+        } catch(Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "internal server error ");
+        }
 
         OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
 
@@ -224,23 +238,44 @@ public class OrganizationEntityService {
     private OrganizationEntity updatePartner(UpdateOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
         List<String> activitiesNames = updateOrganizationEntityDto.getActivities();
         Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
-        Set<Activity> activitiesOfPartner = new HashSet<>(organizationEntity.getActivities());
-        activitiesOfPartner.stream().map((Activity activity) -> {
-            if (!activitiesNames.contains(activity.getName())) {
-                activity.getOrganizationEntities().remove(organizationEntity);
-                organizationEntity.getActivities().remove(activity);
-                this.activityService.save(activity);
+
+        Set<Activity> activitiesToRemove = organizationEntity.getActivities()
+                .stream()
+                .filter(activity -> !activitiesNames.contains(activity.getName()))
+                .collect(Collectors.toSet());
+
+        Set<Activity> activitiesToAdd = activities.stream()
+                .filter(activity -> !organizationEntity.getActivities().contains(activity))
+                .collect(Collectors.toSet());
+
+        activitiesToRemove.forEach(activity -> {
+            activity.getOrganizationEntities().remove(organizationEntity);
+            organizationEntity.getActivities().remove(activity);
+            this.activityService.save(activity);
+        });
+        activitiesToAdd.forEach(activity -> {
+            activity.getOrganizationEntities().add(organizationEntity);
+            organizationEntity.getActivities().add(activity);
+            this.activityService.save(activity);
+        });
+
+        Set<Features> newFeatures = this.featureService.findFeaturesByNames(updateOrganizationEntityDto.getFeatures());
+        Iterator<Features> iterator = organizationEntity.getFeatures().iterator();
+        while (iterator.hasNext()) {
+            Features feature = iterator.next();
+            if (!newFeatures.contains(feature)) {
+                iterator.remove();
+                feature.getOrganizationEntities().removeIf(org -> org.getId().equals(organizationEntity.getId())); // Remove from Feature
+                this.featureService.save(feature);
             }
-            return activity;
-        }).toList();
-        activities.stream().map(activity -> {
-            if (!activitiesOfPartner.contains(activity)) {
-                activity.getOrganizationEntities().add(organizationEntity);
-                organizationEntity.getActivities().add(activity);
-                this.activityService.save(activity);
+        }
+        for (Features feature : newFeatures) {
+            if (!organizationEntity.getFeatures().contains(feature)) {
+                organizationEntity.getFeatures().add(feature);
+                feature.getOrganizationEntities().add(organizationEntity);
+                this.featureService.save(feature);
             }
-            return activity;
-        }).toList();
+        }
 
         organizationEntity.setCommercialNumber(updateOrganizationEntityDto.getCommercialNumber());
         if (updateOrganizationEntityDto.getEntityBankInformationDto() != null) {
@@ -248,8 +283,8 @@ public class OrganizationEntityService {
             bankInformation = this.bankInformationService.update(bankInformation, updateOrganizationEntityDto.getEntityBankInformationDto());
             organizationEntity.setBankInformation(bankInformation);
         }
-        Contract contract = organizationEntity.getContract();
         this.organizationEntityRepository.save(organizationEntity);
+        Contract contract = organizationEntity.getContract();
         this.contractService.update(contract, updateOrganizationEntityDto);
         return this.organizationEntityRepository.save(organizationEntity);
     }
@@ -279,7 +314,7 @@ public class OrganizationEntityService {
         Role role  = this.roleService.findByName("MANAGER");
         String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
         UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
-        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, role.getId(), organizationEntity.getId(), userAddress);
+        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, "MANAGER", organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
         SimpleDateFormat formatter = new SimpleDateFormat("M/y");
         Date date = new Date();
@@ -336,15 +371,14 @@ public class OrganizationEntityService {
         organizationEntity.getContacts().add(manager1);
         organizationEntity.getContacts().add(manager2);
 
-        Role role  = this.roleService.findByName("MANAGER");
         String pass1 = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
         UserAddress userAddress1 = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
-        UserRequest userRequest1 = new UserRequest(manager1.getName(), manager1.getEmail(), manager1.getPhone(), pass1,  false, role.getId(), organizationEntity.getId(), userAddress1);
+        UserRequest userRequest1 = new UserRequest(manager1.getName(), manager1.getEmail(), manager1.getPhone(), pass1,  false, "MANAGER", organizationEntity.getId(), userAddress1);
         this.userService.createOrganizationEntityUser(userRequest1);
 
         String pass2 = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
         UserAddress userAddress2 = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
-        UserRequest userRequest2 = new UserRequest(manager2.getName(), manager2.getEmail(), manager2.getPhone(), pass2,  false, role.getId(), organizationEntity.getId(), userAddress2);
+        UserRequest userRequest2 = new UserRequest(manager2.getName(), manager2.getEmail(), manager2.getPhone(), pass2,  false, "MANAGER", organizationEntity.getId(), userAddress2);
         this.userService.createOrganizationEntityUser(userRequest2);
 
         OrganizationEntity finalOrganizationEntity = organizationEntity;

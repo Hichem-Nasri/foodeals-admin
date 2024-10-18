@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface RoleRepository extends BaseRepository<Role, UUID> {
     Optional<Role> findByName(String name);
+    boolean existsByName(String name);
 }

@@ -97,4 +97,9 @@ public class RegionServiceImpl implements RegionService {
     public Long count() {
         return this.regionRepository.count();
     }
+
+    @Override
+    public boolean existsByName(String region) {
+        return regionRepository.existsByName(region);
+    }
 }

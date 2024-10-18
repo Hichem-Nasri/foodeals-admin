@@ -20,4 +20,6 @@ public interface CountryService extends CrudService<Country, UUID, CountryReques
     public Long count();
 
     List<City> getCities(UUID id);
+
+    boolean existsByName(String name);
 }

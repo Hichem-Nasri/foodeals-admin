@@ -18,6 +18,7 @@ import net.foodeals.organizationEntity.application.services.*;
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -71,6 +72,7 @@ public class ContractService {
         Contract contract = Contract.builder().name(createAnOrganizationEntityDto.getEntityName())
                 .maxNumberOfSubEntities(createAnOrganizationEntityDto.getMaxNumberOfSubEntities())
                 .minimumReduction(createAnOrganizationEntityDto.getMinimumReduction())
+                .maxNumberOfAccounts(createAnOrganizationEntityDto.getMaxNumberOfAccounts())
                 .contractStatus(ContractStatus.IN_PROGRESS)
                 .singleSubscription(createAnOrganizationEntityDto.getOneSubscription())
                 .subscriptionPayedBySubEntities(createAnOrganizationEntityDto.getSubscriptionPayedBySubEntities())
@@ -87,7 +89,6 @@ public class ContractService {
     }
 
     public byte[] generateContract(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws IOException, DocumentException {
-        System.out.println(createAnOrganizationEntityDto.getActivities().getFirst());
         String templatePath = "resources/contract.html";
        String activities =  createAnOrganizationEntityDto.getActivities()
                   .stream().collect(Collectors.joining(" , "));
@@ -123,10 +124,10 @@ public class ContractService {
         placeholders.put("[type]", activities);
         placeholders.put("[type du partenaire (Vendeur Pro / Acheteur pro)]", features);
         placeholders.put("[nombre de magasins]", createAnOrganizationEntityDto.getMaxNumberOfSubEntities().toString() + " magasin(s)");
-        placeholders.put("[nombre maximum de comptes autorisés]", "avec un maximum de " + createAnOrganizationEntityDto.getMaxNumberOfAccounts().toString() + " comptes");
-        placeholders.put("[taux de réduction]", createAnOrganizationEntityDto.getMinimumReduction().toString());
-        placeholders.put("[Taux de commission/carte]", proMarket != null ? proMarket.getContractCommissionDto().getWithCard().toString() : "");
-        placeholders.put("[Taux de commission/espèce]", proMarket != null ? proMarket.getContractCommissionDto().getWithCash().toString() : "");
+        placeholders.put("[nombre maximum de comptes autorisés]", "avec un maximum de " + createAnOrganizationEntityDto.getMaxNumberOfAccounts().toString() + " compte(s)");
+        placeholders.put("[taux de réduction]", createAnOrganizationEntityDto.getMinimumReduction().toString() + "%");
+        placeholders.put("[Taux de commission/carte]", proMarket != null ? proMarket.getContractCommissionDto().getWithCard().toString() + "%" : "");
+        placeholders.put("[Taux de commission/espèce]", proMarket != null ? proMarket.getContractCommissionDto().getWithCash().toString() + "%" : "");
         placeholders.put("[montant de l'abonnement pro_donate]", proDonate != null  ? proDonate.getContractSubscriptionDto().getAnnualPayment().toString()  + "dh": "");
         placeholders.put("[le nombre d’échéances pro_donate]", proDonate != null  ? proDonate.getContractSubscriptionDto().getNumberOfDueDates().toString() : "");
 
@@ -197,39 +198,68 @@ public class ContractService {
 
     @Transactional
     public byte[] updateDocument(Contract contract) throws IOException, DocumentException {
-        String templatePath = "contract.html";
-//        String subActivities =  contract.getOrganizationEntity().getSubActivities().stream().map(activity -> activity.getName()).collect(Collectors.joining(" , "));
+        String templatePath = "resources/contract.html";
+        String activities =  contract.getOrganizationEntity().getActivities().stream().map(f -> f.getName()).collect(Collectors.joining(" , "));
+        String features = contract.getOrganizationEntity().getFeatures().stream().filter(f -> f.getName().equals("seller_pro") || f.getName().equals("buyer_pro")).map(f -> f.getName()).collect(Collectors.joining(" , "));
+
+        SolutionContract proDonate = contract.getSolutionContracts()
+                .stream()
+                .filter(s -> s.getSolution().getName().equals("pro_donate"))
+                .findFirst()
+                .orElse(null);
+
+        SolutionContract proDlc = contract.getSolutionContracts()
+                .stream()
+                .filter(s -> s.getSolution().getName().equals("pro_dlc"))
+                .findFirst()
+                .orElse(null);
+
+        SolutionContract proMarket = contract.getSolutionContracts()
+                .stream()
+                .filter(s -> s.getSolution().getName().equals("pro_market"))
+                .findFirst()
+                .orElse(null);
 
         LocalDate currentDate = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.FRENCH);
         String formattedDate = currentDate.format(formatter);
 
         Map<String, String> placeholders = new HashMap<>();
-//        placeholders.put("[raison sociale du partenaire]", contract.getOrganizationEntity().getName());
-//        placeholders.put("[Adresse du partenaire]", contract.getOrganizationEntity().getAddress().getAddress());
-//        placeholders.put("[numéro du registre de commerce]", contract.getOrganizationEntity().getCommercialNumber());
-//        placeholders.put("[nom du gérant/responsable]", contract.getOrganizationEntity().getContacts().get(0).getName().firstName() + " " + contract.getOrganizationEntity().getContacts().get(0).getName().lastName());
-//        placeholders.put("[Catégorie]", contract.getOrganizationEntity().getMainActivity().getName());
-//        placeholders.put("[sous-catégorie]", subActivities);
-//        placeholders.put("[nombre de points de vente]", contract.getMaxNumberOfSubEntities().toString());
-//        placeholders.put("[nombre maximum de comptes autorisés]", contract.getMaxNumberOfAccounts().toString());
-//        placeholders.put("[taux de réduction]", contract.getMinimumReduction().toString());
-//        placeholders.put("[Taux de commission/carte]", "2.5%");
-//        placeholders.put("[Taux de commission/espèce]", "3%");
-//        placeholders.put("[montant de l'abonnement]", "500 MAD");
-//        placeholders.put("[le le nombre d’échéances]", "12");
-//        placeholders.put("[nom du bénéficiaire]", contract.getOrganizationEntity().getBankInformation().getBeneficiaryName());
-//        placeholders.put("[Banque]", contract.getOrganizationEntity().getBankInformation().getBankName());
-//        placeholders.put("[RIB]", contract.getOrganizationEntity().getBankInformation().getRib());
-//        placeholders.put("[date]", formattedDate);
-//        placeholders.put("[nom du signataire]", contract.getOrganizationEntity().getContacts().get(0).getName().firstName() + " " + contract.getOrganizationEntity().getContacts().get(0).getName().lastName());
-//        placeholders.put("[responsibility]", "Manager");
+        placeholders.put("[raison sociale du partenaire]", contract.getOrganizationEntity().getName());
+        placeholders.put("[Adresse du partenaire]", contract.getOrganizationEntity().getAddress().getAddress());
+        placeholders.put("[numéro du registre de commerce]", contract.getOrganizationEntity().getCommercialNumber());
+        placeholders.put("[nom du gérant/responsable]", contract.getOrganizationEntity().getContacts().getFirst().getName().firstName() + " " + contract.getOrganizationEntity().getContacts().getFirst().getName().lastName());
+        placeholders.put("[type]", activities);
+        placeholders.put("[type du partenaire (Vendeur Pro / Acheteur pro)]", features);
+        placeholders.put("[nombre de magasins]", contract.getMaxNumberOfSubEntities().toString() + " magasin(s)");
+        placeholders.put("[nombre maximum de comptes autorisés]", "avec un maximum de " + contract.getMaxNumberOfAccounts().toString() + " compte(s)");
+        placeholders.put("[taux de réduction]", contract.getMinimumReduction().toString() + "%");
+        placeholders.put("[Taux de commission/carte]", proMarket != null ? proMarket.getCommission().getCard().toString() + "%" : "");
+        placeholders.put("[Taux de commission/espèce]", proMarket != null ? proMarket.getCommission().getCash().toString() + "%" : "");
+        placeholders.put("[montant de l'abonnement pro_donate]", proDonate != null  ? proDonate.getSubscription().getAmount().amount().toString()  + "dh": "");
+        placeholders.put("[le nombre d’échéances pro_donate]", proDonate != null  ? proDonate.getSubscription().getNumberOfDueDates().toString() : "");
+
+        placeholders.put("[montant de l'abonnement pro_market]", proMarket != null ? proMarket.getSubscription().getAmount().amount().toString() + "dh" : "");
+        placeholders.put("[le nombre d’échéances pro_market]", proMarket != null ? proMarket.getSubscription().getNumberOfDueDates().toString() :  "");
+
+        placeholders.put("[montant de l'abonnement pro_dlc]", proDlc != null  ? proDlc.getSubscription().getAmount().amount().toString() + "dh" : "");
+        placeholders.put("[le nombre d’échéances pro_dlc]", proDlc != null  ? proDlc.getSubscription().getNumberOfDueDates().toString()  : "");
+        placeholders.put("[nom du bénéficiaire]", contract.getOrganizationEntity().getBankInformation().getBeneficiaryName());
+        placeholders.put("[Banque]", contract.getOrganizationEntity().getBankInformation().getBankName());
+        placeholders.put("[RIB]", contract.getOrganizationEntity().getBankInformation().getRib());
+        placeholders.put("[date]", formattedDate);
+        placeholders.put("[nom du signataire]", contract.getOrganizationEntity().getContacts().getFirst().getName().firstName() + " " + contract.getOrganizationEntity().getContacts().getFirst().getName().lastName());
+        placeholders.put("[status]", "Manager");
+
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
 
         String template = new String(Files.readAllBytes(Paths.get(templatePath)));
 
-//        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-//            template = template.replace(entry.getKey(), entry.getValue());
-//        }
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            template = template.replace(entry.getKey(), entry.getValue());
+        }
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ITextRenderer renderer = new ITextRenderer();
@@ -250,6 +280,8 @@ public class ContractService {
             contract.setMaxNumberOfSubEntities(updateOrganizationEntityDto.getMaxNumberOfSubEntities());
         }
 
+        contract.setMaxNumberOfAccounts(updateOrganizationEntityDto.getMaxNumberOfAccounts());
+
         if (updateOrganizationEntityDto.getMinimumReduction() != null) {
             contract.setMinimumReduction(updateOrganizationEntityDto.getMinimumReduction());
         }
@@ -259,7 +291,11 @@ public class ContractService {
         }
 
         this.solutionContractService.update(contract, updateOrganizationEntityDto);
+        Contract finalContract = contract;
+        this.contractRepository.saveAndFlush(contract);
+        contract = this.contractRepository.findById(contract.getId()).orElseThrow(() -> new ResourceNotFoundException("contract not found " + finalContract.getId()));
         byte[] document = this.updateDocument(contract);
+        // keep the previous version of the document.
         contract.setDocument(document);
         this.contractRepository.save(contract);
     }

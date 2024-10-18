@@ -9,4 +9,6 @@ import java.util.UUID;
 
 public interface RegionService extends CrudService<Region, UUID, RegionRequest> {
     Long count();
+
+    boolean existsByName(String region);
 }

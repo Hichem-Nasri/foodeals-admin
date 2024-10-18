@@ -115,7 +115,7 @@ public class SolutionContractService {
         }).toList();
         List<String> organizationSolutions = contract.getSolutionContracts().stream().map(solutionContract -> solutionContract.getSolution().getName()).toList();
         List<SolutionsContractDto> newSolutions = UpdateOrganizationEntityDto.getSolutionsContractDto().stream().filter(solutionContractDto -> !organizationSolutions.contains(solutionContractDto.getSolution())).toList();
-        newSolutions.stream().map(solutionsContractDto -> {
+        List<SolutionContract> newSolutionsContracts = newSolutions.stream().map(solutionsContractDto -> {
             Solution solution = this.solutionService.findByName(solutionsContractDto.getSolution());
             SolutionContract solutionContract = SolutionContract.builder().solution(solution)
                     .contract(contract)
@@ -132,7 +132,8 @@ public class SolutionContractService {
                 subscription.setSolutionContracts(solutionContractList);
                 solutionContract.setSubscription(subscription);
             }
-            return this.solutionContractRepository.save(solutionContract);
+             return this.solutionContractRepository.save(solutionContract);
         }).toList();
+        contract.getSolutionContracts().addAll(newSolutionsContracts);
     }
 }

@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface CityRepository extends BaseRepository<City, UUID> {
     City findByName(String name);
+    boolean existsByName(String name);
 }
