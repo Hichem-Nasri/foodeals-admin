@@ -26,4 +26,8 @@ public interface UserRepository extends BaseRepository<User, Integer> {
     Page<User> findByOrganizationEntity_Id(UUID organizationId, Pageable pageable);
 
     Integer countByRoleAndDeletedAtIsNull(Role role);
+
+    Page<User> findByName_FirstNameContainingOrName_LastNameContainingAndRoleNameNot(
+            String firstName, String lastName, String roleName, Pageable pageable);
+
 }

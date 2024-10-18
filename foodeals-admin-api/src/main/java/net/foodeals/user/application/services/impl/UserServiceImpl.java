@@ -14,6 +14,7 @@ import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRep
 import net.foodeals.user.application.dtos.requests.UserAddress;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.ClientDto;
+import net.foodeals.user.application.dtos.responses.UserResponse;
 import net.foodeals.user.application.services.RoleService;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.Role;
@@ -49,6 +50,13 @@ class UserServiceImpl implements UserService {
     public List<User> findAll() {
         return repository.findAll();
     }
+
+    @Override
+    public Page<User> searchNonClientUsers(String query, Pageable pageable) {
+        return repository.findByName_FirstNameContainingOrName_LastNameContainingAndRoleNameNot(
+                query, query, "CLIENT", pageable);
+    }
+
 
     @Override
     public Page<User> findAll(Integer pageNumber, Integer pageSize) {
