@@ -14,6 +14,7 @@ import net.foodeals.offer.domain.entities.ReceiverInfo;
 import net.foodeals.offer.domain.enums.DonationReceiverType;
 import net.foodeals.offer.domain.enums.DonorType;
 import net.foodeals.offer.domain.enums.PublisherType;
+import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Payment;
@@ -21,6 +22,7 @@ import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "organization_entities")
@@ -129,5 +131,26 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
             case EntityType.FOOD_BANK -> PublisherType.FOOD_BANK;
             default -> null;
         };
+    }
+
+    public List<CoveredZonesDto> getCoveredZonesDto() {
+        return coveredZones.stream()
+                .map(coveredZone -> CoveredZonesDto.builder()
+                        .country(coveredZone.getRegion().getCity().getCountry().getName())
+                        .city(coveredZone.getRegion().getCity().getName())
+                        .regions(List.of(coveredZone.getRegion().getName()))
+                        .build())
+                .collect(Collectors.groupingBy(CoveredZonesDto::getCity))
+                .entrySet()
+                .stream()
+                .map(entry -> CoveredZonesDto.builder()
+                        .city(entry.getKey())
+                        .country(entry.getValue().get(0).getCountry()) // Extract country from any dto in the group
+                        .regions(entry.getValue().stream()
+                                .flatMap(dto -> dto.getRegions().stream())
+                                .distinct()
+                                .collect(Collectors.toList()))
+                        .build())
+                .collect(Collectors.toList());
     }
 }

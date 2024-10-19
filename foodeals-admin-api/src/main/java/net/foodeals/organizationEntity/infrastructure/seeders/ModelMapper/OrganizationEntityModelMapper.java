@@ -33,6 +33,7 @@ import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.swing.plaf.synth.SynthTextAreaUI;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -296,6 +297,49 @@ public class OrganizationEntityModelMapper {
             organizationEntityDto.setSolutions(solutions);
             return  organizationEntityDto;
         }, OrganizationEntity.class, OrganizationEntityDto.class);
+
+        mapper.addConverter(mappingContext -> {
+            OrganizationEntity organizationEntity = mappingContext.getSource();
+            DeliveryFormData formData = new DeliveryFormData();
+
+            formData.setEntityType(organizationEntity.getType());
+            formData.setEntityName(organizationEntity.getName());
+
+            formData.setSolutions(organizationEntity.getSolutions().stream().map(Solution::getName).collect(Collectors.toList()));
+
+            formData.setCommercialNumber(organizationEntity.getCommercialNumber());
+
+            // Map EntityAddressDto
+            formData.setEntityAddressDto(mapper.map(organizationEntity.getAddress(), EntityAddressDto.class));
+
+            // Map ContactDto (assuming the first contact is the main contact)
+            if (!organizationEntity.getContacts().isEmpty()) {
+                formData.setContactDto(mapper.map(organizationEntity.getContacts().get(0), ContactDto.class));
+            }
+
+            // Map EntityBankInformationDto
+            formData.setEntityBankInformationDto(mapper.map(organizationEntity.getBankInformation(), EntityBankInformationDto.class));
+
+            // Map SolutionsContractDto
+            List<SolutionsContractDto> solutionsContractDtos = organizationEntity.getContract().getSolutionContracts().stream()
+                    .map(sc -> {
+                        SolutionsContractDto dto = new SolutionsContractDto();
+                        dto.setSolution(sc.getSolution().getName());
+
+                        if (sc.getCommission() != null) {
+                            ContractCommissionDto comDto = new ContractCommissionDto();
+                            comDto.setDeliveryAmount(sc.getCommission().getDeliveryAmount());
+                            comDto.setDeliveryCommission(sc.getCommission().getDeliveryCommission());
+                            dto.setContractCommissionDto(comDto);
+                        }
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+            formData.setSolutionsContractDto(solutionsContractDtos);
+            formData.setCoveredZonesDtos(organizationEntity.getCoveredZonesDto());
+
+            return formData;
+        }, OrganizationEntity.class, DeliveryFormData.class);
     }
 
     public OrganizationEntityDto mapOrganizationEntity(OrganizationEntity source) {
@@ -347,6 +391,11 @@ public class OrganizationEntityModelMapper {
 
     public AssociationsDto mapToAssociation(OrganizationEntity organizationEntity) {
         return this.mapper.map(organizationEntity, AssociationsDto.class);
+    }
+
+    @Transactional
+    public DeliveryFormData convertToDeliveryFormData(OrganizationEntity organizationEntity) {
+        return  this.mapper.map(organizationEntity, DeliveryFormData.class);
     }
 }
 

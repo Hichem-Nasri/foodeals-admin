@@ -150,6 +150,12 @@ public class OrganizationEntityService {
         Contract contract = this.contractService.createDeliveryPartnerContract(organizationEntity, createAnOrganizationEntityDto);
         Contact managerContact = organizationEntity.getContacts().getFirst();
 
+        BankInformation bankInformation = BankInformation.builder().beneficiaryName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBeneficiaryName())
+                .bankName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBankName())
+                .rib(createAnOrganizationEntityDto.getEntityBankInformationDto().getRib())
+                .build();
+        organizationEntity.setBankInformation(bankInformation);
+        organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
         Role role  = this.roleService.findByName("MANAGER");
         String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
         UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
@@ -251,6 +257,12 @@ public class OrganizationEntityService {
                     organizationEntity.getCoveredZones().add(coveredZone);
                 }
             }
+        }
+        organizationEntity.setCommercialNumber(updateOrganizationEntityDto.getCommercialNumber());
+        if (updateOrganizationEntityDto.getEntityBankInformationDto() != null) {
+            BankInformation bankInformation = organizationEntity.getBankInformation();
+            bankInformation = this.bankInformationService.update(bankInformation, updateOrganizationEntityDto.getEntityBankInformationDto());
+            organizationEntity.setBankInformation(bankInformation);
         }
         Contract contract = this.contractService.updateDeliveryContract(organizationEntity.getContract(), updateOrganizationEntityDto);
         organizationEntity.setContract(contract);

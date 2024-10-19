@@ -52,10 +52,9 @@ public class OrganizationEntityController {
 
     @GetMapping("/partners/form-data/{id}")
     @Transactional
-    public ResponseEntity<OrganizationEntityFormData> getFormData(@PathVariable("id") UUID id) {
+    public ResponseEntity<?> getFormData(@PathVariable("id") UUID id) {
         OrganizationEntity organizationEntity = this.organizationEntityService.getOrganizationEntityById(id);
-        OrganizationEntityFormData organizationEntityDto = this.modelMapper.convertToFormData(organizationEntity);
-        return new ResponseEntity<OrganizationEntityFormData>(organizationEntityDto, HttpStatus.OK);
+        return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ?   this.modelMapper.convertToDeliveryFormData(organizationEntity) : this.modelMapper.convertToFormData(organizationEntity), HttpStatus.OK);
     }
 
     @DeleteMapping("/partners/{uuid}")
