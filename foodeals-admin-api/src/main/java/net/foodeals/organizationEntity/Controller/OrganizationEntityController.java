@@ -44,8 +44,9 @@ public class OrganizationEntityController {
     }
 
     @PutMapping("/partners/edit/{id}")
-    public ResponseEntity<OrganizationEntityDto> updateOrganizationEntity(@RequestBody UpdateOrganizationEntityDto updateOrganizationEntityDto, @PathVariable("id") UUID id) throws DocumentException, IOException {
-            return new ResponseEntity<>(this.modelMapper.mapOrganizationEntity(this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto)), HttpStatus.OK);
+    public ResponseEntity<?> updateOrganizationEntity(@RequestBody CreateAnOrganizationEntityDto updateOrganizationEntityDto, @PathVariable("id") UUID id) throws DocumentException, IOException {
+        OrganizationEntity  organizationEntity = this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto);
+        return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ? this.modelMapper.mapDeliveryPartners(organizationEntity) : this.modelMapper.mapOrganizationEntity(organizationEntity), HttpStatus.OK);
     }
 
     @GetMapping("/partners/form-data/{id}")
@@ -66,10 +67,9 @@ public class OrganizationEntityController {
 
     @GetMapping("/partners/deleted")
     @Transactional
-    public ResponseEntity<Page<OrganizationEntityDto>> getDeletedOrganizationsPaginated(Pageable pageable) {
-        Page<OrganizationEntity> deletedOrganizations = organizationEntityService.getDeletedOrganizationsPaginated(pageable);
-        Page<OrganizationEntityDto> deletedOrganizationsDto = deletedOrganizations.map(this.modelMapper::mapOrganizationEntity);
-        return ResponseEntity.ok(deletedOrganizationsDto);
+    public ResponseEntity<Page<?>> getDeletedOrganizationsPaginated(Pageable pageable, @RequestParam(value = "type", required = false) EntityType type) {
+        Page<OrganizationEntity> deletedOrganizations = organizationEntityService.getDeletedOrganizationsPaginated(pageable, type);
+        return new ResponseEntity<>(type != null && type.equals(EntityType.DELIVERY_PARTNER) ? deletedOrganizations.map(this.modelMapper::mapDeliveryPartners): deletedOrganizations.map(this.modelMapper::mapOrganizationEntity), HttpStatus.CREATED);
     }
 
     @GetMapping("/partners/{id}")
@@ -94,7 +94,7 @@ public class OrganizationEntityController {
         return new ResponseEntity<Page<OrganizationEntityDto>>(organizationEntitiesDto, HttpStatus.OK);
     }
 
-    // generate contract, delevery partner update, update contract, getcontract
+    // elevery partner update, update contract, getcontract
 
     @GetMapping("/delivery-partners")
     public ResponseEntity<Page<DeliveryPartnerDto>> getDeliveryPartner(Pageable pageable) {

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.application.service.DeadlinesService;
+import net.foodeals.contract.domain.entities.Commission;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.contract.domain.entities.SolutionContract;
 import net.foodeals.delivery.application.services.impl.CoveredZonesService;
@@ -186,7 +187,7 @@ public class OrganizationEntityService {
     }
 
     @Transactional
-    public OrganizationEntity updateOrganizationEntity(UUID id, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
+    public OrganizationEntity updateOrganizationEntity(UUID id, CreateAnOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
         try {
             dtoProcessor.processDto(updateOrganizationEntityDto);
         } catch(Exception e) {
@@ -238,8 +239,40 @@ public class OrganizationEntityService {
         return organizationEntity;
     }
 
-    private OrganizationEntity updateDeliveryPartner(UpdateOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) {
-        return  null;
+    private OrganizationEntity updateDeliveryPartner(CreateAnOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) {
+        if (updateOrganizationEntityDto.getCoveredZonesDtos() != null) {
+            organizationEntity.getCoveredZones().clear();
+            for (CoveredZonesDto coveredZonesDto : updateOrganizationEntityDto.getCoveredZonesDtos()) {
+                for (String regionName : coveredZonesDto.getRegions()) {
+                    CoveredZones coveredZone = CoveredZones.builder().organizationEntity(organizationEntity).build();
+                    Country country = this.countryService.findByName(coveredZonesDto.getCountry());
+                    City city = country.getCities().stream().filter(c -> c.getName().equalsIgnoreCase(coveredZonesDto.getCity())).findFirst().orElseThrow(() -> new RuntimeException("City not found"));
+                    Region region = city.getRegions().stream().filter(r -> r.getName().equalsIgnoreCase(regionName)).findFirst().orElseThrow(() -> new RuntimeException("Region not found"));
+                    coveredZone.setRegion(region);
+                    this.coveredZonesService.save(coveredZone);
+                    organizationEntity.getCoveredZones().add(coveredZone);
+                }
+            }
+        }
+        Contract contract = this.contractService.updateDeliveryContract(organizationEntity.getContract(), updateOrganizationEntityDto);
+        organizationEntity.setContract(contract);
+        organizationEntity = this.organizationEntityRepository.save(organizationEntity);
+
+        for (SolutionContract solutionContract : organizationEntity.getContract().getSolutionContracts()) {
+            Solution solution = solutionContract.getSolution();
+            Commission commission = solutionContract.getCommission();
+
+            System.out.println("Solution: " + solution.getName());
+            System.out.println("  Delivery Amount: " + commission.getDeliveryAmount());
+            System.out.println("  Delivery Commission: " + commission.getDeliveryCommission());
+
+            // If there are other commission-related fields, print them here
+            // For example:
+            // System.out.println("  Other Commission Field: " + commission.getOtherField());
+
+            System.out.println("------------------------");
+        }
+        return this.organizationEntityRepository.save(organizationEntity);
     }
 
     public void deleteOrganization(UUID uuid, DeletionReason reason, String details) {
@@ -249,8 +282,12 @@ public class OrganizationEntityService {
     }
 
 
-    public Page<OrganizationEntity> getDeletedOrganizationsPaginated(Pageable pageable) {
-        return organizationEntityRepository.findByDeletedAtIsNotNull(pageable);
+    public Page<OrganizationEntity> getDeletedOrganizationsPaginated(Pageable pageable, EntityType type) {
+        if (type != null) {
+            return organizationEntityRepository.findByDeletedAtIsNotNullAndType(pageable, type);
+        } else {
+            return organizationEntityRepository.findByDeletedAtIsNotNull(pageable);
+        }
     }
 
     public DeletionDetailsDTO getDeletionDetails(UUID uuid) {
@@ -264,7 +301,7 @@ public class OrganizationEntityService {
         );
     }
 
-    private OrganizationEntity updatePartner(UpdateOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
+    private OrganizationEntity updatePartner(CreateAnOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
         List<String> activitiesNames = updateOrganizationEntityDto.getActivities();
         Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
 

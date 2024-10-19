@@ -89,6 +89,13 @@ public class ContractService {
         return contract;
     }
 
+    public Contract updateDeliveryContract(Contract contract, CreateAnOrganizationEntityDto updateOrganizationEntityDto) {
+        List<SolutionContract> solutionsContracts = this.solutionContractService.updateDeliveryContract(updateOrganizationEntityDto.getDeliveryPartnerContract(), contract);
+//        byte[] document = this.getContractDocumentDelivery(createAnOrganizationEntityDto);
+//        contract.setDocument(document);
+        return this.contractRepository.save(contract);
+    }
+
     public byte[] generateContract(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws IOException, DocumentException {
         String templatePath = "resources/contract.html";
        String activities =  createAnOrganizationEntityDto.getActivities()
@@ -276,7 +283,7 @@ public class ContractService {
     }
 
     @Transactional
-    public void update(Contract contract, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
+    public void update(Contract contract, CreateAnOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
         if (updateOrganizationEntityDto.getMaxNumberOfSubEntities() != null) {
             contract.setMaxNumberOfSubEntities(updateOrganizationEntityDto.getMaxNumberOfSubEntities());
         }
