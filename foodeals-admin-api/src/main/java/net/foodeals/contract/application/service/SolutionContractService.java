@@ -7,6 +7,7 @@ import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.contract.domain.entities.SolutionContract;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.contract.domain.repositories.SolutionContractRepository;
+import net.foodeals.organizationEntity.application.dtos.requests.DeliveryPartnerContract;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.services.SolutionService;
 import net.foodeals.organizationEntity.domain.entities.Solution;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class SolutionContractService {
 
     private final SolutionContractRepository solutionContractRepository;
@@ -29,6 +31,37 @@ public class SolutionContractService {
         this.solutionService = solutionService;
         this.subscriptionService = subscriptionService;
         this.comissionService = comissionService;
+    }
+
+    public List<SolutionContract> createDeliveryContracts(List<DeliveryPartnerContract> deliveryPartnerContracts, Contract contract) {
+        List<SolutionContract> createdContracts = new ArrayList<>();
+
+        for (DeliveryPartnerContract deliveryPartnerContract : deliveryPartnerContracts) {
+            // Find or create the Solution
+            Solution solution = solutionService.findByName(deliveryPartnerContract.solution());
+
+            // Create Commission
+            Commission commission = new Commission();
+            commission.setDeliveryAmount(deliveryPartnerContract.amount());
+            commission.setGetDeliveryCommission(deliveryPartnerContract.commission());
+            // Set other commission fields if needed
+
+            // Create SolutionContract
+            SolutionContract solutionContract = new SolutionContract();
+            solutionContract.setSolution(solution);
+            solutionContract.setContract(contract);
+            solutionContract.setCommission(commission);
+
+            // Set up bidirectional relationships
+            commission.setSolutionContract(solutionContract);
+            contract.getSolutionContracts().add(solutionContract);
+            this.comissionService.save(commission);
+
+            // Save the SolutionContract (this will cascade save the Commission due to CascadeType.ALL)
+           solutionContract = solutionContractRepository.save(solutionContract);
+            createdContracts.add(solutionContract);
+        }
+        return createdContracts;
     }
 
     public List<SolutionContract> createManySolutionContracts(List<SolutionsContractDto> solutionsContractsDto, Contract contract, Boolean oneSubscription) {

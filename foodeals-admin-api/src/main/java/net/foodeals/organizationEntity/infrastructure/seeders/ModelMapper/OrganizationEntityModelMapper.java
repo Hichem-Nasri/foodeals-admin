@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.infrastructure.seeders.ModelMapper;
 
 import ch.qos.logback.core.net.AbstractSocketAppender;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import net.foodeals.contract.application.DTo.upload.ContractCommissionDto;
 import net.foodeals.contract.application.DTo.upload.ContractSubscriptionDto;
 import net.foodeals.contract.application.DTo.upload.SolutionsContractDto;
@@ -60,6 +61,7 @@ public class OrganizationEntityModelMapper {
 
 
     @PostConstruct
+    @Transactional
     private void postConstruct() {
         // Configure ModelMapper for simple property mappings
 

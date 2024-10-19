@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface OrganizationEntityRepository extends BaseRepository<OrganizationEntity, UUID> {
@@ -15,4 +16,7 @@ public interface OrganizationEntityRepository extends BaseRepository<Organizatio
 
     @Query("SELECT o FROM OrganizationEntity o WHERE o.type IN (:types)")
     Page<OrganizationEntity> findByType(List<EntityType> types, Pageable pageable);
+
+    Page<OrganizationEntity> findByDeletedAtIsNotNull(Pageable pageable);
+    Optional<OrganizationEntity> findByIdAndDeletedAtIsNotNull(UUID uuid);
 }

@@ -13,6 +13,7 @@ import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.impl.RegionServiceImpl;
 import net.foodeals.location.domain.repositories.CityRepository;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.DeliveryPartnerContract;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.services.*;
 import net.foodeals.organizationEntity.domain.entities.*;
@@ -333,5 +334,21 @@ public class ContractService {
                 .build();
         return this.contractRepository.save(contract);
     }
+
+    public Contract createDeliveryPartnerContract(OrganizationEntity organizationEntity, CreateAnOrganizationEntityDto createAnOrganizationEntityDto) {
+        Contract contract = Contract.builder().name(createAnOrganizationEntityDto.getEntityName())
+                .contractStatus(ContractStatus.IN_PROGRESS)
+                .build();
+        contract.setOrganizationEntity(organizationEntity);
+        List<SolutionContract> solutionsContracts = this.solutionContractService.createDeliveryContracts(createAnOrganizationEntityDto.getDeliveryPartnerContract(), contract);
+        contract.getSolutionContracts().addAll(solutionsContracts);
+//        byte[] document = this.getContractDocumentDelivery(createAnOrganizationEntityDto);
+//        contract.setDocument(document);
+        return this.contractRepository.save(contract);
+    }
+
+    // to be implemented
+//    private byte[] getContractDocumentDelivery(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) {
+//    }
 }
 

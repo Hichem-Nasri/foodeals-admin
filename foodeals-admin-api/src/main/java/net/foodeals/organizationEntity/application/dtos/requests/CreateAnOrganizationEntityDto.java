@@ -46,4 +46,6 @@ public class CreateAnOrganizationEntityDto {
     private EntityBankInformationDto entityBankInformationDto;
 
     private List<CoveredZonesDto> coveredZonesDtos;
+
+    private List<DeliveryPartnerContract> deliveryPartnerContract;
 }

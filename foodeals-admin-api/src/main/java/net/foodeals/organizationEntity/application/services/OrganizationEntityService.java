@@ -1,6 +1,7 @@
 package net.foodeals.organizationEntity.application.services;
 
 import com.lowagie.text.DocumentException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +9,7 @@ import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.application.service.DeadlinesService;
 import net.foodeals.contract.domain.entities.Contract;
+import net.foodeals.contract.domain.entities.SolutionContract;
 import net.foodeals.delivery.application.services.impl.CoveredZonesService;
 import net.foodeals.delivery.domain.entities.CoveredZones;
 import net.foodeals.location.application.dtos.requests.AddressRequest;
@@ -23,6 +25,7 @@ import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.responses.DeletionDetailsDTO;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityFormData;
 import net.foodeals.organizationEntity.domain.entities.*;
@@ -38,6 +41,7 @@ import net.foodeals.user.application.services.RoleService;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
+import net.foodeals.user.domain.entities.enums.DeletionReason;
 import org.apache.commons.lang.RandomStringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -141,6 +145,8 @@ public class OrganizationEntityService {
                 });
             });
         }
+        Contract contract = this.contractService.createDeliveryPartnerContract(organizationEntity, createAnOrganizationEntityDto);
+        organizationEntity.setContract(contract);
         Contact managerContact = organizationEntity.getContacts().getFirst();
 
         Role role  = this.roleService.findByName("MANAGER");
@@ -234,6 +240,28 @@ public class OrganizationEntityService {
 
     private OrganizationEntity updateDeliveryPartner(UpdateOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) {
         return  null;
+    }
+
+    public void deleteOrganization(UUID uuid, DeletionReason reason, String details) {
+        OrganizationEntity organization = organizationEntityRepository.findById(uuid).orElseThrow(() -> new EntityNotFoundException("Organization not found with uuid: " + uuid));
+        organization.markDeleted(reason, details);
+        organizationEntityRepository.save(organization);
+    }
+
+
+    public Page<OrganizationEntity> getDeletedOrganizationsPaginated(Pageable pageable) {
+        return organizationEntityRepository.findByDeletedAtIsNotNull(pageable);
+    }
+
+    public DeletionDetailsDTO getDeletionDetails(UUID uuid) {
+        OrganizationEntity organization = organizationEntityRepository.findByIdAndDeletedAtIsNotNull(uuid)
+                .orElseThrow(() -> new EntityNotFoundException("Deleted organization not found with uuid: " + uuid));
+
+        return new DeletionDetailsDTO(
+                organization.getDeletionReason(),
+                organization.getDeletionDetails(),
+                organization.getDeletedAt()
+        );
     }
 
     private OrganizationEntity updatePartner(UpdateOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
