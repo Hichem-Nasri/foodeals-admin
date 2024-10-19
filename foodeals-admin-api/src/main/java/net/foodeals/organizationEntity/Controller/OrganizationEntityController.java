@@ -44,6 +44,7 @@ public class OrganizationEntityController {
     }
 
     @PutMapping("/partners/edit/{id}")
+    @Transactional
     public ResponseEntity<?> updateOrganizationEntity(@RequestBody CreateAnOrganizationEntityDto updateOrganizationEntityDto, @PathVariable("id") UUID id) throws DocumentException, IOException {
         OrganizationEntity  organizationEntity = this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto);
         return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ? this.modelMapper.mapDeliveryPartners(organizationEntity) : this.modelMapper.mapOrganizationEntity(organizationEntity), HttpStatus.OK);

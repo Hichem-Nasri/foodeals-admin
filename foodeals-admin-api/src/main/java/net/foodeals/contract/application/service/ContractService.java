@@ -35,6 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class ContractService {
 
     private final ContractRepository contractRepository;
@@ -346,6 +347,7 @@ public class ContractService {
         Contract contract = Contract.builder().name(createAnOrganizationEntityDto.getEntityName())
                 .contractStatus(ContractStatus.IN_PROGRESS)
                 .build();
+        organizationEntity.setContract(contract);
         contract.setOrganizationEntity(organizationEntity);
         List<SolutionContract> solutionsContracts = this.solutionContractService.createDeliveryContracts(createAnOrganizationEntityDto.getDeliveryPartnerContract(), contract);
         contract.getSolutionContracts().addAll(solutionsContracts);

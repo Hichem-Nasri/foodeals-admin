@@ -44,6 +44,7 @@ import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
 import net.foodeals.user.domain.entities.enums.DeletionReason;
 import org.apache.commons.lang.RandomStringUtils;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -147,7 +148,6 @@ public class OrganizationEntityService {
             });
         }
         Contract contract = this.contractService.createDeliveryPartnerContract(organizationEntity, createAnOrganizationEntityDto);
-        organizationEntity.setContract(contract);
         Contact managerContact = organizationEntity.getContacts().getFirst();
 
         Role role  = this.roleService.findByName("MANAGER");
@@ -194,11 +194,8 @@ public class OrganizationEntityService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "internal server error ");
         }
 
-        OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
-
-        if (organizationEntity == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "organization Entity not found with id " + id.toString());
-        }
+        OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "organization Entity not found with id " + id.toString()));
 
         Contract contract = organizationEntity.getContract();
 
@@ -239,6 +236,7 @@ public class OrganizationEntityService {
         return organizationEntity;
     }
 
+    @Transactional
     private OrganizationEntity updateDeliveryPartner(CreateAnOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) {
         if (updateOrganizationEntityDto.getCoveredZonesDtos() != null) {
             organizationEntity.getCoveredZones().clear();
@@ -257,21 +255,6 @@ public class OrganizationEntityService {
         Contract contract = this.contractService.updateDeliveryContract(organizationEntity.getContract(), updateOrganizationEntityDto);
         organizationEntity.setContract(contract);
         organizationEntity = this.organizationEntityRepository.save(organizationEntity);
-
-        for (SolutionContract solutionContract : organizationEntity.getContract().getSolutionContracts()) {
-            Solution solution = solutionContract.getSolution();
-            Commission commission = solutionContract.getCommission();
-
-            System.out.println("Solution: " + solution.getName());
-            System.out.println("  Delivery Amount: " + commission.getDeliveryAmount());
-            System.out.println("  Delivery Commission: " + commission.getDeliveryCommission());
-
-            // If there are other commission-related fields, print them here
-            // For example:
-            // System.out.println("  Other Commission Field: " + commission.getOtherField());
-
-            System.out.println("------------------------");
-        }
         return this.organizationEntityRepository.save(organizationEntity);
     }
 

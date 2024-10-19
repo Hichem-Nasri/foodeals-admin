@@ -7,10 +7,15 @@ import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.payment.application.dto.response.PartnerInfoDto;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
 public class DeliveryPartnerDto {
+
+    private UUID id;
+
+
     private String createdAt;
 
     private PartnerInfoDto partnerInfoDto;

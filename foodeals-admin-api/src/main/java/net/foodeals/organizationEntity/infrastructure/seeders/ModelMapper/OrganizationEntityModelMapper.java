@@ -316,6 +316,7 @@ public class OrganizationEntityModelMapper {
         PartnerInfoDto  partnerInfoDto = PartnerInfoDto.builder().name(organizationEntity.getName())
                 .avatarPath(organizationEntity.getAvatarPath())
                 .build();
+        deliveryPartnerDto.setId(organizationEntity.getId());
         deliveryPartnerDto.setEntityType(organizationEntity.getType());
         deliveryPartnerDto.setPartnerInfoDto(partnerInfoDto);
 

@@ -14,10 +14,7 @@ import net.foodeals.organizationEntity.application.services.SolutionService;
 import net.foodeals.organizationEntity.domain.entities.Solution;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +34,7 @@ public class SolutionContractService {
         this.comissionService = comissionService;
     }
 
+    @Transactional
     public List<SolutionContract> updateDeliveryContract(List<DeliveryPartnerContract> deliveryPartnerContracts, Contract contract) {
         List<SolutionContract> updatedContracts = new ArrayList<>();
 
@@ -44,9 +42,11 @@ public class SolutionContractService {
                 .map(DeliveryPartnerContract::solution)
                 .collect(Collectors.toSet());
 
-        contract.getSolutionContracts().removeIf((SolutionContract solutionContract) -> {
+        Iterator<SolutionContract> iterator = contract.getSolutionContracts().iterator();
+        while (iterator.hasNext()) {
+            SolutionContract solutionContract = iterator.next();
             if (!newSolutionNames.contains(solutionContract.getSolution().getName())) {
-                contract.getSolutionContracts().remove(solutionContract);
+                iterator.remove(); // Remove using iterator
                 solutionContract.setSolution(null);
                 solutionContract.setContract(null);
                 Commission commission = solutionContract.getCommission();
@@ -55,10 +55,8 @@ public class SolutionContractService {
                     this.comissionService.delete(commission);
                 }
                 this.solutionContractRepository.delete(solutionContract);
-                return true;
             }
-            return false;
-        });
+        }
         for (DeliveryPartnerContract dc : deliveryPartnerContracts) {
             String solutionName = dc.solution();
             Solution solution = solutionService.findByName(solutionName);
