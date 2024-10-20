@@ -1,10 +1,9 @@
 package net.foodeals.common.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EntityListeners;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import net.foodeals.user.domain.entities.enums.DeletionReason;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -12,9 +11,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.io.Serializable;
 import java.time.Instant;
 
-/**
- * AbstractEntity
- */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public abstract class AbstractEntity<T> implements Serializable {
@@ -35,9 +31,27 @@ public abstract class AbstractEntity<T> implements Serializable {
     @Setter
     private Instant deletedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "deletion_reason")
+    @Getter
+    @Setter
+    private DeletionReason deletionReason;
+
+    @Column(name = "deletion_details", length = 2000)
+    @Getter
+    @Setter
+    private String deletionDetails;
+
     public abstract T getId();
 
-    public void markDeleted() {
+
+    public void markDeleted(DeletionReason reason, String details) {
         this.deletedAt = Instant.now();
+        this.deletionReason = reason;
+        this.deletionDetails = details;
+    }
+
+    public Instant getDeletedAt() {
+        return deletedAt;
     }
 }

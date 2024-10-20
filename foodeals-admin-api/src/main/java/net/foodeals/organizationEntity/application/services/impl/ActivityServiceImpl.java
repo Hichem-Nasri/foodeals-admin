@@ -37,7 +37,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Page<Activity> findAll(Pageable pageable) {
-        return null;
+        return this.repository.findAll(pageable);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class ActivityServiceImpl implements ActivityService {
         Activity activity = repository.findById(id)
                 .orElseThrow(() -> new ActivityNotFoundException(id));
 
-        this.repository.delete(activity);
+        this.repository.softDelete(activity.getId());
     }
 
     @Override

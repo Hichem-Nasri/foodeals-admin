@@ -14,7 +14,7 @@ public class CreateAnOrganizationEntityDto {
 
     private String entityName;
 
-    private Boolean subscriptionPayedBySubEntities;
+    private Boolean commissionPayedBySubEntities;
 
     private EntityAddressDto entityAddressDto; // valid
 
@@ -46,4 +46,6 @@ public class CreateAnOrganizationEntityDto {
     private EntityBankInformationDto entityBankInformationDto;
 
     private List<CoveredZonesDto> coveredZonesDtos;
+
+    private List<DeliveryPartnerContract> deliveryPartnerContract;
 }

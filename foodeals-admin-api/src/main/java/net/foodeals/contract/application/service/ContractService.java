@@ -13,6 +13,7 @@ import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.impl.RegionServiceImpl;
 import net.foodeals.location.domain.repositories.CityRepository;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.DeliveryPartnerContract;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.services.*;
 import net.foodeals.organizationEntity.domain.entities.*;
@@ -34,6 +35,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class ContractService {
 
     private final ContractRepository contractRepository;
@@ -75,7 +77,7 @@ public class ContractService {
                 .maxNumberOfAccounts(createAnOrganizationEntityDto.getMaxNumberOfAccounts())
                 .contractStatus(ContractStatus.IN_PROGRESS)
                 .singleSubscription(createAnOrganizationEntityDto.getOneSubscription())
-                .subscriptionPayedBySubEntities(createAnOrganizationEntityDto.getSubscriptionPayedBySubEntities())
+                .commissionPayedBySubEntities(createAnOrganizationEntityDto.getCommissionPayedBySubEntities())
                 .userContracts(userContract)
                 .build();
         userContract.setContract(contract);
@@ -86,6 +88,13 @@ public class ContractService {
         byte[] document = this.generateContract(createAnOrganizationEntityDto);
         contract.setDocument(document);
         return contract;
+    }
+
+    public Contract updateDeliveryContract(Contract contract, CreateAnOrganizationEntityDto updateOrganizationEntityDto) {
+        List<SolutionContract> solutionsContracts = this.solutionContractService.updateDeliveryContract(updateOrganizationEntityDto.getDeliveryPartnerContract(), contract);
+//        byte[] document = this.getContractDocumentDelivery(createAnOrganizationEntityDto);
+//        contract.setDocument(document);
+        return this.contractRepository.save(contract);
     }
 
     public byte[] generateContract(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws IOException, DocumentException {
@@ -275,7 +284,7 @@ public class ContractService {
     }
 
     @Transactional
-    public void update(Contract contract, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
+    public void update(Contract contract, CreateAnOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
         if (updateOrganizationEntityDto.getMaxNumberOfSubEntities() != null) {
             contract.setMaxNumberOfSubEntities(updateOrganizationEntityDto.getMaxNumberOfSubEntities());
         }
@@ -333,5 +342,22 @@ public class ContractService {
                 .build();
         return this.contractRepository.save(contract);
     }
+
+    public Contract createDeliveryPartnerContract(OrganizationEntity organizationEntity, CreateAnOrganizationEntityDto createAnOrganizationEntityDto) {
+        Contract contract = Contract.builder().name(createAnOrganizationEntityDto.getEntityName())
+                .contractStatus(ContractStatus.IN_PROGRESS)
+                .build();
+        organizationEntity.setContract(contract);
+        contract.setOrganizationEntity(organizationEntity);
+        List<SolutionContract> solutionsContracts = this.solutionContractService.createDeliveryContracts(createAnOrganizationEntityDto.getDeliveryPartnerContract(), contract);
+        contract.getSolutionContracts().addAll(solutionsContracts);
+//        byte[] document = this.getContractDocumentDelivery(createAnOrganizationEntityDto);
+//        contract.setDocument(document);
+        return this.contractRepository.save(contract);
+    }
+
+    // to be implemented
+//    private byte[] getContractDocumentDelivery(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) {
+//    }
 }
 

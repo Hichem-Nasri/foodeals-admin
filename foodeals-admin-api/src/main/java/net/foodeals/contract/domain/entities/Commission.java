@@ -3,7 +3,6 @@ package net.foodeals.contract.domain.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
-import net.foodeals.common.valueOjects.Price;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
@@ -27,6 +26,10 @@ public class Commission extends AbstractEntity<UUID> {
     private Float cash;
 
     private Float card;
+
+    private Float deliveryAmount;
+
+    private Float deliveryCommission;
 
     @OneToOne(mappedBy = "commission", cascade = CascadeType.ALL)
     private SolutionContract solutionContract;

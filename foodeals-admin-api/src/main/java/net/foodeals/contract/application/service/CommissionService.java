@@ -1,5 +1,6 @@
 package net.foodeals.contract.application.service;
 
+import jakarta.transaction.Transactional;
 import net.foodeals.common.valueOjects.Price;
 import net.foodeals.contract.application.DTo.upload.ContractCommissionDto;
 import net.foodeals.contract.domain.entities.Commission;
@@ -46,5 +47,10 @@ public class CommissionService {
 
     public Commission getCommissionByPartnerName(String name) {
         return this.commissionRepository.findByPartnerName(name);
+    }
+
+    @Transactional
+    public Commission save(Commission commission) {
+        return this.commissionRepository.saveAndFlush(commission);
     }
 }

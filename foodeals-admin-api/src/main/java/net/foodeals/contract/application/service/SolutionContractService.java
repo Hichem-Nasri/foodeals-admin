@@ -7,15 +7,18 @@ import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.contract.domain.entities.SolutionContract;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.contract.domain.repositories.SolutionContractRepository;
+import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.DeliveryPartnerContract;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.services.SolutionService;
 import net.foodeals.organizationEntity.domain.entities.Solution;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class SolutionContractService {
 
     private final SolutionContractRepository solutionContractRepository;
@@ -29,6 +32,96 @@ public class SolutionContractService {
         this.solutionService = solutionService;
         this.subscriptionService = subscriptionService;
         this.comissionService = comissionService;
+    }
+
+    @Transactional
+    public List<SolutionContract> updateDeliveryContract(List<DeliveryPartnerContract> deliveryPartnerContracts, Contract contract) {
+        List<SolutionContract> updatedContracts = new ArrayList<>();
+
+        Set<String> newSolutionNames = deliveryPartnerContracts.stream()
+                .map(DeliveryPartnerContract::solution)
+                .collect(Collectors.toSet());
+
+        Iterator<SolutionContract> iterator = contract.getSolutionContracts().iterator();
+        while (iterator.hasNext()) {
+            SolutionContract solutionContract = iterator.next();
+            if (!newSolutionNames.contains(solutionContract.getSolution().getName())) {
+                iterator.remove(); // Remove using iterator
+                solutionContract.setSolution(null);
+                solutionContract.setContract(null);
+                Commission commission = solutionContract.getCommission();
+                if (commission != null) {
+                    commission.setSolutionContract(null);
+                    this.comissionService.delete(commission);
+                }
+                this.solutionContractRepository.delete(solutionContract);
+            }
+        }
+        for (DeliveryPartnerContract dc : deliveryPartnerContracts) {
+            String solutionName = dc.solution();
+            Solution solution = solutionService.findByName(solutionName);
+            Optional<SolutionContract> existingContract = contract.getSolutionContracts().stream()
+                    .filter(sc -> sc.getSolution().getName().equals(solutionName))
+                    .findFirst();
+
+            if (existingContract.isPresent()) {
+                // Update existing contract
+                SolutionContract solutionContract = existingContract.get();
+                Commission commission = solutionContract.getCommission();
+                commission.setDeliveryAmount(dc.amount());
+                commission.setDeliveryCommission(dc.commission());
+                comissionService.save(commission);
+                updatedContracts.add(solutionContract);
+            } else {
+                // Create new contract
+                Commission commission = new Commission();
+                commission.setDeliveryAmount(dc.amount());
+                commission.setDeliveryCommission(dc.commission());
+
+                SolutionContract solutionContract = new SolutionContract();
+                solutionContract.setSolution(solution);
+                solutionContract.setContract(contract);
+                solutionContract.setCommission(commission);
+
+                commission.setSolutionContract(solutionContract);
+                contract.getSolutionContracts().add(solutionContract);
+                solutionContract = solutionContractRepository.save(solutionContract);
+                updatedContracts.add(solutionContract);
+            }
+        }
+
+        return updatedContracts;
+    }
+
+    public List<SolutionContract> createDeliveryContracts(List<DeliveryPartnerContract> deliveryPartnerContracts, Contract contract) {
+        List<SolutionContract> createdContracts = new ArrayList<>();
+
+        for (DeliveryPartnerContract deliveryPartnerContract : deliveryPartnerContracts) {
+            // Find or create the Solution
+            Solution solution = solutionService.findByName(deliveryPartnerContract.solution());
+
+            // Create Commission
+            Commission commission = new Commission();
+            commission.setDeliveryAmount(deliveryPartnerContract.amount());
+            commission.setDeliveryCommission(deliveryPartnerContract.commission());
+            // Set other commission fields if needed
+
+            // Create SolutionContract
+            SolutionContract solutionContract = new SolutionContract();
+            solutionContract.setSolution(solution);
+            solutionContract.setContract(contract);
+            solutionContract.setCommission(commission);
+
+            // Set up bidirectional relationships
+            commission.setSolutionContract(solutionContract);
+            contract.getSolutionContracts().add(solutionContract);
+            this.comissionService.save(commission);
+
+            // Save the SolutionContract (this will cascade save the Commission due to CascadeType.ALL)
+           solutionContract = solutionContractRepository.save(solutionContract);
+            createdContracts.add(solutionContract);
+        }
+        return createdContracts;
     }
 
     public List<SolutionContract> createManySolutionContracts(List<SolutionsContractDto> solutionsContractsDto, Contract contract, Boolean oneSubscription) {
@@ -70,7 +163,7 @@ public class SolutionContractService {
     }
 
     @Transactional
-    public void update(Contract contract, UpdateOrganizationEntityDto UpdateOrganizationEntityDto) {
+    public void update(Contract contract, CreateAnOrganizationEntityDto UpdateOrganizationEntityDto) {
         List<SolutionContract> solutionContracts = new ArrayList<>(contract.getSolutionContracts());
         solutionContracts.stream().map(solutionContract -> {
             if (!UpdateOrganizationEntityDto.getSolutions().contains(solutionContract.getSolution().getName())) {

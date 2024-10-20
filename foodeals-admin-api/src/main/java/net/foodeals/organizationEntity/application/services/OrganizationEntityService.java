@@ -1,13 +1,16 @@
 package net.foodeals.organizationEntity.application.services;
 
 import com.lowagie.text.DocumentException;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.application.service.DeadlinesService;
+import net.foodeals.contract.domain.entities.Commission;
 import net.foodeals.contract.domain.entities.Contract;
+import net.foodeals.contract.domain.entities.SolutionContract;
 import net.foodeals.delivery.application.services.impl.CoveredZonesService;
 import net.foodeals.delivery.domain.entities.CoveredZones;
 import net.foodeals.location.application.dtos.requests.AddressRequest;
@@ -23,7 +26,9 @@ import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.responses.DeletionDetailsDTO;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityFormData;
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
@@ -37,7 +42,9 @@ import net.foodeals.user.application.services.RoleService;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
+import net.foodeals.user.domain.entities.enums.DeletionReason;
 import org.apache.commons.lang.RandomStringUtils;
+import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -140,8 +147,15 @@ public class OrganizationEntityService {
                 });
             });
         }
+        Contract contract = this.contractService.createDeliveryPartnerContract(organizationEntity, createAnOrganizationEntityDto);
         Contact managerContact = organizationEntity.getContacts().getFirst();
 
+        BankInformation bankInformation = BankInformation.builder().beneficiaryName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBeneficiaryName())
+                .bankName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBankName())
+                .rib(createAnOrganizationEntityDto.getEntityBankInformationDto().getRib())
+                .build();
+        organizationEntity.setBankInformation(bankInformation);
+        organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
         Role role  = this.roleService.findByName("MANAGER");
         String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
         UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
@@ -179,18 +193,15 @@ public class OrganizationEntityService {
     }
 
     @Transactional
-    public OrganizationEntity updateOrganizationEntity(UUID id, UpdateOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
+    public OrganizationEntity updateOrganizationEntity(UUID id, CreateAnOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
         try {
             dtoProcessor.processDto(updateOrganizationEntityDto);
         } catch(Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "internal server error ");
         }
 
-        OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
-
-        if (organizationEntity == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "organization Entity not found with id " + id.toString());
-        }
+        OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "organization Entity not found with id " + id.toString()));
 
         Contract contract = organizationEntity.getContract();
 
@@ -231,11 +242,61 @@ public class OrganizationEntityService {
         return organizationEntity;
     }
 
-    private OrganizationEntity updateDeliveryPartner(UpdateOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) {
-        return  null;
+    @Transactional
+    private OrganizationEntity updateDeliveryPartner(CreateAnOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) {
+        if (updateOrganizationEntityDto.getCoveredZonesDtos() != null) {
+            organizationEntity.getCoveredZones().clear();
+            for (CoveredZonesDto coveredZonesDto : updateOrganizationEntityDto.getCoveredZonesDtos()) {
+                for (String regionName : coveredZonesDto.getRegions()) {
+                    CoveredZones coveredZone = CoveredZones.builder().organizationEntity(organizationEntity).build();
+                    Country country = this.countryService.findByName(coveredZonesDto.getCountry());
+                    City city = country.getCities().stream().filter(c -> c.getName().equalsIgnoreCase(coveredZonesDto.getCity())).findFirst().orElseThrow(() -> new RuntimeException("City not found"));
+                    Region region = city.getRegions().stream().filter(r -> r.getName().equalsIgnoreCase(regionName)).findFirst().orElseThrow(() -> new RuntimeException("Region not found"));
+                    coveredZone.setRegion(region);
+                    this.coveredZonesService.save(coveredZone);
+                    organizationEntity.getCoveredZones().add(coveredZone);
+                }
+            }
+        }
+        organizationEntity.setCommercialNumber(updateOrganizationEntityDto.getCommercialNumber());
+        if (updateOrganizationEntityDto.getEntityBankInformationDto() != null) {
+            BankInformation bankInformation = organizationEntity.getBankInformation();
+            bankInformation = this.bankInformationService.update(bankInformation, updateOrganizationEntityDto.getEntityBankInformationDto());
+            organizationEntity.setBankInformation(bankInformation);
+        }
+        Contract contract = this.contractService.updateDeliveryContract(organizationEntity.getContract(), updateOrganizationEntityDto);
+        organizationEntity.setContract(contract);
+        organizationEntity = this.organizationEntityRepository.save(organizationEntity);
+        return this.organizationEntityRepository.save(organizationEntity);
     }
 
-    private OrganizationEntity updatePartner(UpdateOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
+    public void deleteOrganization(UUID uuid, DeletionReason reason, String details) {
+        OrganizationEntity organization = organizationEntityRepository.findById(uuid).orElseThrow(() -> new EntityNotFoundException("Organization not found with uuid: " + uuid));
+        organization.markDeleted(reason, details);
+        organizationEntityRepository.save(organization);
+    }
+
+
+    public Page<OrganizationEntity> getDeletedOrganizationsPaginated(Pageable pageable, EntityType type) {
+        if (type != null) {
+            return organizationEntityRepository.findByDeletedAtIsNotNullAndType(pageable, type);
+        } else {
+            return organizationEntityRepository.findByDeletedAtIsNotNull(pageable);
+        }
+    }
+
+    public DeletionDetailsDTO getDeletionDetails(UUID uuid) {
+        OrganizationEntity organization = organizationEntityRepository.findByIdAndDeletedAtIsNotNull(uuid)
+                .orElseThrow(() -> new EntityNotFoundException("Deleted organization not found with uuid: " + uuid));
+
+        return new DeletionDetailsDTO(
+                organization.getDeletionReason(),
+                organization.getDeletionDetails(),
+                organization.getDeletedAt()
+        );
+    }
+
+    private OrganizationEntity updatePartner(CreateAnOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
         List<String> activitiesNames = updateOrganizationEntityDto.getActivities();
         Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
 

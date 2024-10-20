@@ -2,6 +2,7 @@ package net.foodeals.contract.application.service;
 
 import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.contract.domain.repositories.UserContractRepository;
+import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
@@ -42,7 +43,7 @@ public class UserContractService {
         return this.userContractRepository.save(userContract);
     }
 
-    public UserContract updateUserContract(UserContract userContract, UpdateOrganizationEntityDto updateOrganizationEntityDto) {
+    public UserContract updateUserContract(UserContract userContract, CreateAnOrganizationEntityDto updateOrganizationEntityDto) {
         User oldUser = userContract.getUser();
         oldUser.getUserContracts().remove(userContract);
             User user = this.userService.findById(updateOrganizationEntityDto.getManagerId());

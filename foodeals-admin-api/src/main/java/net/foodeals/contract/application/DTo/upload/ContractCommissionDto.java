@@ -8,4 +8,8 @@ public class ContractCommissionDto {
     private Float withCard;
 
     private Float withCash;
+
+    private Float deliveryAmount;
+
+    private Float deliveryCommission;
 }

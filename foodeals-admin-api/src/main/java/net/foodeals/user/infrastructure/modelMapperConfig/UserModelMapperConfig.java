@@ -7,6 +7,7 @@ import net.foodeals.user.application.dtos.responses.*;
 import net.foodeals.user.domain.entities.Authority;
 import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
+import net.foodeals.user.domain.valueObjects.Name;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,7 @@ public class UserModelMapperConfig {
 
     @PostConstruct
     public void configureModelMapper() {
+
         modelMapper.addConverter(context -> {
             final Authority authority = context.getSource();
             return new AuthorityResponse(authority.getId(), authority.getName(), authority.getValue());
@@ -49,6 +51,17 @@ public class UserModelMapperConfig {
 
             return new UserResponse(user.getId(), user.getName(), user.getEmail(), user.getPhone(), roleResponse, user.getOrganizationEntity().getId());
         }, User.class, UserResponse.class);
+
+        modelMapper.addConverter(context -> {
+            final User user = context.getSource();
+            System.out.println("SimpleUserDto converter is working");
+            return new SimpleUserDto(
+                    user.getId(),
+                    new Name(user.getName().firstName(),
+                    user.getName().lastName())
+            );
+
+        }, User.class, SimpleUserDto.class);
 
         modelMapper.addMappings(new PropertyMap<User, ClientDto>() {
             @Override
