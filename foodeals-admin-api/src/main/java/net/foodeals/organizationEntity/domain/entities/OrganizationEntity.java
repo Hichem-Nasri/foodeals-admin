@@ -123,6 +123,10 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
         };
     }
 
+    public PartnerType getPartnerType() {
+        return PartnerType.PARTNER;
+    }
+
     @Override
     public PublisherType getPublisherType() {
         return switch (this.type) {

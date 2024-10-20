@@ -359,8 +359,8 @@ public class OrganizationEntityService {
         return organizationEntity;
     }
 
-    public Page<OrganizationEntity> getOrganizationEntities(Pageable pageable) {
-        return this.organizationEntityRepository.findAll(pageable);
+    public Page<OrganizationEntity> getOrganizationEntities(List<EntityType> entityTypes, Pageable pageable) {
+        return this.organizationEntityRepository.findByTypeIn(entityTypes, pageable);
     }
 
     @Transactional
@@ -375,14 +375,14 @@ public class OrganizationEntityService {
         Role role  = this.roleService.findByName("MANAGER");
         String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
         UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
-        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, "MANAGER", organizationEntity.getId(), userAddress);
+        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), false, "MANAGER", organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
         SimpleDateFormat formatter = new SimpleDateFormat("M/y");
         Date date = new Date();
         String formattedDate = formatter.format(date);
         Payment payment = Payment.builder()
                 .organizationEntity(organizationEntity)
-                .partnerType(PartnerType.PARTNER)
+                .partnerType(organizationEntity.getPartnerType())
                 .paymentStatus(PaymentStatus.IN_VALID)
                 .date(formattedDate)
                 .numberOfOrders(Long.valueOf(0))

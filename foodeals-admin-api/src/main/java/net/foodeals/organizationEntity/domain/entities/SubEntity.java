@@ -91,6 +91,10 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     public SubEntity() {
     }
 
+    public PartnerType getPartnerType() {
+        return PartnerType.SUB_ENTITY;
+    }
+
     @Override
     public UUID getId() {
         return this.id;
