@@ -1,4 +1,4 @@
-package net.foodeals.payment.application.services;//package net.foodeals.payment.application.services;
+package net.foodeals.payment.application.services.impl;//package net.foodeals.payment.application.services;
 //
 //import jakarta.transaction.Transactional;
 //import net.foodeals.contract.application.service.CommissionService;
@@ -97,19 +97,19 @@ package net.foodeals.payment.application.services;//package net.foodeals.payment
 //}
 
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import net.foodeals.contract.application.service.CommissionService;
 import net.foodeals.contract.application.service.DeadlinesService;
 import net.foodeals.contract.application.service.SubscriptionService;
-import net.foodeals.contract.domain.entities.Commission;
 import net.foodeals.contract.domain.entities.Deadlines;
 import net.foodeals.contract.domain.entities.Subscription;
+import net.foodeals.contract.domain.entities.enums.DeadlineStatus;
+import net.foodeals.contract.domain.entities.enums.SubscriptionStatus;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
 import net.foodeals.organizationEntity.application.services.SubEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
+import net.foodeals.payment.application.dto.request.ReceiveDto;
 import net.foodeals.payment.application.dto.response.*;
 import net.foodeals.payment.application.services.PaymentService;
 import net.foodeals.payment.application.services.utils.PaymentProcessor;
@@ -118,6 +118,7 @@ import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.repository.PartnerCommissionsRepository;
 import org.apache.coyote.BadRequestException;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -125,10 +126,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -290,6 +288,31 @@ public class PaymentServiceImpl implements PaymentService {
         organizationsDto.addAll(paymentDtos.stream().collect(Collectors.toList()));
         paymentDtos = new PageImpl<>(organizationsDto, paymentDtos.getPageable(), organizationsDto.size());
         return paymentDtos;
+    }
+
+    @Override
+    @Transactional
+    public void paySubscription(MultipartFile document, ReceiveDto receiveDto, UUID uuid) {
+        Deadlines deadlines = this.deadlinesService.findById(uuid);
+
+        if (deadlines == null) {
+            throw  new ResourceNotFoundException("deadline not found with id " + uuid.toString());
+        }
+
+        deadlines.setStatus(DeadlineStatus.PAID);
+        deadlines.setPayedAt(receiveDto.date());
+        deadlines.setEmitterName(receiveDto.emitter());
+
+        this.deadlinesService.save(deadlines);
+
+        Subscription subscription = this.subscriptionService.findById(deadlines.getSubscription().getId());
+
+        subscription.setSubscriptionStatus(SubscriptionStatus.VALID);
+        subscription.getDeadlines().forEach(d -> {
+            if (!d.getStatus().equals(DeadlineStatus.PAID)) {
+                subscription.setSubscriptionStatus(SubscriptionStatus.IN_PROGRESS);
+            }
+        });
     }
 }
 

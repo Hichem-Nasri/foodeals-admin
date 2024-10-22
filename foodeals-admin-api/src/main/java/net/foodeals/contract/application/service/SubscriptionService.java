@@ -16,10 +16,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class SubscriptionService {
@@ -32,6 +29,9 @@ public class SubscriptionService {
         this.deadlinesService = deadlinesService;
     }
 
+    public Subscription findById(UUID id) {
+        return this.subscriptionRepository.findById(id).orElse(null);
+    }
     public Subscription createSubscription(ContractSubscriptionDto contractSubscriptionDto) {
         Subscription subscription = Subscription.builder().amount(new Price(new BigDecimal(contractSubscriptionDto.getAnnualPayment()), Currency.getInstance("MAD")))
                 .numberOfDueDates(contractSubscriptionDto.getNumberOfDueDates())

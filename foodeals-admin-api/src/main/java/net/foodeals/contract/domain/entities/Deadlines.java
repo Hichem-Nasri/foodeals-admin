@@ -37,4 +37,8 @@ public class Deadlines extends AbstractEntity<UUID> {
     private DeadlineStatus status;
 
     private LocalDate paymentDate;
+
+    private Date payedAt;
+
+    private String emitterName;
 }
