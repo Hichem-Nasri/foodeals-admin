@@ -17,6 +17,8 @@ import net.foodeals.order.domain.entities.Coupon;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
+import net.foodeals.payment.domain.entities.PartnerCommissions;
+import net.foodeals.payment.domain.entities.PartnerI;
 import net.foodeals.payment.domain.entities.Payment;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
@@ -30,7 +32,7 @@ import java.util.*;
 @Setter
 @Builder
 @AllArgsConstructor
-public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, ReceiverInfo, PublisherI {
+public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, ReceiverInfo, PublisherI, PartnerI {
 
     @Id
     @GeneratedValue
@@ -75,8 +77,8 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     @OneToMany(mappedBy = "subEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Coupon> coupons;
 
-    @OneToMany(mappedBy = "subEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Payment> payments;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PartnerCommissions> commissions = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "subEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -124,5 +126,21 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
             case SubEntityType.FOOD_BANK_SB -> DonorType.FOOD_BANK_SB;
             default -> null;
         };
+    }
+
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public String getAvatarPath() {
+        return this.avatarPath;
+    }
+
+    @Override
+    public boolean commissionPayedBySubEntities() {
+        return this.organizationEntity.getContract().isCommissionPayedBySubEntities();
     }
 }

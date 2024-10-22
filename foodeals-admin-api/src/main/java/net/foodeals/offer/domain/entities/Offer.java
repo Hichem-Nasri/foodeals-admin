@@ -10,6 +10,7 @@ import net.foodeals.order.domain.entities.Order;
 import net.foodeals.organizationEntity.domain.entities.Activity;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,7 +54,7 @@ public class Offer extends AbstractEntity<UUID> {
         private Offerable offerable;
 
         @OneToMany(fetch = FetchType.EAGER, mappedBy = "offer", cascade = CascadeType.ALL, orphanRemoval = true)
-        private List<Order> orders;
+        private List<Order> orders = new ArrayList<>();
 
         @Transient
         private IOfferChoice offerChoice;

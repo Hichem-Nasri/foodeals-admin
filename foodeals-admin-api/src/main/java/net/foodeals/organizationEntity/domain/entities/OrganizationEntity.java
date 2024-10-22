@@ -17,6 +17,8 @@ import net.foodeals.offer.domain.enums.PublisherType;
 import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
+import net.foodeals.payment.domain.entities.PartnerCommissions;
+import net.foodeals.payment.domain.entities.PartnerI;
 import net.foodeals.payment.domain.entities.Payment;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
@@ -32,8 +34,7 @@ import java.util.stream.Collectors;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInfo, ReceiverInfo, PublisherI {
-
+public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInfo, ReceiverInfo, PublisherI, PartnerI {
     @Id
     @GeneratedValue
     @UuidGenerator
@@ -88,8 +89,8 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     private Set<Features> features = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "organizationEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Payment> payments = new ArrayList<>();
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PartnerCommissions> commissions = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "organizationEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -124,7 +125,11 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     }
 
     public PartnerType getPartnerType() {
-        return PartnerType.PARTNER;
+        return switch (type) {
+            case EntityType.PARTNER_WITH_SB -> PartnerType.PARTNER_SB;
+            case EntityType.NORMAL_PARTNER -> PartnerType.NORMAL_PARTNER;
+            default -> null;
+        };
     }
 
     @Override
@@ -135,6 +140,21 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
             case EntityType.FOOD_BANK -> PublisherType.FOOD_BANK;
             default -> null;
         };
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public String getAvatarPath() {
+        return this.avatarPath;
+    }
+
+    @Override
+    public boolean commissionPayedBySubEntities() {
+        return this.contract.isCommissionPayedBySubEntities();
     }
 
     public List<CoveredZonesDto> getCoveredZonesDto() {

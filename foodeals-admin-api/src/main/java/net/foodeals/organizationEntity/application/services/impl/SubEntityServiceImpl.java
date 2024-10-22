@@ -68,7 +68,11 @@ public class SubEntityServiceImpl implements SubEntityService {
 
     @Override
     public void delete(UUID uuid) {
+    }
 
+    @Override
+    public SubEntity getEntityById(UUID id) {
+        return this.subEntityRepository.findById(id).orElse(null);
     }
 
 

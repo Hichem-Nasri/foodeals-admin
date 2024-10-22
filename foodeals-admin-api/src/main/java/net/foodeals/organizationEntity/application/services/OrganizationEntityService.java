@@ -32,6 +32,8 @@ import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEn
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
+import net.foodeals.payment.domain.entities.PartnerCommissions;
+import net.foodeals.payment.domain.entities.PartnerInfo;
 import net.foodeals.payment.domain.entities.Payment;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
@@ -377,19 +379,15 @@ public class OrganizationEntityService {
         UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
         UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), false, "MANAGER", organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
-        SimpleDateFormat formatter = new SimpleDateFormat("M/y");
         Date date = new Date();
-        String formattedDate = formatter.format(date);
-        Payment payment = Payment.builder()
-                .organizationEntity(organizationEntity)
-                .partnerType(organizationEntity.getPartnerType())
-                .paymentStatus(PaymentStatus.IN_VALID)
-                .date(formattedDate)
-                .numberOfOrders(Long.valueOf(0))
-                .paymentsWithCard(Double.valueOf(0))
-                .paymentsWithCash(Double.valueOf(0))
-                .build();
-        organizationEntity.getPayments().add(payment);
+        if (!organizationEntity.getContract().isCommissionPayedBySubEntities()) {
+            PartnerCommissions partnerCommissions = PartnerCommissions.builder()
+                    .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getPartnerType()))
+                    .paymentStatus(PaymentStatus.IN_VALID)
+                    .date(date)
+                    .build();
+            organizationEntity.getCommissions().add(partnerCommissions);
+        }
         this.userService.save(manager);
         this.organizationEntityRepository.save(organizationEntity);
         this.contractService.validateContract(organizationEntity.getContract());
@@ -408,6 +406,10 @@ public class OrganizationEntityService {
         }
 
         return this.contractService.getContractDocument(organizationEntity.getContract().getId());
+    }
+
+    public OrganizationEntity findById(UUID id) {
+        return this.organizationEntityRepository.findById(id).orElse(null);
     }
 
     public Page<OrganizationEntity> getDeliveryPartners(Pageable pageable) {

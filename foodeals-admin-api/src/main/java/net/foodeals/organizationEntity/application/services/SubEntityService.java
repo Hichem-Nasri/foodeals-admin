@@ -20,4 +20,5 @@ public interface SubEntityService extends CrudService<SubEntityResponse, UUID, S
     Page<SubEntity> getFoodBankSubEntities(Pageable pageable, UUID id);
 
     Page<SubEntity> partnerSubEntities(Pageable pageable, UUID id);
+    SubEntity getEntityById(UUID id);
 }
