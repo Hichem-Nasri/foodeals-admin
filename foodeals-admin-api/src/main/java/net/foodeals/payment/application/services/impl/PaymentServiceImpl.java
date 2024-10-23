@@ -182,8 +182,9 @@ public class PaymentServiceImpl implements PaymentService {
 ////        return paymentDto;
 //    }
 
-    public Page<Subscription> getSubscriptionPayments(Pageable page) {
-        return this.subscriptionService.findAll(page);
+    @Transactional
+    public Page<Subscription> getSubscriptionPayments(Pageable page, int year) {
+        return this.subscriptionService.findByYear(year, page);
     }
 
     public SubscriptionPaymentDto toSubscriptionPaymentDto(Subscription subscription) {

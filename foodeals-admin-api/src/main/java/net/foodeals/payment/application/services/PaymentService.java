@@ -17,7 +17,7 @@ import java.util.UUID;
 public interface PaymentService {
     Page<PartnerCommissions> getCommissionPayments(Pageable page);
 
-    Page<Subscription> getSubscriptionPayments(Pageable page);
+    Page<Subscription> getSubscriptionPayments(Pageable page, int year);
 
     SubscriptionPaymentDto toSubscriptionPaymentDto(Subscription subscription);
 

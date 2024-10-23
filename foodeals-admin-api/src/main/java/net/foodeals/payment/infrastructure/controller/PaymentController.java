@@ -47,9 +47,9 @@ public class PaymentController {
         return new ResponseEntity<String>("payment validated successfully", HttpStatus.OK);
     }
 
-    @GetMapping("/subscriptions")
-    public ResponseEntity<Page<SubscriptionPaymentDto>> getSubscriptionPayments(Pageable page) {
-        Page<Subscription> subscriptions = this.paymentService.getSubscriptionPayments(page);
+    @GetMapping("/subscriptions/{year}")
+    public ResponseEntity<Page<SubscriptionPaymentDto>> getSubscriptionPayments(@PathVariable("year") int year, Pageable page) {
+        Page<Subscription> subscriptions = this.paymentService.getSubscriptionPayments(page, year);
         Page<SubscriptionPaymentDto> paymentsDtos = subscriptions.map(this.paymentService::toSubscriptionPaymentDto);
         return new ResponseEntity<Page<SubscriptionPaymentDto>>(paymentsDtos, HttpStatus.OK);
     }

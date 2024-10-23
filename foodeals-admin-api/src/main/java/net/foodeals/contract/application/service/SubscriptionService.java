@@ -1,5 +1,6 @@
 package net.foodeals.contract.application.service;
 
+import jakarta.transaction.Transactional;
 import net.foodeals.common.valueOjects.Price;
 import net.foodeals.contract.application.DTo.upload.ContractSubscriptionDto;
 import net.foodeals.contract.domain.entities.Deadlines;
@@ -27,6 +28,11 @@ public class SubscriptionService {
     public SubscriptionService(SubscriptionRepository subscriptionRepository, DeadlinesService deadlinesService) {
         this.subscriptionRepository = subscriptionRepository;
         this.deadlinesService = deadlinesService;
+    }
+
+    @Transactional
+    public Page<Subscription> findByYear(int year, Pageable pageable) {
+        return this.subscriptionRepository.findSubscriptionsByYear(year, pageable);
     }
 
     public Subscription findById(UUID id) {
