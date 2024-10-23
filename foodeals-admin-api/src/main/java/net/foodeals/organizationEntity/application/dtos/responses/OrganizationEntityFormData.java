@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.application.dtos.responses;
 
 import lombok.Data;
 import net.foodeals.contract.application.DTo.upload.SolutionsContractDto;
+import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto;
 import net.foodeals.organizationEntity.application.dtos.requests.EntityAddressDto;
@@ -45,4 +46,5 @@ public class OrganizationEntityFormData {
 
     private EntityBankInformationDto entityBankInformationDto;
 
+    private ContractStatus status;
 }

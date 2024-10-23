@@ -8,10 +8,10 @@ import net.foodeals.processors.annotations.Processable;
 import java.util.UUID;
 
 public record AddressRequest(
-        @NotBlank @Processable String country,
-        @NotBlank String address,
-        @NotNull @Processable String cityName,
-        @NotNull @Processable String regionName,
-        @NotNull String iframe
+        @Processable String country,
+        String address,
+         @Processable String cityName,
+         @Processable String regionName,
+         String iframe
 ) {
 }
