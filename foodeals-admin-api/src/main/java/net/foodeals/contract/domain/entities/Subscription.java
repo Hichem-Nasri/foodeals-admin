@@ -40,7 +40,6 @@ public class Subscription extends AbstractEntity<UUID> {
 
     private Integer numberOfDueDates;
 
-
     private LocalDate startDate;
 
     private Integer duration;

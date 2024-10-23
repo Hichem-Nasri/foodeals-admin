@@ -1,5 +1,6 @@
 package net.foodeals.contract.application.service;
 
+import jakarta.transaction.Transactional;
 import net.foodeals.common.valueOjects.Price;
 import net.foodeals.contract.application.DTo.upload.ContractSubscriptionDto;
 import net.foodeals.contract.domain.entities.Deadlines;
@@ -16,10 +17,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class SubscriptionService {
@@ -32,6 +30,14 @@ public class SubscriptionService {
         this.deadlinesService = deadlinesService;
     }
 
+    @Transactional
+    public Page<Subscription> findByYear(int year, Pageable pageable) {
+        return this.subscriptionRepository.findSubscriptionsByYear(year, pageable);
+    }
+
+    public Subscription findById(UUID id) {
+        return this.subscriptionRepository.findById(id).orElse(null);
+    }
     public Subscription createSubscription(ContractSubscriptionDto contractSubscriptionDto) {
         Subscription subscription = Subscription.builder().amount(new Price(new BigDecimal(contractSubscriptionDto.getAnnualPayment()), Currency.getInstance("MAD")))
                 .numberOfDueDates(contractSubscriptionDto.getNumberOfDueDates())

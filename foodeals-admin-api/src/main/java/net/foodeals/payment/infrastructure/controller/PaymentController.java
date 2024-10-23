@@ -1,39 +1,55 @@
 package net.foodeals.payment.infrastructure.controller;
 
+import lombok.AllArgsConstructor;
 import net.foodeals.contract.domain.entities.Subscription;
+import net.foodeals.payment.application.dto.request.PaymentRequest;
+import net.foodeals.payment.application.dto.request.ReceiveDto;
 import net.foodeals.payment.application.dto.response.CommissionPaymentDto;
+import net.foodeals.payment.application.dto.response.PaymentResponse;
 import net.foodeals.payment.application.dto.response.SubscriptionPaymentDto;
 import net.foodeals.payment.application.services.PaymentService;
-import net.foodeals.payment.domain.entities.Payment;
+import net.foodeals.payment.domain.entities.PartnerCommissions;
+import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/api/v1/payments")
+@AllArgsConstructor
 public class PaymentController {
 
     private final PaymentService paymentService;
 
-
-    public PaymentController(PaymentService paymentService) {
-        this.paymentService = paymentService;
+    @PostMapping(value = "/commissions/process")
+    public ResponseEntity<PaymentResponse> processPayment(@RequestParam("paymentRequest") PaymentRequest paymentRequest, @RequestParam("document") MultipartFile document) throws BadRequestException {
+        PaymentResponse result = paymentService.processPayment(paymentRequest,document);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/commissions")
     public ResponseEntity<Page<CommissionPaymentDto>> getCommissionPayments(Pageable page) {
-        Page<Payment> payments = this.paymentService.getCommissionPayments(page);
-        Page<CommissionPaymentDto> paymentsDtos = payments.map(this.paymentService::toCommissionPaymentDto);
+        Page<PartnerCommissions> payments = this.paymentService.getCommissionPayments(page);
+        Page<CommissionPaymentDto> paymentsDtos = this.paymentService.convertCommissionToDto(payments);
         return new ResponseEntity<Page<CommissionPaymentDto>>(paymentsDtos, HttpStatus.OK);
     }
 
-    @GetMapping("/subscriptions")
-    public ResponseEntity<Page<SubscriptionPaymentDto>> getSubscriptionPayments(Pageable page) {
-        Page<Subscription> subscriptions = this.paymentService.getSubscriptionPayments(page);
+    @PostMapping(value = "/subscriptions/process/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> getCommissionPayments(@RequestPart("document") MultipartFile document, @RequestPart("info") ReceiveDto receiveDto, @PathVariable("id") UUID id) {
+        this.paymentService.paySubscription(document, receiveDto, id);
+        return new ResponseEntity<String>("payment validated successfully", HttpStatus.OK);
+    }
+
+    @GetMapping("/subscriptions/{year}")
+    public ResponseEntity<Page<SubscriptionPaymentDto>> getSubscriptionPayments(@PathVariable("year") int year, Pageable page) {
+        Page<Subscription> subscriptions = this.paymentService.getSubscriptionPayments(page, year);
         Page<SubscriptionPaymentDto> paymentsDtos = subscriptions.map(this.paymentService::toSubscriptionPaymentDto);
         return new ResponseEntity<Page<SubscriptionPaymentDto>>(paymentsDtos, HttpStatus.OK);
     }

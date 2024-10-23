@@ -37,6 +37,11 @@ public class OrderServiceImpl implements OrderService {
     private final DeliveryService deliveryService;
 
     @Override
+    public List<Order> findByOfferPublisherInfoId(UUID publisherId) {
+        return this.repository.findByOfferPublisherInfoId(publisherId);
+    }
+
+    @Override
     public List<Order> findAll() {
         return repository.findAll();
     }

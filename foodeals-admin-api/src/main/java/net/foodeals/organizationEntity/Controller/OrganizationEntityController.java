@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -89,7 +90,7 @@ public class OrganizationEntityController {
     @GetMapping("/partners")
     @Transactional
     public ResponseEntity<Page<OrganizationEntityDto>> getOrganizationEntities(Pageable pageable) {
-        Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getOrganizationEntities(pageable);
+        Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getOrganizationEntities(List.of(EntityType.NORMAL_PARTNER, EntityType.PARTNER_WITH_SB), pageable);
         Page<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.map(this.modelMapper::mapOrganizationEntity);
         return new ResponseEntity<Page<OrganizationEntityDto>>(organizationEntitiesDto, HttpStatus.OK);
     }

@@ -20,4 +20,6 @@ public interface OrganizationEntityRepository extends BaseRepository<Organizatio
     Page<OrganizationEntity> findByDeletedAtIsNotNull(Pageable pageable);
     Optional<OrganizationEntity> findByIdAndDeletedAtIsNotNull(UUID uuid);
     Page<OrganizationEntity> findByDeletedAtIsNotNullAndType(Pageable pageable, EntityType type);
+
+    Page<OrganizationEntity> findByTypeIn(List<EntityType> entityTypes, Pageable pageable);
 }

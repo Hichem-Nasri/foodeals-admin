@@ -1,0 +1,79 @@
+{
+    "commissionPayedBySubEntities": true ,
+  "entityType": "DELIVERY_PARTNER",
+  "entityName": "Example Entity",
+  "features": ["seller_prO", "buyer_pro"],
+  "entityAddressDto": {
+    "country": "Morocco",
+    "address": "test add",
+    "city": "Casablanca",
+    "region": "Maarif",
+    "iframe": ""
+  },
+  "solutions": ["pro_donate", "pro_dlc"],
+  "commercialNumber": "COMM-12345615175",
+  "contactDto": {
+  "name": {
+    "firstName": "Test ",
+    "lastName": "test  "
+  },
+    "email": "te254ss2133@51252a418184415346641gma4il.com",
+    "phone": "+062"
+  },
+  "managerId": 1,
+  "activities": ["Activity 3"],
+  "maxNumberOfSubEntities": 5,
+  "minimumReduction": 10.0,
+  "maxNumberOfAccounts": 5,
+  "solutionsContractDto": [
+    {
+        "solution": "pro_donate",
+        "contractSubscriptionDto": {
+            "duration": 6,
+            "annualPayment": 600.0,
+            "numberOfDueDates": 6
+        },
+        "contractCommissionDto": {
+            "withCard": 3.0,
+            "withCash": 2.0
+        }
+    },
+    {
+        "solution": "pro_dlc",
+        "contractSubscriptionDto": {
+            "duration": 12,
+            "annualPayment": 1500.0,
+            "numberOfDueDates": 12
+        },
+        "contractCommissionDto": {
+            "withCard": 2.0,
+            "withCash": 1.0
+        }
+    }
+  ],
+  "oneSubscription": false,
+  "entityBankInformationDto": {
+    "beneficiaryName": " test ",
+    "bankName": " test",
+    "rib": "136"
+  },
+  "coveredZonesDtos": [
+    {
+  "country": "Morocco",
+  "city": "Casablanca",
+  "regions": ["Maarif"]
+}
+  ],
+  "deliveryPartnerContract": [
+  {
+    "solution": "pro_donate",
+    "amount": 100.0,
+    "commission": 2.5
+  },
+  {
+    "solution": "pro_dlc",
+    "amount": 150.0,
+    "commission": 1.5
+  }
+]
+}

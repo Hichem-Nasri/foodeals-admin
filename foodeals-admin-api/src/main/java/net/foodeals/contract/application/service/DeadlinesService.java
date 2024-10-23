@@ -8,6 +8,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class DeadlinesService {
@@ -30,5 +31,13 @@ public class DeadlinesService {
 
         deadlineDto.setDeadlineAmount(deadline.getAmount().amount());
         return deadlineDto;
+    }
+
+    public Deadlines findById(UUID uuid){
+        return  this.deadlinesRepository.findById(uuid).orElse(null);
+    }
+
+    public void save(Deadlines deadlines) {
+        this.deadlinesRepository.save(deadlines);
     }
 }
