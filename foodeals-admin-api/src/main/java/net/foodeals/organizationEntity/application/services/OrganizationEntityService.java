@@ -7,10 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
-import net.foodeals.contract.application.service.DeadlinesService;
-import net.foodeals.contract.domain.entities.Commission;
 import net.foodeals.contract.domain.entities.Contract;
-import net.foodeals.contract.domain.entities.SolutionContract;
 import net.foodeals.delivery.application.services.impl.CoveredZonesService;
 import net.foodeals.delivery.domain.entities.CoveredZones;
 import net.foodeals.location.application.dtos.requests.AddressRequest;
@@ -25,17 +22,12 @@ import net.foodeals.location.domain.entities.Region;
 import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
-import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.responses.DeletionDetailsDTO;
-import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
-import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityFormData;
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.PartnerInfo;
-import net.foodeals.payment.domain.entities.Payment;
-import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 import net.foodeals.processors.classes.DtoProcessor;
 import net.foodeals.user.application.dtos.requests.UserAddress;
@@ -46,7 +38,6 @@ import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
 import net.foodeals.user.domain.entities.enums.DeletionReason;
 import org.apache.commons.lang.RandomStringUtils;
-import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -55,7 +46,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -89,7 +79,7 @@ public class OrganizationEntityService {
         this.organizationEntityRepository.softDelete(organizationEntity.getId());
     }
 
-    public OrganizationEntity createAnewOrganizationEntity(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
+    public OrganizationEntity createAnewOrganizationEntity(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, MultipartFile logo, MultipartFile cover) throws DocumentException, IOException {
         try {
             dtoProcessor.processDto(createAnOrganizationEntityDto);
         } catch(Exception e) {
@@ -366,7 +356,7 @@ public class OrganizationEntityService {
     }
 
     @Transactional
-    public String validateOrganizationEntity(UUID id) {
+    public String validateOrganizationEntity(UUID id, MultipartFile document) {
         OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
 
         if (organizationEntity == null) {

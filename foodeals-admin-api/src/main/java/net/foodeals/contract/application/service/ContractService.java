@@ -332,7 +332,8 @@ public class ContractService {
                 }
             });
         }
-
+        contract.setContractStatus(ContractStatus.VALIDATED);
+        this.contractRepository.save(contract);
     }
 
     public Contract createAssociationContract(Integer maxNumberOfPoints, OrganizationEntity organizationEntity) {

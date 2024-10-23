@@ -33,9 +33,9 @@ public class OrganizationEntityController {
         this.modelMapper = modelMapper;
     }
 
-    @PostMapping("/partners/create")
-    public ResponseEntity<?> addAnOrganizationEntity(@RequestBody CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
-            OrganizationEntity  organizationEntity = this.organizationEntityService.createAnewOrganizationEntity(createAnOrganizationEntityDto);
+    @PostMapping(value = "/partners/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> addAnOrganizationEntity(@RequestPart("dto") CreateAnOrganizationEntityDto createAnOrganizationEntityDto, @RequestPart("logo") MultipartFile logo, @RequestPart("cover") MultipartFile cover) throws DocumentException, IOException {
+            OrganizationEntity  organizationEntity = this.organizationEntityService.createAnewOrganizationEntity(createAnOrganizationEntityDto, logo, cover);
             return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ? this.modelMapper.mapDeliveryPartners(organizationEntity) : this.modelMapper.mapOrganizationEntity(organizationEntity), HttpStatus.CREATED);
     }
 
@@ -105,9 +105,9 @@ public class OrganizationEntityController {
     }
 
 
-    @PostMapping("/partners/validate/{id}")
-    public ResponseEntity<String> validateOrganizationEntity(@PathVariable("id") UUID id) {
-        return new ResponseEntity<String>(this.organizationEntityService.validateOrganizationEntity(id), HttpStatus.OK);
+    @PostMapping(value = "/partners/validate/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> validateOrganizationEntity(@PathVariable("id") UUID id, @RequestPart("document") MultipartFile file) {
+        return new ResponseEntity<String>(this.organizationEntityService.validateOrganizationEntity(id, file), HttpStatus.OK);
     }
 
     @GetMapping("/partners/contracts/{id}")
