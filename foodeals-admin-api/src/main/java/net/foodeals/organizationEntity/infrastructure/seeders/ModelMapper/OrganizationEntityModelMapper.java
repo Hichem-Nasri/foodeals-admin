@@ -85,7 +85,7 @@ public class OrganizationEntityModelMapper {
             formData.setMaxNumberOfAccounts(organizationEntity.getContract().getMaxNumberOfAccounts());
             formData.setMinimumReduction(organizationEntity.getContract().getMinimumReduction());
             formData.setOneSubscription(organizationEntity.getContract().isSingleSubscription());
-
+            formData.setStatus(organizationEntity.getContract().getContractStatus());
             // Map EntityAddressDto
             formData.setEntityAddressDto(mapper.map(organizationEntity.getAddress(), EntityAddressDto.class));
 

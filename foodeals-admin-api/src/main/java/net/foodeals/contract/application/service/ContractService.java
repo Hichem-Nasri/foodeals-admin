@@ -75,7 +75,7 @@ public class ContractService {
                 .maxNumberOfSubEntities(createAnOrganizationEntityDto.getMaxNumberOfSubEntities())
                 .minimumReduction(createAnOrganizationEntityDto.getMinimumReduction())
                 .maxNumberOfAccounts(createAnOrganizationEntityDto.getMaxNumberOfAccounts())
-                .contractStatus(ContractStatus.IN_PROGRESS)
+                .contractStatus(createAnOrganizationEntityDto.getStatus())
                 .singleSubscription(createAnOrganizationEntityDto.getOneSubscription())
                 .commissionPayedBySubEntities(createAnOrganizationEntityDto.getCommissionPayedBySubEntities())
                 .userContracts(userContract)
@@ -297,6 +297,10 @@ public class ContractService {
 
         if (updateOrganizationEntityDto.getManagerId() != null && updateOrganizationEntityDto.getManagerId() != contract.getUserContracts().getUser().getId()) {
             this.userContractService.updateUserContract(contract.getUserContracts(), updateOrganizationEntityDto);
+        }
+
+        if (updateOrganizationEntityDto.getStatus() != null) {
+            contract.setContractStatus(updateOrganizationEntityDto.getStatus());
         }
 
         this.solutionContractService.update(contract, updateOrganizationEntityDto);

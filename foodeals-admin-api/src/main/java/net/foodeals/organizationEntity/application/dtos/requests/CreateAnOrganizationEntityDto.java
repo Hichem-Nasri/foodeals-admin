@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.application.dtos.requests;
 
 import lombok.Data;
 import net.foodeals.contract.application.DTo.upload.SolutionsContractDto;
+import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.processors.annotations.Processable;
 
@@ -48,4 +49,6 @@ public class CreateAnOrganizationEntityDto {
     private List<CoveredZonesDto> coveredZonesDtos;
 
     private List<DeliveryPartnerContract> deliveryPartnerContract;
+
+    private ContractStatus status;
 }
