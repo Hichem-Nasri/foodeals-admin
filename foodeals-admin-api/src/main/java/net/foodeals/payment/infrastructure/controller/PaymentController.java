@@ -34,9 +34,9 @@ public class PaymentController {
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/commissions")
-    public ResponseEntity<Page<CommissionPaymentDto>> getCommissionPayments(Pageable page) {
-        Page<PartnerCommissions> payments = this.paymentService.getCommissionPayments(page);
+    @GetMapping("/commissions/{year}/{month}")
+    public ResponseEntity<Page<CommissionPaymentDto>> getCommissionPayments(@PathVariable("year") int year, @PathVariable int month, Pageable page) {
+        Page<PartnerCommissions> payments = this.paymentService.getCommissionPayments(page, year, month);
         Page<CommissionPaymentDto> paymentsDtos = this.paymentService.convertCommissionToDto(payments);
         return new ResponseEntity<Page<CommissionPaymentDto>>(paymentsDtos, HttpStatus.OK);
     }

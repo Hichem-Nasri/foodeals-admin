@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,8 +38,8 @@ public class OrderServiceImpl implements OrderService {
     private final DeliveryService deliveryService;
 
     @Override
-    public List<Order> findByOfferPublisherInfoId(UUID publisherId) {
-        return this.repository.findByOfferPublisherInfoId(publisherId);
+    public List<Order> findByOfferPublisherInfoIdAndDate(UUID publisherId, Date date) {
+        return this.repository.findOrdersByPublisherIdAndOrderDate(publisherId, date);
     }
 
     @Override

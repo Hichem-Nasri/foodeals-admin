@@ -156,8 +156,8 @@ public class PaymentServiceImpl implements PaymentService {
         this.organizationEntityService = organizationEntityService;
     }
 
-    public Page<PartnerCommissions> getCommissionPayments(Pageable page) {
-        return this.partnerCommissionsRepository.findAll(page);
+    public Page<PartnerCommissions> getCommissionPayments(Pageable page, int year, int month) {
+        return this.partnerCommissionsRepository.findCommissionsByDate(year, month, page);
     }
 
 //    @Transactional
