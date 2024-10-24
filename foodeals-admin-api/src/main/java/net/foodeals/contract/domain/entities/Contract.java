@@ -7,6 +7,7 @@ import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
@@ -52,6 +53,10 @@ public class Contract extends AbstractEntity<UUID> {
     @OneToOne(mappedBy = "contract", fetch = FetchType.LAZY,cascade = CascadeType.ALL)
     @JsonIgnore
     private OrganizationEntity organizationEntity;
+
+    @OneToMany(mappedBy = "contract")
+    private List<SubEntity> subEntities;
+
 
     private boolean singleSubscription;
 

@@ -4,6 +4,7 @@ import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
 import net.foodeals.payment.application.dto.request.ReceiveDto;
 import net.foodeals.payment.application.dto.response.CommissionPaymentDto;
+import net.foodeals.payment.application.dto.response.MonthlyOperationsDto;
 import net.foodeals.payment.application.dto.response.PaymentResponse;
 import net.foodeals.payment.application.dto.response.SubscriptionPaymentDto;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
@@ -26,4 +27,6 @@ public interface PaymentService {
     Page<CommissionPaymentDto> convertCommissionToDto(Page<PartnerCommissions> payments);
 
     void paySubscription(MultipartFile document, ReceiveDto receiveDto, UUID uuid);
+
+    Page<MonthlyOperationsDto> monthlyOperations(UUID id, int year, int month, Pageable page);
 }

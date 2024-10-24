@@ -2,6 +2,8 @@ package net.foodeals.order.domain.repositories;
 
 import net.foodeals.common.contracts.BaseRepository;
 import net.foodeals.order.domain.entities.Order;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,4 +17,9 @@ public interface OrderRepository extends BaseRepository<Order, UUID> {
             "AND EXTRACT(MONTH FROM o.createdAt) = EXTRACT(MONTH FROM CAST(:orderDate AS timestamp)) " +
             "AND EXTRACT(YEAR FROM o.createdAt) = EXTRACT(YEAR FROM CAST(:orderDate AS timestamp))")
     List<Order> findOrdersByPublisherIdAndOrderDate(@Param("publisherId") UUID publisherId, @Param("orderDate") Date orderDate);
+
+    @Query("SELECT o FROM Order o WHERE o.offer.publisherInfo.id = :publisherId " +
+            "AND EXTRACT(MONTH FROM o.createdAt) = EXTRACT(MONTH FROM CAST(:orderDate AS timestamp)) " +
+            "AND EXTRACT(YEAR FROM o.createdAt) = EXTRACT(YEAR FROM CAST(:orderDate AS timestamp))")
+    Page<Order> findOrdersByPublisherIdAndOrderDate(@Param("publisherId") UUID publisherId, @Param("orderDate") Date orderDate, Pageable pageable);
 }

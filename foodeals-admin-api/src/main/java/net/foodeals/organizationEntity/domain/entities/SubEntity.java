@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Coordinates;
+import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
@@ -84,6 +85,8 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     @OneToMany(mappedBy = "subEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subscription> subscriptions = new ArrayList<>();
 
+    @ManyToOne
+    private Contract contract;
 
     @ManyToMany(cascade = CascadeType.ALL)
     private Set<Solution> solutions = new HashSet<>();

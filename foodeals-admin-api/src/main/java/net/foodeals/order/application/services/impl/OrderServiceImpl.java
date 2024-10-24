@@ -43,6 +43,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Page<Order> findByOfferPublisherInfoIdAndDate(UUID publisherId, Date date, Pageable pageable) {
+        return this.repository.findOrdersByPublisherIdAndOrderDate(publisherId, date, pageable);
+    }
+
+    @Override
     public List<Order> findAll() {
         return repository.findAll();
     }
