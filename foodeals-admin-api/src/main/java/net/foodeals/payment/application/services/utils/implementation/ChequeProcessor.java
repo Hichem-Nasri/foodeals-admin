@@ -13,12 +13,12 @@ public class ChequeProcessor implements PaymentProcessor {
     @Override
     public PaymentResponse process(PaymentRequest request, MultipartFile document) {
 
-        ChequeDetails details = (ChequeDetails) request.paymentDetails();
-
-        // Logic for processing cheque payment
-
-        // Record cheque details, mark as pending clearance, etc.
-
+//        ChequeDetails details = (ChequeDetails) request.paymentDetails();
+//
+//        // Logic for processing cheque payment
+//
+//        // Record cheque details, mark as pending clearance, etc.
+//
         return new PaymentResponse("");
 
     }

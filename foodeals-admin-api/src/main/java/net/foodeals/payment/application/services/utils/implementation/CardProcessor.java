@@ -12,12 +12,12 @@ public class CardProcessor implements PaymentProcessor {
 
     @Override
     public PaymentResponse process(PaymentRequest request, MultipartFile document) {
-        CardDetails details = (CardDetails) request.paymentDetails();
-
-        // Logic for processing card payment
-
-        // Validate card, charge card, etc.
-
+//        CardDetails details = (CardDetails) request.paymentDetails();
+//
+//        // Logic for processing card payment
+//
+//        // Validate card, charge card, etc.
+//
         return new PaymentResponse("");
 
     }

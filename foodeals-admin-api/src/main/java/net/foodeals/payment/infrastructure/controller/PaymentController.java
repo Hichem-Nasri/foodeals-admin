@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
 import net.foodeals.payment.application.dto.request.ReceiveDto;
+import net.foodeals.payment.application.dto.request.paymentDetails.CashDetails;
 import net.foodeals.payment.application.dto.response.CommissionPaymentDto;
 import net.foodeals.payment.application.dto.response.MonthlyOperationsDto;
 import net.foodeals.payment.application.dto.response.PaymentResponse;
@@ -30,7 +31,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping(value = "/commissions/process", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<PaymentResponse> processPayment(@RequestParam("paymentRequest") PaymentRequest paymentRequest, @RequestParam(value = "document", required = false) MultipartFile document) throws BadRequestException {
+    public ResponseEntity<?> processPayment(@RequestPart("dto") PaymentRequest paymentRequest, @RequestPart(value = "document", required = false) MultipartFile document) throws BadRequestException {
         PaymentResponse result = paymentService.processPayment(paymentRequest,document);
         return ResponseEntity.ok(result);
     }
