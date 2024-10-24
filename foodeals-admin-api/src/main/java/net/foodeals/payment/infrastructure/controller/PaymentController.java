@@ -29,8 +29,8 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @PostMapping(value = "/commissions/process")
-    public ResponseEntity<PaymentResponse> processPayment(@RequestParam("paymentRequest") PaymentRequest paymentRequest, @RequestParam("document") MultipartFile document) throws BadRequestException {
+    @PostMapping(value = "/commissions/process", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PaymentResponse> processPayment(@RequestParam("paymentRequest") PaymentRequest paymentRequest, @RequestParam(value = "document", required = false) MultipartFile document) throws BadRequestException {
         PaymentResponse result = paymentService.processPayment(paymentRequest,document);
         return ResponseEntity.ok(result);
     }
