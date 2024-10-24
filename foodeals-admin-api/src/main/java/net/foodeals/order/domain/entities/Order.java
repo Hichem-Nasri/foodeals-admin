@@ -29,9 +29,7 @@ public class Order extends AbstractEntity<UUID> {
 
     @Embedded
     private Price price;
-
-    private Date date;
-
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "order_type")
     private OrderType type;
