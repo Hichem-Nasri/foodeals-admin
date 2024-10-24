@@ -100,10 +100,17 @@ import jakarta.transaction.Transactional;
 import net.foodeals.contract.application.service.CommissionService;
 import net.foodeals.contract.application.service.DeadlinesService;
 import net.foodeals.contract.application.service.SubscriptionService;
+import net.foodeals.contract.domain.entities.Commission;
 import net.foodeals.contract.domain.entities.Deadlines;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.contract.domain.entities.enums.DeadlineStatus;
 import net.foodeals.contract.domain.entities.enums.SubscriptionStatus;
+import net.foodeals.offer.domain.enums.PublisherType;
+import net.foodeals.order.application.services.OrderService;
+import net.foodeals.order.domain.entities.Order;
+import net.foodeals.order.domain.entities.Transaction;
+import net.foodeals.order.domain.enums.TransactionStatus;
+import net.foodeals.order.domain.enums.TransactionType;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
 import net.foodeals.organizationEntity.application.services.SubEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
@@ -126,6 +133,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -140,8 +148,9 @@ public class PaymentServiceImpl implements PaymentService {
     private final Map<String, PaymentProcessor> processors;
     private final SubEntityService subEntityService;
     private final OrganizationEntityService organizationEntityService;
+    private final OrderService orderService;
 
-    public PaymentServiceImpl(PartnerCommissionsRepository partnerCommissionsRepository, ModelMapper modelMapper, CommissionService commissionService, SubscriptionService subscriptionService, DeadlinesService deadlinesService, List<PaymentProcessor> processorList, SubEntityService subEntityService, OrganizationEntityService organizationEntityService) {
+    public PaymentServiceImpl(PartnerCommissionsRepository partnerCommissionsRepository, ModelMapper modelMapper, CommissionService commissionService, SubscriptionService subscriptionService, DeadlinesService deadlinesService, List<PaymentProcessor> processorList, SubEntityService subEntityService, OrganizationEntityService organizationEntityService, OrderService orderService) {
         this.partnerCommissionsRepository = partnerCommissionsRepository;
         this.modelMapper = modelMapper;
         this.commissionService = commissionService;
@@ -154,6 +163,7 @@ public class PaymentServiceImpl implements PaymentService {
                 ));
         this.subEntityService = subEntityService;
         this.organizationEntityService = organizationEntityService;
+        this.orderService = orderService;
     }
 
     public Page<PartnerCommissions> getCommissionPayments(Pageable page, int year, int month) {
@@ -313,6 +323,43 @@ public class PaymentServiceImpl implements PaymentService {
             if (!d.getStatus().equals(DeadlineStatus.PAID)) {
                 subscription.setSubscriptionStatus(SubscriptionStatus.IN_PROGRESS);
             }
+        });
+    }
+
+    @Override
+    @Transactional
+    public Page<MonthlyOperationsDto> monthlyOperations(UUID id, int year, int month, Pageable page) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(year, month - 1, 1); // month is 0-based in Calendar
+        Date date = calendar.getTime();
+        Page<Order> orders = this.orderService.findByOfferPublisherInfoIdAndDate(id, date, page);
+        List<Order> filteredOrders  = orders.getContent().stream()
+                .filter(o -> !o.getTransactions().isEmpty() &&
+                        o.getTransactions().get(0).getStatus().equals(TransactionStatus.COMPLETED))
+                .collect(Collectors.toList());
+        System.out.println("orders");
+        for (Order order : orders) {
+            System.out.println(order);
+        }
+        orders = new PageImpl<>(filteredOrders, orders.getPageable(), orders.getTotalElements());
+
+    return orders.map(o -> {
+        Transaction transaction = o.getTransactions().getFirst();
+        UUID organizationId = o.getOffer().getPublisherInfo().type().equals(PublisherType.PARTNER_SB) ? this.subEntityService.getEntityById(id).getOrganizationEntity().getId() : id;
+        Commission commission = this.commissionService.getCommissionByPartnerId(id);
+        System.out.println(commission);
+        BigDecimal cashAmount = transaction.getType().equals(TransactionType.CASH) ? transaction.getPrice().amount() : BigDecimal.ZERO;
+        BigDecimal cardAmount = transaction.getType().equals(TransactionType.CASH) ? BigDecimal.ZERO : transaction.getPrice().amount();
+        BigDecimal cashCommission = transaction.getType().equals(TransactionType.CASH)
+                ? BigDecimal.valueOf(commission.getCash()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount())
+                : BigDecimal.ZERO;
+        BigDecimal cardCommission = transaction.getType().equals(TransactionType.CASH)
+                ? BigDecimal.ZERO
+                : BigDecimal.valueOf(commission.getCard()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount());
+        BigDecimal amount = transaction.getPrice().amount();
+        System.out.println(commission.getCard());
+
+        return new MonthlyOperationsDto(null, o.getId(), amount, o.getQuantity(), cashAmount, cashCommission, cardAmount, cardCommission);
         });
     }
 }

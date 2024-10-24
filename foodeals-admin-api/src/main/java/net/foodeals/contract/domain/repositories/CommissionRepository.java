@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface CommissionRepository extends BaseRepository<Commission, UUID> {
     @Query("SELECT sc.commission FROM SolutionContract sc " +
             "JOIN sc.contract c " +
-            "WHERE c.name = :partnerName")
-    Commission findByPartnerName(@Param("partnerName") String name);
+            "JOIN c.organizationEntity o " + // Join with OrganizationEntity
+            "WHERE o.id = :organizationId") // Filter by organization ID
+    Commission findCommissionByOrganizationId(@Param("organizationId") UUID organizationId);
 }

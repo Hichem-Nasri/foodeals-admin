@@ -53,11 +53,9 @@ public class PaymentModelMapperConfig {
             PartnerInfoDto partnerInfoDto = new PartnerInfoDto(partnerCommissions.getPartner().getName(), partnerCommissions.getPartner().getAvatarPath());
             String organizationName = !partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) ? partnerCommissions.getPartner().getName() : ((SubEntity) partnerCommissions.getPartner()).getOrganizationEntity().getName();
             UUID organizationId = !partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) ? partnerCommissions.getPartner().getId() : ((SubEntity) partnerCommissions.getPartner()).getOrganizationEntity().getId();
-            Commission commission = this.commissionService.getCommissionByPartnerName(organizationName);
+            Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
             SimpleDateFormat formatter = new SimpleDateFormat("M/yyyy");
             List<Order> orderList = this.orderService.findByOfferPublisherInfoIdAndDate(partnerCommissions.getPartner().getId(), partnerCommissions.getDate());
-            System.out.println(orderList);
-            System.out.println("--");
             List<Transaction> transactions = orderList.stream()
                     .flatMap(order -> order.getTransactions().stream())
                     .collect(Collectors.toList());

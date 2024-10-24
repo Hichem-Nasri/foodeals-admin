@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Currency;
+import java.util.UUID;
 
 @Service
 public class CommissionService {
@@ -45,12 +46,12 @@ public class CommissionService {
         return this.commissionRepository.save(commission);
     }
 
-    public Commission getCommissionByPartnerName(String name) {
-        return this.commissionRepository.findByPartnerName(name);
-    }
-
     @Transactional
     public Commission save(Commission commission) {
         return this.commissionRepository.saveAndFlush(commission);
+    }
+
+    public Commission getCommissionByPartnerId(UUID id) {
+        return this.commissionRepository.findCommissionByOrganizationId(id);
     }
 }

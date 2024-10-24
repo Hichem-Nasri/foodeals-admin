@@ -26,6 +26,8 @@ public class Offer extends AbstractEntity<UUID> {
         @UuidGenerator
         private UUID id;
 
+        private String imagePath;
+
         @Embedded
         @AttributeOverrides({
                 @AttributeOverride(name = "amount", column = @Column(name = "price_amount")),

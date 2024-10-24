@@ -29,7 +29,7 @@ public class Order extends AbstractEntity<UUID> {
 
     @Embedded
     private Price price;
-    
+
     @Enumerated(EnumType.STRING)
     @Column(name = "order_type")
     private OrderType type;
@@ -39,6 +39,8 @@ public class Order extends AbstractEntity<UUID> {
 
     @ManyToOne(cascade = CascadeType.ALL)
     private User client;
+
+    private Integer quantity;
 
     @ManyToOne(cascade = CascadeType.ALL)
     private Offer offer;
