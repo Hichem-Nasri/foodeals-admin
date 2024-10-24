@@ -28,6 +28,7 @@ import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRep
 import net.foodeals.payment.application.dto.response.PartnerInfoDto;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
+import net.foodeals.user.domain.valueObjects.Name;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -365,12 +366,18 @@ public class OrganizationEntityModelMapper {
         deliveryPartnerDto.setPartnerInfoDto(partnerInfoDto);
 
         User manager = organizationEntity.getUsers().stream().filter(user -> user.getRole().getName().equals("MANAGER")).findFirst().orElse(null);
+        Contact contact = organizationEntity.getContacts().get(0);
+        Name name = manager != null ? manager.getName() : contact.getName();
+        String avatarPath = manager != null ? manager.getAvatarPath() : "";
+        String phone = manager != null ? manager.getPhone() : contact.getPhone();
+        String email = manager != null ? manager.getEmail() : contact.getEmail();
 
-        ResponsibleInfoDto responsibleInfoDto = ResponsibleInfoDto.builder().name(manager.getName())
-                .avatarPath(manager.getAvatarPath())
-                .phone(manager.getPhone())
-                .email(manager.getEmail())
+        ResponsibleInfoDto responsibleInfoDto = ResponsibleInfoDto.builder().name(name)
+                .avatarPath(avatarPath)
+                .phone(phone)
+                .email(email)
                 .build();
+
         deliveryPartnerDto.setResponsibleInfoDto(responsibleInfoDto);
 
         Long numberOfDeliveryPeople = this.userService.countDeliveryUsersByOrganizationId(organizationEntity.getId());

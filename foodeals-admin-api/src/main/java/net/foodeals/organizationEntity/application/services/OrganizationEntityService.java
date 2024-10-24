@@ -140,23 +140,12 @@ public class OrganizationEntityService {
             });
         }
         Contract contract = this.contractService.createDeliveryPartnerContract(organizationEntity, createAnOrganizationEntityDto);
-        Contact managerContact = organizationEntity.getContacts().getFirst();
-
         BankInformation bankInformation = BankInformation.builder().beneficiaryName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBeneficiaryName())
                 .bankName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBankName())
                 .rib(createAnOrganizationEntityDto.getEntityBankInformationDto().getRib())
                 .build();
         organizationEntity.setBankInformation(bankInformation);
         organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
-        Role role  = this.roleService.findByName("MANAGER");
-        String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
-        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), true, "MANAGER", organizationEntity.getId(), userAddress);
-        User manager = this.userService.create(userRequest);
-        //        String receiver = manager.getEmail();
-//        String subject = "Foodeals account validation";
-//        String message = "You're account has been validated\n Your email : " + manager.getEmail() + " \n" + " Your password : " + pass;
-//        this.emailService.sendEmail(receiver, subject, message);
         return this.organizationEntityRepository.save(organizationEntity);
     }
 
@@ -370,18 +359,19 @@ public class OrganizationEntityService {
         UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
         UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), false, "MANAGER", organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
-        Date date = new Date();
-        if (!organizationEntity.getContract().isCommissionPayedBySubEntities()) {
-            PartnerCommissions partnerCommissions = PartnerCommissions.builder()
-                    .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getPartnerType()))
-                    .paymentStatus(PaymentStatus.IN_VALID)
-                    .date(date)
-                    .build();
-            organizationEntity.getCommissions().add(partnerCommissions);
+        if (!organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER)) {
+            if (!organizationEntity.getContract().isCommissionPayedBySubEntities()) {
+                Date date = new Date();
+                PartnerCommissions partnerCommissions = PartnerCommissions.builder()
+                        .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getPartnerType()))
+                        .paymentStatus(PaymentStatus.IN_VALID)
+                        .date(date)
+                        .build();
+                organizationEntity.getCommissions().add(partnerCommissions);
+            }
+            this.contractService.validateContract(organizationEntity.getContract());
+            this.organizationEntityRepository.save(organizationEntity);
         }
-        this.userService.save(manager);
-        this.organizationEntityRepository.save(organizationEntity);
-        this.contractService.validateContract(organizationEntity.getContract());
 //        String receiver = manager.getEmail();
 //        String subject = "Foodeals account validation";
 //        String message = "You're account has been validated\n Your email : " + manager.getEmail() + " \n" + " Your password : " + pass;
