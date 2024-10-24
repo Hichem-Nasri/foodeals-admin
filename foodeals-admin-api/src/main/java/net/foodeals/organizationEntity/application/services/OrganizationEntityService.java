@@ -214,6 +214,7 @@ public class OrganizationEntityService {
                     }
                     return solution;
                 }).toList();
+        organizationEntity.setType(updateOrganizationEntityDto.getEntityType());
         OrganizationEntity finalOrganizationEntity1 = organizationEntity;
         solutions.stream().map(solution -> {
             solution.getOrganizationEntities().add(finalOrganizationEntity1);

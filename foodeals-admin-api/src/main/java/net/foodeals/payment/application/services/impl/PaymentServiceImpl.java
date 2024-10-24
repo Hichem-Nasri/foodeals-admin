@@ -330,24 +330,19 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public Page<MonthlyOperationsDto> monthlyOperations(UUID id, int year, int month, Pageable page) {
         Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month - 1, 1); // month is 0-based in Calendar
+        calendar.set(year, month - 1, 1);
         Date date = calendar.getTime();
         Page<Order> orders = this.orderService.findByOfferPublisherInfoIdAndDate(id, date, page);
         List<Order> filteredOrders  = orders.getContent().stream()
                 .filter(o -> !o.getTransactions().isEmpty() &&
                         o.getTransactions().get(0).getStatus().equals(TransactionStatus.COMPLETED))
                 .collect(Collectors.toList());
-        System.out.println("orders");
-        for (Order order : orders) {
-            System.out.println(order);
-        }
         orders = new PageImpl<>(filteredOrders, orders.getPageable(), orders.getTotalElements());
 
     return orders.map(o -> {
         Transaction transaction = o.getTransactions().getFirst();
         UUID organizationId = o.getOffer().getPublisherInfo().type().equals(PublisherType.PARTNER_SB) ? this.subEntityService.getEntityById(id).getOrganizationEntity().getId() : id;
-        Commission commission = this.commissionService.getCommissionByPartnerId(id);
-        System.out.println(commission);
+        Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
         BigDecimal cashAmount = transaction.getType().equals(TransactionType.CASH) ? transaction.getPrice().amount() : BigDecimal.ZERO;
         BigDecimal cardAmount = transaction.getType().equals(TransactionType.CASH) ? BigDecimal.ZERO : transaction.getPrice().amount();
         BigDecimal cashCommission = transaction.getType().equals(TransactionType.CASH)

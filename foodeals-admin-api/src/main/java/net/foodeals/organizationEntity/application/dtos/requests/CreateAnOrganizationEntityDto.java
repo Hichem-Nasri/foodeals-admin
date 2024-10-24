@@ -49,6 +49,4 @@ public class CreateAnOrganizationEntityDto {
     private List<CoveredZonesDto> coveredZonesDtos;
 
     private List<DeliveryPartnerContract> deliveryPartnerContract;
-
-    private ContractStatus status;
 }
