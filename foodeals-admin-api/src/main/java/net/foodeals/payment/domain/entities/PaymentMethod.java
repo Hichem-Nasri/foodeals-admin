@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.common.valueOjects.Price;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -20,5 +22,7 @@ public abstract class PaymentMethod extends AbstractEntity<UUID> {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private Double amount;
+    @Embedded
+    private Price amount;
+
 }

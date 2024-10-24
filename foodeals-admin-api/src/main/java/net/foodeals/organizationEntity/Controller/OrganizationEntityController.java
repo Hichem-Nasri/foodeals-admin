@@ -35,13 +35,13 @@ public class OrganizationEntityController {
     }
 
     @PostMapping(value = "/partners/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> addAnOrganizationEntity(@RequestPart("dto") CreateAnOrganizationEntityDto createAnOrganizationEntityDto, @RequestPart("logo") MultipartFile logo, @RequestPart("cover") MultipartFile cover) throws DocumentException, IOException {
+    public ResponseEntity<?> addAnOrganizationEntity(@RequestPart("dto") CreateAnOrganizationEntityDto createAnOrganizationEntityDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) throws DocumentException, IOException {
             OrganizationEntity  organizationEntity = this.organizationEntityService.createAnewOrganizationEntity(createAnOrganizationEntityDto, logo, cover);
             return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ? this.modelMapper.mapDeliveryPartners(organizationEntity) : this.modelMapper.mapOrganizationEntity(organizationEntity), HttpStatus.CREATED);
     }
 
     @PostMapping(value = "/associations/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UUID> createAssociation(@RequestPart("createAssociationDto") CreateAssociationDto createAssociationDto, @RequestPart("logo") MultipartFile logo, @RequestPart("cover") MultipartFile cover) {
+    public ResponseEntity<UUID> createAssociation(@RequestPart("createAssociationDto") CreateAssociationDto createAssociationDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) {
         return new ResponseEntity<UUID>(this.organizationEntityService.createAssociation(createAssociationDto, logo, cover), HttpStatus.OK);
     }
 

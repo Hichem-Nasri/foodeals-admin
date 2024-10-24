@@ -25,21 +25,21 @@ public class BankTransferProcessor implements PaymentProcessor {
     @Override
     public PaymentResponse process(PaymentRequest request, MultipartFile document) throws BadRequestException {
 
-        if (document.isEmpty()) {
-            throw new BadRequestException("bad document");
-        }
-
-        // logic to upload file into cloud storage.
-
-        PartnerCommissions partnerCommissions = this.partnerCommissionsRepository.findById(request.id()).orElseThrow(() -> new ResourceNotFoundException("commission not found with id : " + request.id().toString() ));
-        partnerCommissions.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
-        BankTransferPaymentMethod bankTransferPaymentMethod = new BankTransferPaymentMethod();
-        // saving document path
-        // bankTransferPaymentMethod.setDocumentPath("")
-        bankTransferPaymentMethod.setAmount(request.amount());
-
-        partnerCommissions.setPaymentMethod(bankTransferPaymentMethod);
-        this.partnerCommissionsRepository.save(partnerCommissions);
+//        if (document.isEmpty()) {
+//            throw new BadRequestException("bad document");
+//        }
+//
+//        // logic to upload file into cloud storage.
+//
+//        PartnerCommissions partnerCommissions = this.partnerCommissionsRepository.findById(request.id()).orElseThrow(() -> new ResourceNotFoundException("commission not found with id : " + request.id().toString() ));
+//        partnerCommissions.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
+//        BankTransferPaymentMethod bankTransferPaymentMethod = new BankTransferPaymentMethod();
+//        // saving document path
+//        // bankTransferPaymentMethod.setDocumentPath("")
+//        bankTransferPaymentMethod.setAmount(request.amount());
+//
+//        partnerCommissions.setPaymentMethod(bankTransferPaymentMethod);
+//        this.partnerCommissionsRepository.save(partnerCommissions);
         return new PaymentResponse("payment validated successfully");
     }
 
