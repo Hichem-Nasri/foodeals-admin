@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 public interface PaymentService {
-    Page<PartnerCommissions> getCommissionPayments(Pageable page);
+    Page<PartnerCommissions> getCommissionPayments(Pageable page, int year, int month);
 
     Page<Subscription> getSubscriptionPayments(Pageable page, int year);
 

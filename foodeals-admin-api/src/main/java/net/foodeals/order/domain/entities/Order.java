@@ -12,6 +12,7 @@ import net.foodeals.order.domain.enums.OrderType;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +29,7 @@ public class Order extends AbstractEntity<UUID> {
 
     @Embedded
     private Price price;
-
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "order_type")
     private OrderType type;
