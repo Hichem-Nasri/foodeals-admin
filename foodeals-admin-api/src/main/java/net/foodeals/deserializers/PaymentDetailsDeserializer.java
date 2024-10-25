@@ -47,7 +47,7 @@ public class PaymentDetailsDeserializer extends JsonDeserializer<PaymentDetails>
                 String expiryDate = node.get("expiryDate").asText();
                 String cvv = node.get("cvv").asText();
                 return new CardDetails(cardNumber, cardHolderName, expiryDate, cvv);
-            case "BANK_TRANSFER":
+            case "BANKTRANSFER":
                 return new BankTransferDetails();
             default:
                 throw new IllegalArgumentException("Unknown payment details type: " + type);
