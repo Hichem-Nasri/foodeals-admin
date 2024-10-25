@@ -305,6 +305,7 @@ public class OrganizationEntityModelMapper {
 
             formData.setEntityType(organizationEntity.getType());
             formData.setEntityName(organizationEntity.getName());
+            formData.setStatus(organizationEntity.getContract().getContractStatus());
 
             formData.setSolutions(organizationEntity.getSolutions().stream().map(Solution::getName).collect(Collectors.toList()));
 
@@ -377,6 +378,7 @@ public class OrganizationEntityModelMapper {
                 .phone(phone)
                 .email(email)
                 .build();
+        deliveryPartnerDto.setStatus(organizationEntity.getContract().getContractStatus());
 
         deliveryPartnerDto.setResponsibleInfoDto(responsibleInfoDto);
 
@@ -405,4 +407,3 @@ public class OrganizationEntityModelMapper {
         return  this.mapper.map(organizationEntity, DeliveryFormData.class);
     }
 }
-
