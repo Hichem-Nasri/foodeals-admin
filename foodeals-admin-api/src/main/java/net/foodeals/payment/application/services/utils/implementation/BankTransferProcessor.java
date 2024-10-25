@@ -36,15 +36,15 @@ public class BankTransferProcessor implements PaymentProcessor {
         try {
             //        // logic to upload file into cloud storage.
             PartnerCommissions partnerCommission = this.partnerCommissionsRepository.findById(request.id()).orElseThrow(() -> new ResourceNotFoundException("commission not found with id : " + request.id().toString()));
+            BankTransferPaymentMethod bankTransferPaymentMethod = new BankTransferPaymentMethod();
+            bankTransferPaymentMethod.setAmount(new Price(request.amount().amount(), Currency.getInstance(request.amount().currency())));
+            partnerCommission.setPaymentMethod(bankTransferPaymentMethod);
+            partnerCommission.setPaymentDirection(PaymentDirection.FOODEALS_TO_PARTENER);
             if (partnerCommission.getPaymentStatus().equals(PaymentStatus.VALIDATED_BY_PARTNER)) {
                 partnerCommission.setPaymentStatus(PaymentStatus.VALIDATED_BY_BOTH);
             } else {
                 partnerCommission.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
             }
-            BankTransferPaymentMethod bankTransferPaymentMethod = new BankTransferPaymentMethod();
-            bankTransferPaymentMethod.setAmount(new Price(request.amount().amount(), Currency.getInstance(request.amount().currency())));
-            partnerCommission.setPaymentMethod(bankTransferPaymentMethod);
-            partnerCommission.setPaymentDirection(PaymentDirection.FOODEALS_TO_PARTENER);
             this.partnerCommissionsRepository.save(partnerCommission);
         } catch(Exception e) {
             throw new RuntimeException("error : payment not validated");

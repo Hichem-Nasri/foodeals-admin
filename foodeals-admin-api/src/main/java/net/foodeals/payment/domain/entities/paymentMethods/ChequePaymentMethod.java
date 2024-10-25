@@ -24,5 +24,5 @@ public class ChequePaymentMethod extends PaymentMethod {
     private Date recuperationDate;
     private String bank;
     private String issuer;
-    private byte[] chequeDocument;
+    private String chequeDocument;
 }

@@ -34,13 +34,20 @@ public class PaymentDetailsDeserializer extends JsonDeserializer<PaymentDetails>
             case "CHEQUE":
                 String chequeNumber = node.get("chequeNumber").asText();
                 String bankName = node.get("bankName").asText();
-                Date chequeDate = null;
+                String issuer = node.get("issuer").asText();
+                Date deadlineDate = null;
                 try {
-                    chequeDate = dateFormat.parse(node.get("chequeDate").asText());
+                    deadlineDate = dateFormat.parse(node.get("deadlineDate").asText());
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
-                return new ChequeDetails(chequeNumber, bankName, chequeDate);
+                Date recuperationDate = null;
+                try {
+                    recuperationDate = dateFormat.parse(node.get("recuperationDate").asText());
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                return new ChequeDetails(chequeNumber, bankName, deadlineDate, recuperationDate, issuer);
             case "CARD":
                 String cardNumber = node.get("cardNumber").asText();
                 String cardHolderName = node.get("cardHolderName").asText();
