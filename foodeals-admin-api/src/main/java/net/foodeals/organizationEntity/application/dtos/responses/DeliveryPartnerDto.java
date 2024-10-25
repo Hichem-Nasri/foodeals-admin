@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.application.dtos.responses;
 
 import lombok.Builder;
 import lombok.Data;
+import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.organizationEntity.application.dtos.responses.enums.DistributionType;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.payment.application.dto.response.PartnerInfoDto;
@@ -14,7 +15,6 @@ import java.util.UUID;
 public class DeliveryPartnerDto {
 
     private UUID id;
-
 
     private String createdAt;
 
@@ -31,4 +31,6 @@ public class DeliveryPartnerDto {
     private DistributionType distribution;
 
     private List<String> solutions;
+
+    private ContractStatus status;
 }

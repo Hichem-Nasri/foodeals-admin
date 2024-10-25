@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.domain.entities.Contract;
+import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.delivery.application.services.impl.CoveredZonesService;
 import net.foodeals.delivery.domain.entities.CoveredZones;
 import net.foodeals.location.application.dtos.requests.AddressRequest;
@@ -370,8 +371,10 @@ public class OrganizationEntityService {
                 organizationEntity.getCommissions().add(partnerCommissions);
             }
             this.contractService.validateContract(organizationEntity.getContract());
-            this.organizationEntityRepository.save(organizationEntity);
         }
+        organizationEntity.getContract().setContractStatus(ContractStatus.VALIDATED);
+        this.organizationEntityRepository.save(organizationEntity);
+
 //        String receiver = manager.getEmail();
 //        String subject = "Foodeals account validation";
 //        String message = "You're account has been validated\n Your email : " + manager.getEmail() + " \n" + " Your password : " + pass;

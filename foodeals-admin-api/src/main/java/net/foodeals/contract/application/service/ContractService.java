@@ -332,7 +332,6 @@ public class ContractService {
                 }
             });
         }
-        contract.setContractStatus(ContractStatus.VALIDATED);
         this.contractRepository.save(contract);
     }
 
