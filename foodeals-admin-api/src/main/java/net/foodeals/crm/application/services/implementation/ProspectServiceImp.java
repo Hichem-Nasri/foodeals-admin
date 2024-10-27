@@ -1,10 +1,7 @@
 package net.foodeals.crm.application.services.implementation;
 
 import lombok.AllArgsConstructor;
-import net.foodeals.crm.application.dto.requests.EventRequest;
-import net.foodeals.crm.application.dto.requests.PartialEventRequest;
-import net.foodeals.crm.application.dto.requests.PartialProspectRequest;
-import net.foodeals.crm.application.dto.requests.ProspectRequest;
+import net.foodeals.crm.application.dto.requests.*;
 import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
 import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
@@ -19,8 +16,6 @@ import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.impl.RegionServiceImpl;
 import net.foodeals.location.domain.entities.Address;
-import net.foodeals.location.domain.entities.City;
-import net.foodeals.location.domain.entities.Region;
 import net.foodeals.organizationEntity.application.services.ActivityService;
 import net.foodeals.organizationEntity.application.services.ContactsService;
 import net.foodeals.organizationEntity.application.services.SolutionService;
@@ -36,7 +31,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -218,6 +212,14 @@ public final class ProspectServiceImp implements ProspectService {
     public ProspectStatisticDto statistics() {
         Role role = this.roleService.findByName("LEAD");
         return new ProspectStatisticDto(this.prospectRepository.countDistinctLeadsByStatus(ProspectStatus.IN_PROGRESS), this.prospectRepository.countByStatusAndDeletedAtIsNull(ProspectStatus.CANCELED), this.prospectRepository.countByStatusAndDeletedAtIsNull(ProspectStatus.IN_PROGRESS), this.userService.countByRole(role));
+    }
+
+    @Override
+    public String changeStatus(UUID id, ProspectStatusRequest dto) {
+        Prospect prospect = this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("prospect not found with id " + id.toString()));
+        prospect.setStatus(dto.status());
+        this.prospectRepository.save(prospect);
+        return "status changed successfully";
     }
 
     @Override

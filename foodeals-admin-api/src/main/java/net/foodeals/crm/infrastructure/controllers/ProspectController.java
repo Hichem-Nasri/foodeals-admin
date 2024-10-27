@@ -2,14 +2,12 @@ package net.foodeals.crm.infrastructure.controllers;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import net.foodeals.crm.application.dto.requests.EventRequest;
-import net.foodeals.crm.application.dto.requests.PartialEventRequest;
-import net.foodeals.crm.application.dto.requests.PartialProspectRequest;
-import net.foodeals.crm.application.dto.requests.ProspectRequest;
+import net.foodeals.crm.application.dto.requests.*;
 import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
 import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
 import net.foodeals.crm.application.services.ProspectService;
+import net.foodeals.crm.domain.entities.enums.ProspectStatus;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -77,6 +75,12 @@ public final class ProspectController {
     @PutMapping("/prospects/{prospectId}/events/{eventId}")
     public ResponseEntity<EventResponse> updateEvent(@PathVariable("prospectId") UUID prospectId,@PathVariable("eventId") UUID eventId, @RequestBody EventRequest eventRequest) {
         return new ResponseEntity<EventResponse>(this.prospectService.updateEvent(prospectId, eventId, eventRequest), HttpStatus.OK);
+    }
+
+    @PostMapping("/prospects/status/{id}")
+    public ResponseEntity<String> changeStatus(@PathVariable("id") UUID id, @RequestBody ProspectStatusRequest status) {
+        System.out.println(status);
+        return new ResponseEntity<String>(this.prospectService.changeStatus(id, status), HttpStatus.OK);
     }
 
     @PatchMapping("/prospects/{prospectId}/events/{eventId}")
