@@ -1,10 +1,7 @@
 package net.foodeals.crm.application.services;
 
 import net.foodeals.common.contracts.CrudService;
-import net.foodeals.crm.application.dto.requests.EventRequest;
-import net.foodeals.crm.application.dto.requests.PartialEventRequest;
-import net.foodeals.crm.application.dto.requests.PartialProspectRequest;
-import net.foodeals.crm.application.dto.requests.ProspectRequest;
+import net.foodeals.crm.application.dto.requests.*;
 import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
 import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
@@ -31,4 +28,6 @@ public interface ProspectService extends CrudService<ProspectResponse, UUID, Pro
     void deleteEvent(UUID prospectId, UUID eventId);
 
     ProspectStatisticDto statistics();
+
+    String changeStatus(UUID id, ProspectStatusRequest status);
 }
