@@ -50,7 +50,7 @@ public class PaymentModelMapperConfig {
     public void paymentModelMapperConfig() {
         modelMapper.addConverter(mappingContext -> {
             PartnerCommissions partnerCommissions = mappingContext.getSource();
-            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(partnerCommissions.getPartner().getName(), partnerCommissions.getPartner().getAvatarPath());
+            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(partnerCommissions.getPartner().getId(), partnerCommissions.getPartner().getName(), partnerCommissions.getPartner().getAvatarPath());
             String organizationName = !partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) ? partnerCommissions.getPartner().getName() : ((SubEntity) partnerCommissions.getPartner()).getOrganizationEntity().getName();
             UUID organizationId = !partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) ? partnerCommissions.getPartner().getId() : ((SubEntity) partnerCommissions.getPartner()).getOrganizationEntity().getId();
             Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
@@ -82,7 +82,7 @@ public class PaymentModelMapperConfig {
         modelMapper.addConverter(mappingContext -> {
             OrganizationEntity organizationEntity = mappingContext.getSource();
 
-            PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder().name(organizationEntity.getName())
+            PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder().id(organizationEntity.getId()).name(organizationEntity.getName())
                     .avatarPath(organizationEntity.getAvatarPath())
                     .build();
             return CommissionPaymentDto.builder()

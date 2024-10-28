@@ -31,7 +31,6 @@ public class EntityAddressDto {
     private String region;
 
 
-    @Processable
     @NotBlank
     private String iframe;
 }

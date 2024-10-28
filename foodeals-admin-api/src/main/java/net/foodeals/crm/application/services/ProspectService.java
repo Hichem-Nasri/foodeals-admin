@@ -5,6 +5,7 @@ import net.foodeals.crm.application.dto.requests.*;
 import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
 import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
+import net.foodeals.crm.domain.entities.enums.ProspectStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

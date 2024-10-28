@@ -207,7 +207,7 @@ public class OrganizationEntityModelMapper {
             OffsetDateTime dateTime = OffsetDateTime.parse(organizationEntity.getCreatedAt().toString());
             LocalDate date = dateTime.toLocalDate();
 
-            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getName(), organizationEntity.getAvatarPath());
+            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
             Optional<User> responsible = organizationEntity.getUsers().stream()
                     .filter(user -> user.getRole().getName().equals("MANAGER"))
                     .findFirst();
@@ -280,7 +280,7 @@ public class OrganizationEntityModelMapper {
                 ContactDto contactDto = new ContactDto(contact.getName(), contact.getEmail(), contact.getPhone());
                 organizationEntityDto.setContactDto(contactDto);
             });
-            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getName(), organizationEntity.getAvatarPath());
+            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
             organizationEntityDto.setPartnerInfoDto(partnerInfoDto);
             Long offers = this.offerService.countByPublisherId(organizationEntity.getId());
             Long orders = this.offerService.countOrdersByPublisherInfoId(organizationEntity.getId());
@@ -359,7 +359,7 @@ public class OrganizationEntityModelMapper {
         DeliveryPartnerDto deliveryPartnerDto = DeliveryPartnerDto.builder().createdAt(date.toString())
                 .build();
 
-        PartnerInfoDto  partnerInfoDto = PartnerInfoDto.builder().name(organizationEntity.getName())
+        PartnerInfoDto  partnerInfoDto = PartnerInfoDto.builder().id(organizationEntity.getId()).name(organizationEntity.getName())
                 .avatarPath(organizationEntity.getAvatarPath())
                 .build();
         deliveryPartnerDto.setId(organizationEntity.getId());
