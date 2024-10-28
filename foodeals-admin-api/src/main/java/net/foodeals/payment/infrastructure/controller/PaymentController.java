@@ -4,14 +4,11 @@ import lombok.AllArgsConstructor;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
 import net.foodeals.payment.application.dto.request.ReceiveDto;
-import net.foodeals.payment.application.dto.request.paymentDetails.CashDetails;
-import net.foodeals.payment.application.dto.response.CommissionPaymentDto;
-import net.foodeals.payment.application.dto.response.MonthlyOperationsDto;
-import net.foodeals.payment.application.dto.response.PaymentResponse;
-import net.foodeals.payment.application.dto.response.SubscriptionPaymentDto;
+import net.foodeals.payment.application.dto.response.*;
 import net.foodeals.payment.application.services.PaymentService;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import org.apache.coyote.BadRequestException;
+import org.hibernate.stat.Statistics;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -21,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -37,10 +35,10 @@ public class PaymentController {
     }
 
     @GetMapping("/commissions/{year}/{month}")
-    public ResponseEntity<Page<CommissionPaymentDto>> getCommissionPayments(@PathVariable("year") int year, @PathVariable int month, Pageable page) {
-        Page<PartnerCommissions> payments = this.paymentService.getCommissionPayments(page, year, month);
-        Page<CommissionPaymentDto> paymentsDtos = this.paymentService.convertCommissionToDto(payments);
-        return new ResponseEntity<Page<CommissionPaymentDto>>(paymentsDtos, HttpStatus.OK);
+    public ResponseEntity<CommissionDto> getCommissionPayments(@PathVariable("year") int year, @PathVariable int month, Pageable page, @RequestParam(value = "id", required = false) UUID id) {
+        List<PartnerCommissions> payments = id == null ? this.paymentService.getCommissionPayments(year, month) : this.paymentService.getCommissionPaymentsByOrganizationId(id, year, month);
+        return new ResponseEntity<CommissionDto>(this.paymentService.getCommissionResponse(payments, page), HttpStatus.OK);
+
     }
 
     @GetMapping("/commissions/{id}/monthly-operations/{year}/{month}")

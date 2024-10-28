@@ -97,6 +97,7 @@ package net.foodeals.payment.application.services.impl;//package net.foodeals.pa
 //}
 
 import jakarta.transaction.Transactional;
+import net.foodeals.common.valueOjects.Price;
 import net.foodeals.contract.application.service.CommissionService;
 import net.foodeals.contract.application.service.DeadlinesService;
 import net.foodeals.contract.application.service.SubscriptionService;
@@ -120,7 +121,7 @@ import net.foodeals.payment.application.dto.request.ReceiveDto;
 import net.foodeals.payment.application.dto.response.*;
 import net.foodeals.payment.application.services.PaymentService;
 import net.foodeals.payment.application.services.utils.PaymentProcessor;
-import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
+import net.foodeals.payment.domain.entities.Enum.PaymentResponsibility;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.repository.PartnerCommissionsRepository;
@@ -134,7 +135,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -166,8 +170,8 @@ public class PaymentServiceImpl implements PaymentService {
         this.orderService = orderService;
     }
 
-    public Page<PartnerCommissions> getCommissionPayments(Pageable page, int year, int month) {
-        return this.partnerCommissionsRepository.findCommissionsByDate(year, month, page);
+    public List<PartnerCommissions> getCommissionPayments(int year, int month) {
+        return this.partnerCommissionsRepository.findCommissionsByDate(year, month);
     }
 
 //    @Transactional
@@ -233,71 +237,78 @@ public class PaymentServiceImpl implements PaymentService {
         return processor.process(request, document);
     }
 
+    // convert to dto
+       // case of partner with subentities.
+
     @Override
     @Transactional
     public Page<CommissionPaymentDto> convertCommissionToDto(Page<PartnerCommissions> payments) {
-        Set<OrganizationEntity> organizations = new HashSet<>();
-        payments.map(payment -> {
+        Page<CommissionPaymentDto> paymentDtos = payments.map(payment -> {
             if (payment.getPartnerInfo().type().equals(PartnerType.SUB_ENTITY)) {
                 SubEntity subEntity = this.subEntityService.getEntityById(payment.getPartnerInfo().id());
                 payment.setPartner(subEntity);
-                if (subEntity.commissionPayedBySubEntities() == true)
-                        organizations.add(subEntity.getOrganizationEntity());
             } else {
                 OrganizationEntity organizationEntity = this.organizationEntityService.findById(payment.getPartnerInfo().id());
                 payment.setPartner(organizationEntity);
             }
-            return payment;
-        });
-        Page<CommissionPaymentDto> paymentDtos = payments.map(payment -> this.modelMapper.map(payment, CommissionPaymentDto.class));
-        Page<CommissionPaymentDto> finalPaymentDtos = paymentDtos;
-        List<CommissionPaymentDto> organizationsDto = organizations.stream().map(organization -> {
-            CommissionPaymentDto commissionPaymentDto = this.modelMapper.map(organization, CommissionPaymentDto.class);
-            List<CommissionPaymentDto> childs = finalPaymentDtos.stream().filter(payment -> payment.getPartnerType().equals(PartnerType.SUB_ENTITY) && payment.getOrganizationId().equals(organization.getId())).collect(Collectors.toList());
-            Double totalAmount = childs.stream().map(payment -> payment.getTotalAmount()).collect(Collectors.summingDouble(Double::doubleValue));
-            ;
-            Double totalCommission = childs.stream()
-                    .map(payment -> payment.getFoodealsCommission()).collect(Collectors.summingDouble(Double::doubleValue));
-            Double toPay = childs.stream().map(payment -> payment.getToPay()).collect(Collectors.summingDouble(Double::doubleValue));
-            Double toReceive = childs.stream().map(payment -> payment.getToReceive()).collect(Collectors.summingDouble(Double::doubleValue));
-            commissionPaymentDto.setDate(childs.stream().findFirst().get().getDate());
-            commissionPaymentDto.setTotalAmount(totalAmount);
-            commissionPaymentDto.setFoodealsCommission(totalCommission);
-            commissionPaymentDto.setToPay(toPay);
-            commissionPaymentDto.setToReceive(toReceive);
-            commissionPaymentDto.setPaymentStatus(PaymentStatus.VALIDATED_BY_BOTH);
-            commissionPaymentDto.setPayable(false);
-            commissionPaymentDto.setCommissionPayedBySubEntities(true);
-            childs.forEach(child -> {
-                if (!child.getPaymentStatus().equals(PaymentStatus.VALIDATED_BY_BOTH)) {
-                    commissionPaymentDto.setPaymentStatus(PaymentStatus.IN_VALID);
-                }
-            });
-            return commissionPaymentDto;
-        }).collect(Collectors.toList());
-        Page<CommissionPaymentDto> finalPaymentDtos1 = paymentDtos;
-        paymentDtos = paymentDtos.map(payment -> {
-            if (payment.getPartnerType().equals(PartnerType.PARTNER_SB) && payment.isCommissionPayedBySubEntities() == false) {
-                List<CommissionPaymentDto> childs = finalPaymentDtos1.stream().filter(c -> c.getPartnerType().equals(PartnerType.SUB_ENTITY) && c.getOrganizationId().equals(payment.getEntityId())).collect(Collectors.toList());
-                Double totalAmount = childs.stream().map(p -> p.getTotalAmount()).collect(Collectors.summingDouble(Double::doubleValue));
-                ;
-                Double totalCommission = childs.stream()
-                        .map(p2 -> p2.getFoodealsCommission()).collect(Collectors.summingDouble(Double::doubleValue));
-                Double toPay = childs.stream().map(p3 -> p3.getToPay()).collect(Collectors.summingDouble(Double::doubleValue));
-                Double toReceive = childs.stream().map(p4 -> p4.getToReceive()).collect(Collectors.summingDouble(Double::doubleValue));
-                payment.setTotalAmount(totalAmount);
-                payment.setFoodealsCommission(totalCommission);
-                payment.setToPay(toPay);
-                payment.setToReceive(toReceive);
-                payment.setPayable(true);
+            CommissionPaymentDto dto = null;
+            if (payment.getPartnerInfo().type().equals(PartnerType.PARTNER_SB)) {
+                List<CommissionPaymentDto> childs = payment.getSubEntityCommissions().stream().map((PartnerCommissions p) -> {
+                    if (p.getPartnerInfo().type().equals(PartnerType.SUB_ENTITY)) {
+                        SubEntity subEntity = this.subEntityService.getEntityById(p.getPartnerInfo().id());
+                        p.setPartner(subEntity);
+                    } else {
+                        OrganizationEntity organizationEntity = this.organizationEntityService.findById(p.getPartnerInfo().id());
+                        p.setPartner(organizationEntity);
+                    }
+                    return  this.modelMapper.map(p, CommissionPaymentDto.class);
+                }).collect(Collectors.toList());
+
+                dto = new CommissionPaymentDto();
+                Currency defaultCurrency = Currency.getInstance("MAD");
+                Price totalCommission = !childs.isEmpty()
+                        ? childs.stream()
+                        .map(p -> p.getFoodealsCommission())
+                        .reduce(Price.ZERO(defaultCurrency), (price1, price2) -> Price.add((Price)price1, (Price)price2))
+                        : Price.ZERO(defaultCurrency);
+
+                Price toPay = !childs.isEmpty()
+                        ? childs.stream()
+                        .map(p -> p.getToPay())
+                        .reduce(Price.ZERO(defaultCurrency), (price1, price2) -> Price.add((Price)price1, (Price)price2))
+                        : Price.ZERO(defaultCurrency);
+
+                Price toReceive = !childs.isEmpty()
+                        ? childs.stream()
+                        .map(p -> p.getToReceive())
+                        .reduce(Price.ZERO(defaultCurrency), (price1, price2) -> Price.add((Price)price1, (Price)price2))
+                        : Price.ZERO(defaultCurrency);
+
+                Price totalAmount = !childs.isEmpty()
+                        ? childs.stream()
+                        .map(p -> p.getTotalAmount())
+                        .reduce(Price.ZERO(defaultCurrency), (price1, price2) -> Price.add((Price)price1, (Price)price2))
+                        : Price.ZERO(defaultCurrency);
+                dto.setId(payment.getId());
+                dto.setEntityId(payment.getPartnerInfo().id());
+                PartnerInfoDto partnerInfoDto = new PartnerInfoDto(payment.getPartnerInfo().id(), payment.getPartner().getName(), payment.getPartner().getAvatarPath());
+                dto.setPartnerInfoDto(partnerInfoDto);
+                dto.setPartnerType(payment.getPartnerInfo().type());
+                dto.setOrganizationId(payment.getPartnerInfo().id());
+                SimpleDateFormat formatter = new SimpleDateFormat("M/yyyy");
+                dto.setDate(formatter.format(payment.getDate()));
+                dto.setTotalAmount(totalAmount);
+                dto.setFoodealsCommission(totalCommission);
+                dto.setToPay(toPay);
+                dto.setToReceive(toReceive);
+                dto.setPaymentStatus(payment.getPaymentStatus());
+                dto.setPayable(payment.getPaymentResponsibility().equals(PaymentResponsibility.PAYED_BY_PARTNER));
+                dto.setCommissionPayedBySubEntities(payment.getPaymentResponsibility().equals(PaymentResponsibility.PAYED_BY_SUB_ENTITIES));
+            } else {
+                dto = this.modelMapper.map(payment, CommissionPaymentDto.class);
             }
-            if (payment.getPartnerType().equals(PartnerType.SUB_ENTITY) && payment.isCommissionPayedBySubEntities() == false) {
-                payment.setPayable(false);
-            }
-            return payment;
+            return dto;
         });
-        organizationsDto.addAll(paymentDtos.stream().collect(Collectors.toList()));
-        paymentDtos = new PageImpl<>(organizationsDto, paymentDtos.getPageable(), organizationsDto.size());
         return paymentDtos;
     }
 
@@ -356,6 +367,54 @@ public class PaymentServiceImpl implements PaymentService {
 
         return new MonthlyOperationsDto(null, o.getId(), amount, o.getQuantity(), cashAmount, cashCommission, cardAmount, cardCommission);
         });
+    }
+
+    @Override
+    public List<PartnerCommissions> getCommissionPaymentsByOrganizationId(UUID id, int year, int month) {
+        return this.partnerCommissionsRepository.findCommissionsByDateAndOrganization(year, month, id);
+    }
+
+    @Override
+    @Transactional
+    public CommissionDto getCommissionResponse(List<PartnerCommissions> commissions, Pageable page) {
+        int start = (int) page.getOffset();
+        int end = Math.min((start + page.getPageSize()), commissions.size());
+        List<PartnerCommissions> pageContent = commissions.subList(start, end);
+        Page<PartnerCommissions> commissionsPage = new PageImpl<>(pageContent, page, pageContent.size());
+        Page<CommissionPaymentDto> commissionsDtos = this.convertCommissionToDto(commissionsPage);
+        PaymentStatistics statistics = this.getPaymentStatistics(commissions);
+        return new CommissionDto(statistics, commissionsDtos);
+    }
+
+    @Override
+    @Transactional
+    public PaymentStatistics getPaymentStatistics(List<PartnerCommissions> commissions) {
+        AtomicReference<BigDecimal> total = new AtomicReference<>(BigDecimal.ZERO);
+        AtomicReference<BigDecimal> totalCommission = new AtomicReference<>(BigDecimal.ZERO);
+
+        commissions.stream().forEach(partnerCommissions -> {
+            if (!partnerCommissions.getPartnerInfo().type().equals(PartnerType.PARTNER_SB)) {
+                if (partnerCommissions.getPartnerInfo().type().equals(PartnerType.SUB_ENTITY)) {
+                    partnerCommissions.setPartner(this.subEntityService.getEntityById(partnerCommissions.getPartnerInfo().id()));
+                } else {
+                    partnerCommissions.setPartner(this.organizationEntityService.findById(partnerCommissions.getPartnerInfo().id()));
+                }
+                UUID organizationId = !partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) ? partnerCommissions.getPartner().getId() : ((SubEntity) partnerCommissions.getPartner()).getOrganizationEntity().getId();
+                Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
+                List<Order> orderList = this.orderService.findByOfferPublisherInfoIdAndDate(partnerCommissions.getPartner().getId(), partnerCommissions.getDate());
+                List<Transaction> transactions = orderList.stream()
+                        .flatMap(order -> order.getTransactions().stream())
+                        .collect(Collectors.toList());
+                BigDecimal paymentsWithCash = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CASH) && transaction.getStatus().equals(TransactionStatus.COMPLETED))
+                        .map(transaction -> transaction.getPrice().amount()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                BigDecimal paymentsWithCard = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CARD) && transaction.getStatus().equals(TransactionStatus.COMPLETED))
+                        .map(transaction -> transaction.getPrice().amount()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                Double commissionTotal = ((Double) (commission.getCard().doubleValue() / 100)) * paymentsWithCard.doubleValue() + ((Double) (commission.getCash().doubleValue() / 100)) * paymentsWithCash.doubleValue();
+                total.updateAndGet(current -> current.add(paymentsWithCash.add(paymentsWithCard)));
+                totalCommission.updateAndGet(current -> current.add(new BigDecimal(commissionTotal)));
+            }
+        });
+        return new PaymentStatistics(new Price(total.get().setScale(3, RoundingMode.HALF_UP), Currency.getInstance("MAD")), new Price(totalCommission.get().setScale(3, RoundingMode.HALF_UP),Currency.getInstance("MAD")));
     }
 }
 
