@@ -10,7 +10,7 @@ import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import java.util.UUID;
 
 @Embeddable
-public record PartnerInfo(@Column(name = "partner_Id")
+public record PartnerInfo(@Column(name = "organization_Id") UUID organizationId, @Column(name = "partner_Id")
                           UUID id,
                           @Enumerated(EnumType.STRING)
                           @Column(name = "partner_type")

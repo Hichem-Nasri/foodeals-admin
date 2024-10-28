@@ -29,6 +29,8 @@ package net.foodeals.payment.application.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import net.foodeals.common.valueOjects.Price;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 
@@ -37,6 +39,7 @@ import java.util.UUID;
 @Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class CommissionPaymentDto {
     private UUID id;
 
@@ -50,13 +53,13 @@ public class CommissionPaymentDto {
 
     private PartnerType partnerType;
 
-    private Double totalAmount;
+    private Price totalAmount;
 
-    private Double foodealsCommission;
+    private Price foodealsCommission;
 
-    private Double toPay;
+    private Price toPay;
 
-    private Double toReceive;
+    private Price toReceive;
 
     private PaymentStatus paymentStatus;
 

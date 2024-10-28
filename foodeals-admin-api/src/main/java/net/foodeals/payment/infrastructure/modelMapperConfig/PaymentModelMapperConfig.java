@@ -3,6 +3,7 @@ package net.foodeals.payment.infrastructure.modelMapperConfig;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import net.foodeals.common.valueOjects.Price;
 import net.foodeals.contract.application.service.CommissionService;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.domain.entities.Commission;
@@ -29,7 +30,9 @@ import org.modelmapper.PropertyMap;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.util.Currency;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -51,7 +54,6 @@ public class PaymentModelMapperConfig {
         modelMapper.addConverter(mappingContext -> {
             PartnerCommissions partnerCommissions = mappingContext.getSource();
             PartnerInfoDto partnerInfoDto = new PartnerInfoDto(partnerCommissions.getPartner().getId(), partnerCommissions.getPartner().getName(), partnerCommissions.getPartner().getAvatarPath());
-            String organizationName = !partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) ? partnerCommissions.getPartner().getName() : ((SubEntity) partnerCommissions.getPartner()).getOrganizationEntity().getName();
             UUID organizationId = !partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) ? partnerCommissions.getPartner().getId() : ((SubEntity) partnerCommissions.getPartner()).getOrganizationEntity().getId();
             Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
             SimpleDateFormat formatter = new SimpleDateFormat("M/yyyy");
@@ -59,17 +61,19 @@ public class PaymentModelMapperConfig {
             List<Transaction> transactions = orderList.stream()
                     .flatMap(order -> order.getTransactions().stream())
                     .collect(Collectors.toList());
-            BigDecimal paymentsWithCash = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CASH) && transaction.getStatus().equals(TransactionStatus.COMPLETED))
-                    .map(transaction -> transaction.getPrice().amount()).reduce(BigDecimal.ZERO, BigDecimal::add);
-            BigDecimal paymentsWithCard = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CARD) && transaction.getStatus().equals(TransactionStatus.COMPLETED))
-                    .map(transaction -> transaction.getPrice().amount()).reduce(BigDecimal.ZERO, BigDecimal::add);
-            Double commissionTotal = ((Double)(commission.getCard().doubleValue() / 100)) * paymentsWithCard.doubleValue()  + ((Double)(commission.getCash().doubleValue() / 100)) * paymentsWithCash.doubleValue();
-            Double difference = (paymentsWithCard.doubleValue() - commissionTotal);
+            Currency mad = Currency.getInstance("MAD");
+            Price paymentsWithCash = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CASH) && transaction.getStatus().equals(TransactionStatus.COMPLETED))
+                    .map(transaction -> transaction.getPrice()).reduce(Price.ZERO(mad), Price::add);
+            Price paymentsWithCard = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CARD) && transaction.getStatus().equals(TransactionStatus.COMPLETED))
+                    .map(transaction -> transaction.getPrice()).reduce(Price.ZERO(mad), Price::add);
+            Double commissionTotal = ((Double)(commission.getCard().doubleValue() / 100)) * paymentsWithCard.amount().doubleValue()  + ((Double)(commission.getCash().doubleValue() / 100)) * paymentsWithCash.amount().doubleValue();
+            Double difference = (paymentsWithCard.amount().doubleValue() - commissionTotal);
             Double toPay = difference < 0 ? 0 : difference;
             Double toReceive = difference < 0 ? difference : 0;
-            BigDecimal totalAmount = paymentsWithCard.add(paymentsWithCash);
+            Price totalAmount = Price.add(paymentsWithCash, paymentsWithCard);
+            totalAmount = new Price(totalAmount.amount().setScale(3, BigDecimal.ROUND_HALF_UP), mad);
             boolean payable = (partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) && partnerCommissions.getPartner().commissionPayedBySubEntities() == false) ? false : true;
-            return new CommissionPaymentDto(partnerCommissions.getId(), partnerCommissions.getPartner().getId(),  organizationId,formatter.format(partnerCommissions.getDate()), partnerInfoDto, partnerCommissions.getPartner().getPartnerType(), totalAmount.doubleValue(), commissionTotal, toPay, toReceive, partnerCommissions.getPaymentStatus(), payable, partnerCommissions.getPartner().commissionPayedBySubEntities());
+            return new CommissionPaymentDto(partnerCommissions.getId(), partnerCommissions.getPartner().getId(),  organizationId,formatter.format(partnerCommissions.getDate()), partnerInfoDto, partnerCommissions.getPartner().getPartnerType(), totalAmount, new Price(new BigDecimal(commissionTotal).setScale(3, RoundingMode.HALF_UP), mad), new Price(new BigDecimal(toPay).setScale(3, RoundingMode.HALF_UP), mad), new Price(new BigDecimal(toReceive).setScale(3, RoundingMode.HALF_UP), mad), partnerCommissions.getPaymentStatus(), payable, partnerCommissions.getPartner().commissionPayedBySubEntities());
         }, PartnerCommissions.class, CommissionPaymentDto.class);
         modelMapper.addMappings(new PropertyMap<Subscription, SubscriptionPaymentDto>() {
             @Override
