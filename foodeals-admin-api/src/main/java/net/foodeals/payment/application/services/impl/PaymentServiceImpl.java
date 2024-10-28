@@ -216,7 +216,7 @@ public class PaymentServiceImpl implements PaymentService {
         String avatarPath = "12";
 
         subscriptionPaymentDto.setTotalAmount(subscription.getAmount().amount());
-        PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder().name(partnerName)
+        PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder().id(UUID.randomUUID()).name(partnerName)
                 .avatarPath(avatarPath)
                 .build();
         subscriptionPaymentDto.setPartnerType(subscription.getPartnerType());

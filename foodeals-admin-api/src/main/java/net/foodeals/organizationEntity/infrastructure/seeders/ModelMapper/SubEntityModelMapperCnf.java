@@ -44,7 +44,7 @@ public class SubEntityModelMapperCnf {
             OffsetDateTime dateTime = OffsetDateTime.parse(subEntitie.getCreatedAt().toString());
             LocalDate date = dateTime.toLocalDate();
 
-            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(subEntitie.getName(), subEntitie.getAvatarPath());
+            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(subEntitie.getId(),subEntitie.getName(), subEntitie.getAvatarPath());
             Optional<User> responsible = subEntitie.getUsers().stream().filter(user -> user.getRole().getName().equals("MANAGER")).findFirst();
 
             ResponsibleInfoDto responsibleInfoDto = ResponsibleInfoDto.builder().build();
@@ -81,7 +81,7 @@ public class SubEntityModelMapperCnf {
                 subEntityDto.setContactDto(contactDto);
             });
 
-            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(subEntity.getName(), subEntity.getAvatarPath());
+            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath());
             subEntityDto.setPartnerInfoDto(partnerInfoDto);
 
             subEntityDto.setReference(subEntity.getReference());

@@ -30,7 +30,7 @@ public class EventModelMapper {
             modelMapper.addConverter(mappingContext -> {
                 final Event event = mappingContext.getSource();
 
-                LeadDto leadDto = new LeadDto(event.getLead().getName(), event.getLead().getAvatarPath());
+                LeadDto leadDto = new LeadDto(event.getLead().getName(), event.getLead().getAvatarPath(), event.getLead().getId());
                 OffsetDateTime dateTime = OffsetDateTime.parse(event.getCreatedAt().toString());
                 LocalDate date = dateTime.toLocalDate();
                 return new EventResponse(event.getId(), date.toString(), leadDto, event.getDateAndHour(), event.getObject(), event.getMessage());

@@ -3,10 +3,12 @@ package net.foodeals.crm.domain.repositories;
 import net.foodeals.common.contracts.BaseRepository;
 import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.awt.print.Pageable;
 import java.util.UUID;
 
 @Repository

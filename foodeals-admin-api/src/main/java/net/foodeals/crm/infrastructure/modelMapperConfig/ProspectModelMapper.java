@@ -39,14 +39,14 @@ public class ProspectModelMapper {
         modelMapper.addConverter(mappingContext -> {
             final User user = mappingContext.getSource();
 
-            return new CreatorInfoDto(user.getName(), user.getAvatarPath());
+            return new CreatorInfoDto(user.getName(), user.getAvatarPath(), user.getId());
 
         }, User.class, CreatorInfoDto.class);
 
         modelMapper.addConverter(mappingContext -> {
             final User user = mappingContext.getSource();
 
-            return new ManagerInfoDto(user.getName(), user.getAvatarPath());
+            return new ManagerInfoDto(user.getName(), user.getAvatarPath(), user.getId());
 
         }, User.class, ManagerInfoDto.class);
 

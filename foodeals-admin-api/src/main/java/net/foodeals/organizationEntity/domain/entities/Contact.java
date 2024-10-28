@@ -26,7 +26,6 @@ public class Contact extends AbstractEntity<UUID> {
     @Embedded
     private Name name;
 
-    @Column(unique = true)
     private String email;
 
     private String phone;
