@@ -343,6 +343,7 @@ public class OrganizationEntityService {
         return organizationEntity;
     }
 
+    @Transactional
     public Page<OrganizationEntity> getOrganizationEntities(List<EntityType> entityTypes, Pageable pageable) {
         return this.organizationEntityRepository.findByTypeIn(entityTypes, pageable);
     }
@@ -362,17 +363,17 @@ public class OrganizationEntityService {
         UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), false, "MANAGER", organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
         if (!organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER)) {
-//            Solution pro_market = this.solutionService.findByName("pro_market");
-//            if (organizationEntity.getSolutions().contains(pro_market)) {
-//                Date date = new Date();
-//                PartnerCommissions partnerCommissions = PartnerCommissions.builder()
-//                        .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType()))
-//                        .paymentStatus(PaymentStatus.IN_VALID)
-//                        .paymentResponsibility(organizationEntity.commissionPayedBySubEntities() ? PaymentResponsibility.PAYED_BY_SUB_ENTITIES : PaymentResponsibility.PAYED_BY_PARTNER)
-//                        .date(date)
-//                        .build();
-//                organizationEntity.getCommissions().add(partnerCommissions);
-//            }
+            Solution pro_market = this.solutionService.findByName("pro_market");
+            if (organizationEntity.getSolutions().contains(pro_market)) {
+                Date date = new Date();
+                PartnerCommissions partnerCommissions = PartnerCommissions.builder()
+                        .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType()))
+                        .paymentStatus(PaymentStatus.IN_VALID)
+                        .paymentResponsibility(organizationEntity.commissionPayedBySubEntities() ? PaymentResponsibility.PAYED_BY_SUB_ENTITIES : PaymentResponsibility.PAYED_BY_PARTNER)
+                        .date(date)
+                        .build();
+                organizationEntity.getCommissions().add(partnerCommissions);
+            }
             this.contractService.validateContract(organizationEntity.getContract());
         }
         organizationEntity.getContract().setContractStatus(ContractStatus.VALIDATED);
@@ -450,3 +451,4 @@ public class OrganizationEntityService {
         return this.organizationEntityRepository.findByType(List.of(EntityType.ASSOCIATION, EntityType.FOOD_BANK), pageable);
     }
 }
+

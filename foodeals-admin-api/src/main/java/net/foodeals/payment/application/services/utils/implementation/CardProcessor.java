@@ -4,6 +4,8 @@ import net.foodeals.payment.application.dto.request.PaymentRequest;
 import net.foodeals.payment.application.dto.request.PaymentType;
 import net.foodeals.payment.application.dto.response.PaymentResponse;
 import net.foodeals.payment.application.services.utils.PaymentProcessor;
+import net.foodeals.user.domain.entities.User;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,6 +19,7 @@ public class CardProcessor implements PaymentProcessor {
 //        // Logic for processing card payment
 //
 //        // Validate card, charge card, etc.
+
 //
         return new PaymentResponse("");
 

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Price;
+import net.foodeals.payment.domain.entities.Enum.PaymentMethodType;
 
 import java.util.Date;
 import java.util.UUID;
@@ -17,12 +18,20 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class PaymentMethod extends AbstractEntity<UUID> {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Embedded
     private Price amount;
+
+    // Add abstract methods for common functionality
+    public abstract Date getOperationDate();
+    public abstract String getDocumentPath();
+    public Price getPrice() {
+        return amount;
+    }
+    public abstract PaymentMethodType getType();
+
 
 }

@@ -12,12 +12,16 @@ import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.paymentMethods.BankTransferPaymentMethod;
 import net.foodeals.payment.domain.repository.PartnerCommissionsRepository;
+import net.foodeals.user.application.services.UserService;
+import net.foodeals.user.domain.entities.User;
 import org.apache.coyote.BadRequestException;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Currency;
+import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -26,6 +30,7 @@ import java.util.stream.Collectors;
 public class BankTransferProcessor implements PaymentProcessor {
 
     private final PartnerCommissionsRepository partnerCommissionsRepository;
+    private final UserService userService;
 
     @Override
     public PaymentResponse process(PaymentRequest request, MultipartFile document, PaymentType type) throws BadRequestException {
@@ -53,6 +58,10 @@ public class BankTransferProcessor implements PaymentProcessor {
     public void processCommission(PaymentRequest request) {
         PartnerCommissions partnerCommission = this.partnerCommissionsRepository.findById(request.id()).orElseThrow(() -> new ResourceNotFoundException("commission not found with id : " + request.id().toString()));
         BankTransferPaymentMethod bankTransferPaymentMethod = new BankTransferPaymentMethod();
+        final String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        final User emitter = this.userService.findByEmail(email);
+        bankTransferPaymentMethod.setPayedAt(new Date());
+        partnerCommission.setEmitter(emitter);
         bankTransferPaymentMethod.setAmount(new Price(request.amount().amount(), Currency.getInstance(request.amount().currency())));
         partnerCommission.setPaymentMethod(bankTransferPaymentMethod);
         partnerCommission.setPaymentDirection(PaymentDirection.FOODEALS_TO_PARTENER);

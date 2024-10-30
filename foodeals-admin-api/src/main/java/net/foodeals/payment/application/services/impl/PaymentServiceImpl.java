@@ -126,7 +126,13 @@ import net.foodeals.payment.domain.entities.Enum.PaymentResponsibility;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
+import net.foodeals.payment.domain.entities.PaymentMethod;
+import net.foodeals.payment.domain.entities.paymentMethods.BankTransferPaymentMethod;
+import net.foodeals.payment.domain.entities.paymentMethods.CardPaymentMethod;
+import net.foodeals.payment.domain.entities.paymentMethods.CashPaymentMethod;
+import net.foodeals.payment.domain.entities.paymentMethods.ChequePaymentMethod;
 import net.foodeals.payment.domain.repository.PartnerCommissionsRepository;
+import net.foodeals.user.domain.entities.User;
 import org.apache.coyote.BadRequestException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.modelmapper.ModelMapper;
@@ -318,16 +324,14 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public void receiveSubscription(MultipartFile document, ReceiveDto receiveDto) {
+    public void receiveSubscription(ReceiveDto receiveDto) {
         Deadlines deadlines = this.deadlinesService.findById(receiveDto.id());
 
         if (deadlines == null) {
             throw  new ResourceNotFoundException("deadline not found with id " + receiveDto.id().toString());
         }
 
-        deadlines.setStatus(DeadlineStatus.PAID);
-        deadlines.setPayedAt(receiveDto.date());
-        deadlines.setEmitterName(receiveDto.emitter());
+        deadlines.setStatus(DeadlineStatus.CONFIRMED_BY_FOODEALS);
 
         this.deadlinesService.save(deadlines);
 
@@ -335,10 +339,46 @@ public class PaymentServiceImpl implements PaymentService {
 
         subscription.setSubscriptionStatus(SubscriptionStatus.VALID);
         subscription.getDeadlines().forEach(d -> {
-            if (!d.getStatus().equals(DeadlineStatus.PAID)) {
+            if (!d.getStatus().equals(DeadlineStatus.CONFIRMED_BY_FOODEALS)) {
                 subscription.setSubscriptionStatus(SubscriptionStatus.IN_PROGRESS);
             }
         });
+    }
+
+    @Override
+    public PaymentFormData getFormData(UUID id, PaymentType type) {
+        return switch (type) {
+            case PaymentType.COMMISSION -> this.getCommissionFormData(id);
+            case PaymentType.SUBSCRIPTION -> this.getSubscriptionFormData(id);
+            default -> null;
+        };
+    }
+
+    @Override
+    @Transactional
+    public PaymentFormData getCommissionFormData(UUID id) {
+        PartnerCommissions partnerCommission = this.partnerCommissionsRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("commission not found with id " + id.toString()));
+        PartnerInfoDto partnerInfoDto = null;
+        if (partnerCommission.getPartnerInfo().type().equals(PartnerType.SUB_ENTITY)) {
+            SubEntity subEntity = this.subEntityService.getEntityById(partnerCommission.getPartnerInfo().id());
+            partnerInfoDto = new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath());
+        } else {
+            OrganizationEntity partner = this.organizationEntityService.findById(partnerCommission.getPartnerInfo().id());
+            partnerInfoDto = new PartnerInfoDto(partner.getId(), partner.getName(), partner.getAvatarPath());
+        }
+        User emitter = partnerCommission.getEmitter();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/M/y");
+        PaymentMethod paymentMethod = partnerCommission.getPaymentMethod();
+        String date = formatter.format(paymentMethod.getOperationDate());
+        String document = paymentMethod.getDocumentPath();
+        Price price = paymentMethod.getPrice();
+        return new PaymentFormData(paymentMethod.getType(), partnerInfoDto, emitter.getName(), price, document , date);
+    }
+
+    @Override
+    public PaymentFormData getSubscriptionFormData(UUID id) {
+        return null;
     }
 
     @Override
@@ -423,25 +463,19 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public PaymentResponse receive(MultipartFile document, ReceiveDto receiveDto, PaymentType type) throws BadRequestException {
+    public PaymentResponse receive(ReceiveDto receiveDto, PaymentType type) throws BadRequestException {
         if (type.equals(PaymentType.COMMISSION)) {
-            this.receiveCommission(document, receiveDto);
+            this.receiveCommission(receiveDto);
         } else {
-            this.receiveSubscription(document, receiveDto);
+            this.receiveSubscription(receiveDto);
         }
         return new PaymentResponse("payment validated successfully");
     }
 
     @Override
     @Transactional
-    public void receiveCommission(MultipartFile document, ReceiveDto receiveDto) throws BadRequestException {
-        if (document.isEmpty()) {
-            throw  new BadRequestException("bad document");
-        }
-        // logic to upload doc
+    public void receiveCommission(ReceiveDto receiveDto) throws BadRequestException {
         PartnerCommissions commission = this.partnerCommissionsRepository.findById(receiveDto.id()).orElseThrow(() -> new ResourceNotFoundException("commission not found with id " + receiveDto.id().toString()));
-        commission.setConfirmedAt(receiveDto.date());
-        commission.setEmitterName(receiveDto.emitter());
         if (commission.getPartnerInfo().type().equals(PartnerType.PARTNER_SB)) {
             Set<PartnerCommissions> childs = commission.getSubEntityCommissions().stream().map(c -> {
                 c.setPaymentStatus(PaymentStatus.VALIDATED_BY_BOTH);
@@ -462,4 +496,3 @@ public class PaymentServiceImpl implements PaymentService {
         this.partnerCommissionsRepository.save(commission);
     }
 }
-

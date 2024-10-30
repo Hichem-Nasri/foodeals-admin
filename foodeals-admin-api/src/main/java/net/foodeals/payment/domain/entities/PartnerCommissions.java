@@ -6,6 +6,7 @@ import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.payment.domain.entities.Enum.PaymentDirection;
 import net.foodeals.payment.domain.entities.Enum.PaymentResponsibility;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
+import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Date;
@@ -43,11 +44,10 @@ public class PartnerCommissions extends AbstractEntity<UUID> {
     @JoinColumn(name = "payment_method_id", referencedColumnName = "id")
     private PaymentMethod paymentMethod;
 
-    private String proofDocument;
+    private Date recuperationDate;
 
-    private Date confirmedAt;
-
-    private String emitterName;
+    @ManyToOne
+    private User emitter;
 
     @ManyToOne
     @JoinColumn(name = "parent_partner_id")

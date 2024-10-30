@@ -41,14 +41,20 @@ public class PaymentController {
 
     }
 
+    @GetMapping("/form-data/{id}")
+    public ResponseEntity<PaymentFormData> getFormData(@PathVariable("id") UUID id, @RequestParam(value = "type", required = true) PaymentType type) {
+        return new ResponseEntity<PaymentFormData>(this.paymentService.getFormData(id, type), HttpStatus.OK);
+
+    }
+
     @GetMapping("/commissions/{id}/monthly-operations/{year}/{month}")
     public ResponseEntity<Page<MonthlyOperationsDto>> getCommissionPayments(@PathVariable("id") UUID id, @PathVariable("year") int year, @PathVariable int month, Pageable page) {
         return new ResponseEntity<Page<MonthlyOperationsDto>>(this.paymentService.monthlyOperations(id, year, month, page), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/receive", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<PaymentResponse> receive(@RequestPart("document") MultipartFile document, @RequestPart("info") ReceiveDto receiveDto, @RequestParam(value = "type", required = true) PaymentType type) throws BadRequestException {
-        return new ResponseEntity<PaymentResponse>(this.paymentService.receive(document, receiveDto, type), HttpStatus.OK);
+    @PostMapping(value = "/receive")
+    public ResponseEntity<PaymentResponse> receive(@RequestBody ReceiveDto receiveDto, @RequestParam(value = "type", required = true) PaymentType type) throws BadRequestException {
+        return new ResponseEntity<PaymentResponse>(this.paymentService.receive(receiveDto, type), HttpStatus.OK);
     }
 
     @GetMapping("/subscriptions/{year}")
