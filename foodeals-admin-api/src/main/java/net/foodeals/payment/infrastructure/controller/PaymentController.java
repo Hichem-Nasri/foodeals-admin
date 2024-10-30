@@ -3,12 +3,12 @@ package net.foodeals.payment.infrastructure.controller;
 import lombok.AllArgsConstructor;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
+import net.foodeals.payment.application.dto.request.PaymentType;
 import net.foodeals.payment.application.dto.request.ReceiveDto;
 import net.foodeals.payment.application.dto.response.*;
 import net.foodeals.payment.application.services.PaymentService;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import org.apache.coyote.BadRequestException;
-import org.hibernate.stat.Statistics;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -28,9 +28,9 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @PostMapping(value = "/commissions/process", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> processPayment(@RequestPart("dto") PaymentRequest paymentRequest, @RequestPart(value = "document", required = false) MultipartFile document) throws BadRequestException {
-        PaymentResponse result = paymentService.processPayment(paymentRequest,document);
+    @PostMapping(value = "/process", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> processPayment(@RequestPart("dto") PaymentRequest paymentRequest, @RequestPart(value = "document", required = false) MultipartFile document, @RequestParam(value = "type", required = true) PaymentType type) throws BadRequestException {
+        PaymentResponse result = paymentService.processPayment(paymentRequest,document, type);
         return ResponseEntity.ok(result);
     }
 
@@ -46,10 +46,9 @@ public class PaymentController {
         return new ResponseEntity<Page<MonthlyOperationsDto>>(this.paymentService.monthlyOperations(id, year, month, page), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/subscriptions/process/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> getCommissionPayments(@RequestPart("document") MultipartFile document, @RequestPart("info") ReceiveDto receiveDto, @PathVariable("id") UUID id) {
-        this.paymentService.paySubscription(document, receiveDto, id);
-        return new ResponseEntity<String>("payment validated successfully", HttpStatus.OK);
+    @PostMapping(value = "/receive", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PaymentResponse> receive(@RequestPart("document") MultipartFile document, @RequestPart("info") ReceiveDto receiveDto, @RequestParam(value = "type", required = true) PaymentType type) throws BadRequestException {
+        return new ResponseEntity<PaymentResponse>(this.paymentService.receive(document, receiveDto, type), HttpStatus.OK);
     }
 
     @GetMapping("/subscriptions/{year}")
@@ -59,3 +58,10 @@ public class PaymentController {
         return new ResponseEntity<Page<SubscriptionPaymentDto>>(paymentsDtos, HttpStatus.OK);
     }
 }
+
+
+// create partner with sub payed by sub
+// pay commission by sub
+// recive it
+// chack status and all data.
+

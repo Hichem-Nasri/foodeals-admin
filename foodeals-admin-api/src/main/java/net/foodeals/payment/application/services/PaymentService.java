@@ -2,6 +2,7 @@ package net.foodeals.payment.application.services;
 
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
+import net.foodeals.payment.application.dto.request.PaymentType;
 import net.foodeals.payment.application.dto.request.ReceiveDto;
 import net.foodeals.payment.application.dto.response.*;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
@@ -20,11 +21,9 @@ public interface PaymentService {
 
     SubscriptionPaymentDto toSubscriptionPaymentDto(Subscription subscription);
 
-    PaymentResponse processPayment(PaymentRequest paymentRequest, MultipartFile document) throws BadRequestException;
+    PaymentResponse processPayment(PaymentRequest paymentRequest, MultipartFile document, PaymentType type) throws BadRequestException;
 
     Page<CommissionPaymentDto> convertCommissionToDto(Page<PartnerCommissions> payments);
-
-    void paySubscription(MultipartFile document, ReceiveDto receiveDto, UUID uuid);
 
     Page<MonthlyOperationsDto> monthlyOperations(UUID id, int year, int month, Pageable page);
 
@@ -33,4 +32,10 @@ public interface PaymentService {
     CommissionDto getCommissionResponse(List<PartnerCommissions> payments, Pageable page);
 
     PaymentStatistics getPaymentStatistics(List<PartnerCommissions> commissions);
+
+    PaymentResponse receive(MultipartFile document, ReceiveDto receiveDto, PaymentType type) throws BadRequestException;
+
+    void receiveCommission(MultipartFile document, ReceiveDto receiveDto) throws BadRequestException;
+
+    void receiveSubscription(MultipartFile document, ReceiveDto receiveDto);
 }

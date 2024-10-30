@@ -69,7 +69,7 @@ public class PaymentModelMapperConfig {
             Double commissionTotal = ((Double)(commission.getCard().doubleValue() / 100)) * paymentsWithCard.amount().doubleValue()  + ((Double)(commission.getCash().doubleValue() / 100)) * paymentsWithCash.amount().doubleValue();
             Double difference = (paymentsWithCard.amount().doubleValue() - commissionTotal);
             Double toPay = difference < 0 ? 0 : difference;
-            Double toReceive = difference < 0 ? difference : 0;
+            Double toReceive = difference < 0 ? Math.abs(difference) : 0;
             Price totalAmount = Price.add(paymentsWithCash, paymentsWithCard);
             totalAmount = new Price(totalAmount.amount().setScale(3, BigDecimal.ROUND_HALF_UP), mad);
             boolean payable = (partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) && partnerCommissions.getPartner().commissionPayedBySubEntities() == false) ? false : true;

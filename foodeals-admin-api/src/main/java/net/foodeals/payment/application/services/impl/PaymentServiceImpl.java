@@ -117,11 +117,13 @@ import net.foodeals.organizationEntity.application.services.SubEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
+import net.foodeals.payment.application.dto.request.PaymentType;
 import net.foodeals.payment.application.dto.request.ReceiveDto;
 import net.foodeals.payment.application.dto.response.*;
 import net.foodeals.payment.application.services.PaymentService;
 import net.foodeals.payment.application.services.utils.PaymentProcessor;
 import net.foodeals.payment.domain.entities.Enum.PaymentResponsibility;
+import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.repository.PartnerCommissionsRepository;
@@ -201,6 +203,7 @@ public class PaymentServiceImpl implements PaymentService {
         return this.subscriptionService.findByYear(year, page);
     }
 
+    @Transactional
     public SubscriptionPaymentDto toSubscriptionPaymentDto(Subscription subscription) {
         SubscriptionPaymentDto subscriptionPaymentDto = this.modelMapper.map(subscription, SubscriptionPaymentDto.class);
         List<Deadlines> deadlines = subscription.getDeadlines();
@@ -229,12 +232,13 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public PaymentResponse processPayment(PaymentRequest request, MultipartFile document) throws BadRequestException {
+    @Transactional
+    public PaymentResponse processPayment(PaymentRequest request, MultipartFile document, PaymentType type) throws BadRequestException {
         PaymentProcessor processor = processors.get(request.paymentMethod().toLowerCase());
         if (processor == null) {
             throw new IllegalArgumentException("Unsupported payment method: " + request.paymentMethod());
         }
-        return processor.process(request, document);
+        return processor.process(request, document, type);
     }
 
     // convert to dto
@@ -314,11 +318,11 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public void paySubscription(MultipartFile document, ReceiveDto receiveDto, UUID uuid) {
-        Deadlines deadlines = this.deadlinesService.findById(uuid);
+    public void receiveSubscription(MultipartFile document, ReceiveDto receiveDto) {
+        Deadlines deadlines = this.deadlinesService.findById(receiveDto.id());
 
         if (deadlines == null) {
-            throw  new ResourceNotFoundException("deadline not found with id " + uuid.toString());
+            throw  new ResourceNotFoundException("deadline not found with id " + receiveDto.id().toString());
         }
 
         deadlines.setStatus(DeadlineStatus.PAID);
@@ -415,6 +419,47 @@ public class PaymentServiceImpl implements PaymentService {
             }
         });
         return new PaymentStatistics(new Price(total.get().setScale(3, RoundingMode.HALF_UP), Currency.getInstance("MAD")), new Price(totalCommission.get().setScale(3, RoundingMode.HALF_UP),Currency.getInstance("MAD")));
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponse receive(MultipartFile document, ReceiveDto receiveDto, PaymentType type) throws BadRequestException {
+        if (type.equals(PaymentType.COMMISSION)) {
+            this.receiveCommission(document, receiveDto);
+        } else {
+            this.receiveSubscription(document, receiveDto);
+        }
+        return new PaymentResponse("payment validated successfully");
+    }
+
+    @Override
+    @Transactional
+    public void receiveCommission(MultipartFile document, ReceiveDto receiveDto) throws BadRequestException {
+        if (document.isEmpty()) {
+            throw  new BadRequestException("bad document");
+        }
+        // logic to upload doc
+        PartnerCommissions commission = this.partnerCommissionsRepository.findById(receiveDto.id()).orElseThrow(() -> new ResourceNotFoundException("commission not found with id " + receiveDto.id().toString()));
+        commission.setConfirmedAt(receiveDto.date());
+        commission.setEmitterName(receiveDto.emitter());
+        if (commission.getPartnerInfo().type().equals(PartnerType.PARTNER_SB)) {
+            Set<PartnerCommissions> childs = commission.getSubEntityCommissions().stream().map(c -> {
+                c.setPaymentStatus(PaymentStatus.VALIDATED_BY_BOTH);
+                return  c;
+            }).collect(Collectors.toSet());
+            this.partnerCommissionsRepository.saveAll(childs);
+        } else if (commission.getPartnerInfo().type().equals(PartnerType.SUB_ENTITY)) {
+            PartnerCommissions parent = commission.getParentPartner();
+            parent.setPaymentStatus(PaymentStatus.VALIDATED_BY_BOTH);
+            parent.getSubEntityCommissions().forEach(c -> {
+                if (c.getId() != commission.getId() && !c.getPaymentStatus().equals(PaymentStatus.VALIDATED_BY_BOTH)) {
+                    parent.setPaymentStatus(PaymentStatus.IN_VALID);
+                }
+            });
+            this.partnerCommissionsRepository.save(parent);
+        }
+        commission.setPaymentStatus(PaymentStatus.VALIDATED_BY_BOTH);
+        this.partnerCommissionsRepository.save(commission);
     }
 }
 
