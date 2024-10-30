@@ -83,7 +83,7 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     @JoinColumn(name = "bank_information")
     private BankInformation bankInformation;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Contract contract;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})

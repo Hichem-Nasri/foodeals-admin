@@ -373,7 +373,7 @@ public class PaymentServiceImpl implements PaymentService {
         String date = formatter.format(paymentMethod.getOperationDate());
         String document = paymentMethod.getDocumentPath();
         Price price = paymentMethod.getPrice();
-        return new PaymentFormData(partnerInfoDto, emitter.getName(), price, document , date);
+        return new PaymentFormData(paymentMethod.getType(), partnerInfoDto, emitter.getName(), price, document , date);
     }
 
     @Override
@@ -496,4 +496,3 @@ public class PaymentServiceImpl implements PaymentService {
         this.partnerCommissionsRepository.save(commission);
     }
 }
-

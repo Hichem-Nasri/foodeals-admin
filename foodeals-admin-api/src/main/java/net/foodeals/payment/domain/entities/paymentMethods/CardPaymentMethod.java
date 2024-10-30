@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import net.foodeals.payment.domain.entities.Enum.PaymentMethodType;
 import net.foodeals.payment.domain.entities.PaymentMethod;
 
 import java.util.Date;
@@ -29,5 +30,10 @@ public class CardPaymentMethod extends PaymentMethod {
     @Override
     public String getDocumentPath() {
         return null;
+    }
+
+    @Override
+    public PaymentMethodType getType() {
+        return PaymentMethodType.CARD;
     }
 }

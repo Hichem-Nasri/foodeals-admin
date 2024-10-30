@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.payment.domain.entities.Enum.PaymentMethodType;
 import net.foodeals.payment.domain.entities.PaymentMethod;
 
 import java.time.LocalDate;
@@ -34,5 +35,10 @@ public class ChequePaymentMethod extends PaymentMethod {
     @Override
     public String getDocumentPath() {
         return this.chequeDocument;
+    }
+
+    @Override
+    public PaymentMethodType getType() {
+        return PaymentMethodType.ChEQUE;
     }
 }
