@@ -343,6 +343,7 @@ public class OrganizationEntityService {
         return organizationEntity;
     }
 
+    @Transactional
     public Page<OrganizationEntity> getOrganizationEntities(List<EntityType> entityTypes, Pageable pageable) {
         return this.organizationEntityRepository.findByTypeIn(entityTypes, pageable);
     }

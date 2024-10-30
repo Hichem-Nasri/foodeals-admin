@@ -16,4 +16,14 @@ import java.util.Date;
 @NoArgsConstructor
 public class CashPaymentMethod extends PaymentMethod {
     private Date recuperationDate;
+
+    @Override
+    public Date getOperationDate() {
+        return this.recuperationDate;
+    }
+
+    @Override
+    public String getDocumentPath() {
+        return null;
+    }
 }

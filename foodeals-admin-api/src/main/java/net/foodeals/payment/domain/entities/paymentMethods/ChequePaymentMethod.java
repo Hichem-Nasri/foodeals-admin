@@ -25,4 +25,14 @@ public class ChequePaymentMethod extends PaymentMethod {
     private String bank;
     private String issuer;
     private String chequeDocument;
+
+    @Override
+    public Date getOperationDate() {
+        return this.recuperationDate;
+    }
+
+    @Override
+    public String getDocumentPath() {
+        return this.chequeDocument;
+    }
 }

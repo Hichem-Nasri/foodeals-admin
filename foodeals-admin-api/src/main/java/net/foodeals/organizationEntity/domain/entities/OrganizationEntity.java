@@ -90,7 +90,7 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     private Set<Features> features = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartnerCommissions> commissions = new ArrayList<>();
 
     @Builder.Default

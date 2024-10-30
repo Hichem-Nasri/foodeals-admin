@@ -82,7 +82,7 @@ public class SubscriptionService {
                     Deadlines deadline = Deadlines.builder().subscription(subscription)
                             .dueDate(dueDate)
                             .amount(new Price(amountPerDeadline, Currency.getInstance("MAD")))
-                            .status(DeadlineStatus.PENDING)
+                            .status(DeadlineStatus.IN_VALID)
                             .build();
                     deadlines.add(deadline);
                 }

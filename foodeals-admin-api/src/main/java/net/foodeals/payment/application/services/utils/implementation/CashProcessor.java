@@ -13,8 +13,11 @@ import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.paymentMethods.CashPaymentMethod;
 import net.foodeals.payment.domain.repository.PartnerCommissionsRepository;
+import net.foodeals.user.application.services.UserService;
+import net.foodeals.user.domain.entities.User;
 import org.apache.coyote.BadRequestException;
 import org.apache.velocity.exception.ResourceNotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +30,7 @@ import java.util.stream.Collectors;
 public class CashProcessor implements PaymentProcessor {
 
     private final PartnerCommissionsRepository repository;
+    private final UserService userService;
 
     @Override
     public PaymentResponse process(PaymentRequest request, MultipartFile document, PaymentType type) {
@@ -54,6 +58,9 @@ public class CashProcessor implements PaymentProcessor {
         partnerCommission.setPaymentMethod(paymentMethod);
         partnerCommission.setPaymentDirection(PaymentDirection.FOODEALS_TO_PARTENER);
         partnerCommission.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
+        final String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        final User emitter = this.userService.findByEmail(email);
+        partnerCommission.setEmitter(emitter);
         if (partnerCommission.getPartnerInfo().type().equals(PartnerType.PARTNER_SB)) {
             Set<PartnerCommissions> childs = partnerCommission.getSubEntityCommissions();
             childs = childs.stream().map(c -> {

@@ -33,9 +33,15 @@ public interface PaymentService {
 
     PaymentStatistics getPaymentStatistics(List<PartnerCommissions> commissions);
 
-    PaymentResponse receive(MultipartFile document, ReceiveDto receiveDto, PaymentType type) throws BadRequestException;
+    PaymentResponse receive(ReceiveDto receiveDto, PaymentType type) throws BadRequestException;
 
-    void receiveCommission(MultipartFile document, ReceiveDto receiveDto) throws BadRequestException;
+    void receiveCommission(ReceiveDto receiveDto) throws BadRequestException;
 
-    void receiveSubscription(MultipartFile document, ReceiveDto receiveDto);
+    void receiveSubscription(ReceiveDto receiveDto);
+
+    PaymentFormData getFormData(UUID id, PaymentType type);
+
+    PaymentFormData getCommissionFormData(UUID id);
+
+    PaymentFormData getSubscriptionFormData(UUID id);
 }

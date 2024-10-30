@@ -17,7 +17,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class PaymentMethod extends AbstractEntity<UUID> {
-
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,4 +24,10 @@ public abstract class PaymentMethod extends AbstractEntity<UUID> {
     @Embedded
     private Price amount;
 
+    // Add abstract methods for common functionality
+    public abstract Date getOperationDate();
+    public abstract String getDocumentPath();
+    public Price getPrice() {
+        return amount;
+    }
 }
