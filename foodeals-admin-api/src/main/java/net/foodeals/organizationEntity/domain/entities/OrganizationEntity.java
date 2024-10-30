@@ -1,6 +1,7 @@
 package net.foodeals.organizationEntity.domain.entities;
 
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.contract.domain.entities.Contract;
@@ -82,14 +83,14 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     @JoinColumn(name = "bank_information")
     private BankInformation bankInformation;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Contract contract;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Features> features = new HashSet<>();
 
     @Builder.Default
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartnerCommissions> commissions = new ArrayList<>();
 
     @Builder.Default
@@ -153,6 +154,7 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     }
 
     @Override
+    @Transactional
     public boolean commissionPayedBySubEntities() {
         return this.contract.isCommissionPayedBySubEntities();
     }

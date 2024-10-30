@@ -43,7 +43,11 @@ public class PartnerCommissions extends AbstractEntity<UUID> {
     @JoinColumn(name = "payment_method_id", referencedColumnName = "id")
     private PaymentMethod paymentMethod;
 
-    private byte[] proofDocument;
+    private String proofDocument;
+
+    private Date confirmedAt;
+
+    private String emitterName;
 
     @ManyToOne
     @JoinColumn(name = "parent_partner_id")

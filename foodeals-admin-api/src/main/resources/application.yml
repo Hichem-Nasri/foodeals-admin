@@ -37,6 +37,16 @@ app:
       refresh-token:
         # 30 days
         expiration: 2592000000
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+    open-in-view: false
+  datasource:
+    hikari:
+      auto-commit: false
 
 logging:
   level:

@@ -78,7 +78,7 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     @OneToMany(mappedBy = "subEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Coupon> coupons;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartnerCommissions> commissions = new ArrayList<>();
 
     @Builder.Default
