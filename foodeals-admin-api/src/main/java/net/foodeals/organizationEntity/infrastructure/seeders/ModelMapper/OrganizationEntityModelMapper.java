@@ -74,6 +74,7 @@ public class OrganizationEntityModelMapper {
             formData.setEntityType(organizationEntity.getType());
             formData.setEntityName(organizationEntity.getName());
             formData.setCommissionPayedBySubEntities(organizationEntity.getContract().isCommissionPayedBySubEntities());
+            formData.setSubscriptionPayedBySubEntities(organizationEntity.getContract().isSubscriptionPayedBySubEntities());
 
             formData.setSolutions(organizationEntity.getSolutions().stream().map(Solution::getName).collect(Collectors.toList()));
             formData.setFeatures(organizationEntity.getFeatures().stream().map(Features::getName).collect(Collectors.toList()));

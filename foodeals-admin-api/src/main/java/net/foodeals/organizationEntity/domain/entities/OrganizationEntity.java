@@ -94,7 +94,7 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     private List<PartnerCommissions> commissions = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "organizationEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subscription> subscriptions = new ArrayList<>();
 
     @Builder.Default
@@ -157,6 +157,17 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     @Transactional
     public boolean commissionPayedBySubEntities() {
         return this.contract.isCommissionPayedBySubEntities();
+    }
+
+    @Override
+    @Transactional
+    public boolean subscriptionPayedBySubEntities() {
+        return this.contract.isSubscriptionPayedBySubEntities();
+    }
+
+    @Override
+    public boolean singleSubscription() {
+        return this.contract.isSingleSubscription();
     }
 
     public List<CoveredZonesDto> getCoveredZonesDto() {

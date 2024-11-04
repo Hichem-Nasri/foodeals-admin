@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.config.BeanUtil;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
@@ -13,6 +14,7 @@ import org.hibernate.annotations.UuidGenerator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Entity
 @Table(name = "contracts")
@@ -66,4 +68,6 @@ public class Contract extends AbstractEntity<UUID> {
     private Integer maxNumberOfAccounts;
 
     private boolean commissionPayedBySubEntities;
+
+    private boolean subscriptionPayedBySubEntities;
 }

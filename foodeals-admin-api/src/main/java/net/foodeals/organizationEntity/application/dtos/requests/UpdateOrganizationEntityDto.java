@@ -52,4 +52,6 @@ public class UpdateOrganizationEntityDto {
     private List<DeliveryPartnerContract> deliveryPartnerContracts;
 
     private ContractStatus status;
+
+    private boolean subscriptionPayedBySubEntities;
 }

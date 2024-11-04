@@ -17,8 +17,6 @@ import java.util.UUID;
 public interface PaymentService {
     List<PartnerCommissions> getCommissionPayments(int year, int month);
 
-    Page<Subscription> getSubscriptionPayments(Pageable page, int year);
-
     SubscriptionPaymentDto toSubscriptionPaymentDto(Subscription subscription);
 
     PaymentResponse processPayment(PaymentRequest paymentRequest, MultipartFile document, PaymentType type) throws BadRequestException;
@@ -44,4 +42,6 @@ public interface PaymentService {
     PaymentFormData getCommissionFormData(UUID id);
 
     PaymentFormData getSubscriptionFormData(UUID id);
+
+    SubscriptionPaymentDto getSubscriptionResponse(int year, Pageable pageable, UUID id);
 }

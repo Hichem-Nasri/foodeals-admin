@@ -11,7 +11,10 @@ import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganiz
 import net.foodeals.organizationEntity.application.dtos.requests.DeliveryPartnerContract;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.services.SolutionService;
+import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.Solution;
+import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
+import net.foodeals.payment.domain.entities.PartnerInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -25,13 +28,16 @@ public class SolutionContractService {
     private final SolutionService solutionService;
     private final SubscriptionService subscriptionService;
     private final CommissionService comissionService;
+    private final OrganizationEntityRepository organizationEntityRepository;
 
 
-    public SolutionContractService(SolutionContractRepository solutionContractRepository, SolutionService solutionService, SubscriptionService subscriptionService, CommissionService comissionService) {
+
+    public SolutionContractService(SolutionContractRepository solutionContractRepository, SolutionService solutionService, SubscriptionService subscriptionService, CommissionService comissionService, OrganizationEntityRepository organizationEntityRepository) {
         this.solutionContractRepository = solutionContractRepository;
         this.solutionService = solutionService;
         this.subscriptionService = subscriptionService;
         this.comissionService = comissionService;
+        this.organizationEntityRepository = organizationEntityRepository;
     }
 
     @Transactional
@@ -93,6 +99,7 @@ public class SolutionContractService {
         return updatedContracts;
     }
 
+    // solution contracts -> many sub -> single subs  | subscrption clone ->
     public List<SolutionContract> createDeliveryContracts(List<DeliveryPartnerContract> deliveryPartnerContracts, Contract contract) {
         List<SolutionContract> createdContracts = new ArrayList<>();
 
@@ -126,8 +133,10 @@ public class SolutionContractService {
 
     public List<SolutionContract> createManySolutionContracts(List<SolutionsContractDto> solutionsContractsDto, Contract contract, Boolean oneSubscription) {
         Subscription globalSubscription;
+        OrganizationEntity organizationEntity = contract.getOrganizationEntity();
         if (oneSubscription) {
             globalSubscription = this.subscriptionService.createSubscription(solutionsContractsDto.getFirst().getContractSubscriptionDto());
+            organizationEntity.getSubscriptions().add(globalSubscription);
         } else {
             globalSubscription = null;
         }
@@ -143,13 +152,16 @@ public class SolutionContractService {
             }
             if (oneSubscription) {
                 List<SolutionContract> solutionContractsList = new ArrayList<>(globalSubscription.getSolutionContracts());
-                globalSubscription.setPartnerType(contract.getOrganizationEntity().getPartnerType());
+                globalSubscription.getSolutions().add(solution);
+                globalSubscription.setPartner(new PartnerInfo(contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getPartnerType()));
                 solutionContract.setSubscription(globalSubscription);
                 solutionContractsList.add(solutionContract);
                 globalSubscription.setSolutionContracts(solutionContractsList);
             } else {
                 Subscription subscription = this.subscriptionService.createSubscription(solutionsContractDto.getContractSubscriptionDto());
-                subscription.setPartnerType(contract.getOrganizationEntity().getPartnerType());
+                subscription.getSolutions().add(solution);
+                organizationEntity.getSubscriptions().add(subscription);
+                subscription.setPartner(new PartnerInfo(contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getPartnerType()));
                 List<SolutionContract> solutionContractList = new ArrayList<SolutionContract>();
                 solutionContractList.add(solutionContract);
                 subscription.setSolutionContracts(solutionContractList);
@@ -157,6 +169,7 @@ public class SolutionContractService {
             }
             return this.solutionContractRepository.save(solutionContract);
         }).toList();
+        this.organizationEntityRepository.save(organizationEntity);
         return solutionContracts;
     }
 

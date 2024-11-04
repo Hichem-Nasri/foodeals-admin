@@ -84,7 +84,7 @@ public class SubEntityModelMapperCnf {
             PartnerInfoDto partnerInfoDto = new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath());
             subEntityDto.setPartnerInfoDto(partnerInfoDto);
 
-            subEntityDto.setReference(subEntity.getReference());
+            subEntityDto.setReference(subEntity.getId());
 
             Long offers = this.offerService.countByPublisherId(subEntity.getId());
             Long orders = this.offerService.countOrdersByPublisherInfoId(subEntity.getId());

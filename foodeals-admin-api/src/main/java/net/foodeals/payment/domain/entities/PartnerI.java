@@ -15,4 +15,7 @@ public interface PartnerI {
     String getAvatarPath();
 
     boolean commissionPayedBySubEntities();
+    boolean subscriptionPayedBySubEntities();
+    boolean singleSubscription();
+
 }

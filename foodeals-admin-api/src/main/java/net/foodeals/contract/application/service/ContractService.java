@@ -73,6 +73,7 @@ public class ContractService {
         UserContract userContract = UserContract.builder().user(user).build();
         Contract contract = Contract.builder().name(createAnOrganizationEntityDto.getEntityName())
                 .maxNumberOfSubEntities(createAnOrganizationEntityDto.getMaxNumberOfSubEntities())
+                .subscriptionPayedBySubEntities(createAnOrganizationEntityDto.getSubscriptionPayedBySubEntities())
                 .minimumReduction(createAnOrganizationEntityDto.getMinimumReduction())
                 .maxNumberOfAccounts(createAnOrganizationEntityDto.getMaxNumberOfAccounts())
                 .contractStatus(ContractStatus.IN_PROGRESS)
@@ -294,6 +295,10 @@ public class ContractService {
         if (updateOrganizationEntityDto.getMinimumReduction() != null) {
             contract.setMinimumReduction(updateOrganizationEntityDto.getMinimumReduction());
         }
+
+        contract.setCommissionPayedBySubEntities(updateOrganizationEntityDto.getCommissionPayedBySubEntities());
+
+        contract.setSubscriptionPayedBySubEntities(updateOrganizationEntityDto.getSubscriptionPayedBySubEntities());
 
         if (updateOrganizationEntityDto.getManagerId() != null && updateOrganizationEntityDto.getManagerId() != contract.getUserContracts().getUser().getId()) {
             this.userContractService.updateUserContract(contract.getUserContracts(), updateOrganizationEntityDto);

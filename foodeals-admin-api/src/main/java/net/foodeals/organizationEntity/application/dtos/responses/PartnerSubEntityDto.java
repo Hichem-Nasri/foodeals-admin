@@ -19,7 +19,7 @@ public class PartnerSubEntityDto {
 
     private Long users;
 
-    private String reference;
+    private UUID reference;
 
     private String city;
 

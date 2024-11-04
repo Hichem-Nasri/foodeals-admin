@@ -47,4 +47,6 @@ public class OrganizationEntityFormData {
     private EntityBankInformationDto entityBankInformationDto;
 
     private ContractStatus status;
+
+    private boolean subscriptionPayedBySubEntities;
 }
