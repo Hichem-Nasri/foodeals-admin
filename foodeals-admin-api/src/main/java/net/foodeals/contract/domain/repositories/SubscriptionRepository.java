@@ -17,5 +17,8 @@ public interface SubscriptionRepository extends BaseRepository<Subscription, UUI
     List<Subscription> findByStartDateBetweenAndSubscriptionStatusNot(LocalDate startDate, LocalDate endDate, SubscriptionStatus status);
 
     List<Subscription> findByPartner_OrganizationIdAndStartDateBetweenAndSubscriptionStatusNot(UUID organizationId, LocalDate startDate, LocalDate endDate, SubscriptionStatus status);
+
+    List<Subscription> findByPartner_IdAndStartDateBetweenAndSubscriptionStatusNot(UUID id, LocalDate startDate, LocalDate endDate, SubscriptionStatus status);
+
 }
 // 23 ->

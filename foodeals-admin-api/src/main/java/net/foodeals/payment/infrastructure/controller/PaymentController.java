@@ -61,7 +61,13 @@ public class PaymentController {
     public ResponseEntity<SubscriptionPaymentDto> getSubscriptionPayments(@PathVariable("year") int year, Pageable pageable, @RequestParam(value = "id", required = false) UUID id) {
         return new ResponseEntity<SubscriptionPaymentDto>(this.paymentService.getSubscriptionResponse(year, pageable, id), HttpStatus.OK);
     }
+
+    @GetMapping("/subscriptions/{year}/{id}")
+    public ResponseEntity<List<SubscriptionsDto>> getSubscriptionsDetails(@PathVariable("year") int year, @PathVariable(value = "id") UUID id) {
+        return new ResponseEntity<List<SubscriptionsDto>>(this.paymentService.getSubscriptionDetails(year, id), HttpStatus.OK);
+    }
 }
+
 
 // should check pages of commissions.
 // and all paginations from list.

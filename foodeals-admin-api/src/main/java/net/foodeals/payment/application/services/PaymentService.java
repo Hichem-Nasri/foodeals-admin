@@ -44,4 +44,6 @@ public interface PaymentService {
     PaymentFormData getSubscriptionFormData(UUID id);
 
     SubscriptionPaymentDto getSubscriptionResponse(int year, Pageable pageable, UUID id);
+
+    List<SubscriptionsDto> getSubscriptionDetails(int year, UUID id);
 }

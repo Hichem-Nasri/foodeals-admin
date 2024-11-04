@@ -561,6 +561,28 @@ public class PaymentServiceImpl implements PaymentService {
         return new SubscriptionPaymentDto(statistics, subscriptionsPage);
     }
 
+    @Override
+    @Transactional
+    public List<SubscriptionsDto> getSubscriptionDetails(int year, UUID id) {
+        LocalDate startOfYear = LocalDate.of(year, 1, 1);
+        LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+        List<Subscription> subscriptions = subscriptionService.findByStartDateBetweenAndSubscriptionStatusNotAndId(startOfYear, endOfYear, SubscriptionStatus.NOT_STARTED, id);
+
+        Subscription firstSubscription = subscriptions.get(0);
+        PartnerI partner = !firstSubscription.getPartner().type().equals(PartnerType.SUB_ENTITY) ? this.organizationEntityService.findById(firstSubscription.getPartner().id()) : this.subEntityService.getEntityById(firstSubscription.getPartner().id());
+        subscriptions.forEach(s -> {
+            s.setPartnerI(partner);
+        });
+        List<SubscriptionsDto> subscriptionsDto =  subscriptions.stream()
+                .map(s -> {
+                    return this.mapToSubscriptionsDto(s);
+                })
+                .collect(Collectors.toList());
+
+        return subscriptionsDto;
+    }
+
     @Transactional
     private Price calculateTotalSubscriptions(List<Subscription> subscriptions) {
         List<Subscription> filteredSubscriptions = subscriptions.stream()
@@ -595,6 +617,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add);
     }
 
+    // case 1 -<  some sub not has all subscriptions ->
     @Transactional
     private Price calculateTotalDeadlines(List<Subscription> subscriptions) {
 // First, get the filtered subscriptions
@@ -633,14 +656,7 @@ public class PaymentServiceImpl implements PaymentService {
         );
 
         // Calculate total amount for this partner
-        Price partnerTotal = partner.getPartnerType().equals(PartnerType.PARTNER_SB) ? calculateTotalSubscriptionsOfPrincipal(partnerId, year) : calculateTotalSubscriptions(partnerSubscriptions);
-
-        // Map subscriptions to SubscriptionsDto
-        List<SubscriptionsDto> subscriptionsDto = partner.getPartnerType().equals(PartnerType.PARTNER_SB) ? new ArrayList<>() : partnerSubscriptions.stream()
-                .map(s -> {
-                    return this.mapToSubscriptionsDto(s);
-                })
-                .collect(Collectors.toList());
+        Price partnerTotal = partner.getPartnerType().equals(PartnerType.PARTNER_SB) ? calculateTotalSubscriptionsOfPrincipal(partnerId, year) :  calculateTotalSubscriptions(partnerSubscriptions);
 
         return new SubscriptionsListDto(
                 partner.getPartnerType().equals(PartnerType.SUB_ENTITY) ? ((SubEntity) partner).getContract().getId() : ((OrganizationEntity) partner).getContract().getId(),
@@ -652,7 +668,6 @@ public class PaymentServiceImpl implements PaymentService {
                         .map(Solution::getName)  // assuming Solution class has a getName() method
                         .distinct()  // to remove duplicates if any
                         .collect(Collectors.toList()),
-                subscriptionsDto,
                 partner.getPartnerType().equals(PartnerType.NORMAL_PARTNER) ||
                         (partner.subscriptionPayedBySubEntities()  && partner.getPartnerType().equals(PartnerType.SUB_ENTITY))
                 ||  (!partner.subscriptionPayedBySubEntities()  && partner.getPartnerType().equals(PartnerType.PARTNER_SB))
@@ -670,13 +685,15 @@ public class PaymentServiceImpl implements PaymentService {
                     String formattedDate = dueDate.format(formatter);
 
                     boolean isPaymentEligible = subscription.getPartner().type().equals(PartnerType.NORMAL_PARTNER)
-                            || (subscription.getPartner().type().equals(PartnerType.SUB_ENTITY) && ((PartnerI)subscription.getPartnerI()).subscriptionPayedBySubEntities());
+                            || (subscription.getPartner().type().equals(PartnerType.SUB_ENTITY) && ((PartnerI)subscription.getPartnerI()).subscriptionPayedBySubEntities())
+                            || (subscription.getPartner().type().equals(PartnerType.PARTNER_SB) && ((PartnerI)subscription.getPartnerI()).subscriptionPayedBySubEntities() == false);
 
                     return new DeadlinesDto(
                             deadline.getId(),
                             formattedDate,
                             deadline.getStatus(),
-                            deadline.getAmount(),
+                            !(subscription.getPartnerI().getPartnerType().equals(PartnerType.PARTNER_SB)) ? deadline.getAmount() : deadline.getSubEntityDeadlines().stream().map(d -> d.getAmount())
+                            .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add),
                             isPaymentEligible
                     );
                 })
@@ -684,7 +701,8 @@ public class PaymentServiceImpl implements PaymentService {
 
         return new SubscriptionsDto(
                 subscription.getId(),
-                subscription.getAmount(),
+                !(subscription.getPartnerI().getPartnerType().equals(PartnerType.PARTNER_SB)) ? subscription.getAmount() : subscription.getSubEntities().stream().map(d -> d.getAmount())
+                        .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add),
                 subscription.getSolutions().stream().map(s -> s.getName()).toList(),
                 deadlinesDto
         );

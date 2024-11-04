@@ -99,4 +99,8 @@ public class SubscriptionService {
     public List<Subscription> findByStartDateBetweenAndSubscriptionStatusNot(LocalDate startDate, LocalDate  end, SubscriptionStatus status, UUID id) {
         return id == null ? this.subscriptionRepository.findByStartDateBetweenAndSubscriptionStatusNot(startDate, end, status) : this.subscriptionRepository.findByPartner_OrganizationIdAndStartDateBetweenAndSubscriptionStatusNot(id, startDate, end, status);
     }
+
+    public List<Subscription> findByStartDateBetweenAndSubscriptionStatusNotAndId(LocalDate startDate, LocalDate  end, SubscriptionStatus status, UUID id) {
+        return this.subscriptionRepository.findByPartner_IdAndStartDateBetweenAndSubscriptionStatusNot(id, startDate, end, status);
+    }
 }
