@@ -115,6 +115,7 @@ import net.foodeals.order.domain.enums.TransactionType;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
 import net.foodeals.organizationEntity.application.services.SubEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
 import net.foodeals.payment.application.dto.request.PaymentType;
@@ -126,11 +127,8 @@ import net.foodeals.payment.domain.entities.Enum.PaymentResponsibility;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
+import net.foodeals.payment.domain.entities.PartnerI;
 import net.foodeals.payment.domain.entities.PaymentMethod;
-import net.foodeals.payment.domain.entities.paymentMethods.BankTransferPaymentMethod;
-import net.foodeals.payment.domain.entities.paymentMethods.CardPaymentMethod;
-import net.foodeals.payment.domain.entities.paymentMethods.CashPaymentMethod;
-import net.foodeals.payment.domain.entities.paymentMethods.ChequePaymentMethod;
 import net.foodeals.payment.domain.repository.PartnerCommissionsRepository;
 import net.foodeals.user.domain.entities.User;
 import org.apache.coyote.BadRequestException;
@@ -145,6 +143,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -182,6 +182,7 @@ public class PaymentServiceImpl implements PaymentService {
         return this.partnerCommissionsRepository.findCommissionsByDate(year, month);
     }
 
+
 //    @Transactional
 //    public CommissionPaymentDto toCommissionPaymentDto(List<PartnerCommissions> partnerCommissions) {
 //        List<CommissionPaymentDto> commissionPaymentDtos  = partnerCommissions.this.modelMapper.map(partnerCommissions, CommissionPaymentDto.class);
@@ -205,36 +206,31 @@ public class PaymentServiceImpl implements PaymentService {
 //    }
 
     @Transactional
-    public Page<Subscription> getSubscriptionPayments(Pageable page, int year) {
-        return this.subscriptionService.findByYear(year, page);
-    }
-
-    @Transactional
     public SubscriptionPaymentDto toSubscriptionPaymentDto(Subscription subscription) {
-        SubscriptionPaymentDto subscriptionPaymentDto = this.modelMapper.map(subscription, SubscriptionPaymentDto.class);
-        List<Deadlines> deadlines = subscription.getDeadlines();
-        List<DeadlinesDto> deadlinesDtos =  deadlines.stream().map(this.deadlinesService::toDeadlineDto).toList();
-
-        List<String> solutions = subscription.getSolutionContracts().stream().map(solutionContract -> solutionContract.getSolution().getName()).toList();
-
-        subscriptionPaymentDto.setSolutions(solutions);
-
-        subscriptionPaymentDto.setDeadlinesDtoList(deadlinesDtos);
-//        String partnerName = subscription.getPartnerType() == PartnerType.ORGANIZATION_ENTITY ? subscription.getOrganizationEntity().getName()
-//                                        : subscription.getSubEntity().getName();
-        String partnerName = "test";
-//        String avatarPath = subscription.getPartnerType() == PartnerType.ORGANIZATION_ENTITY ? subscription.getOrganizationEntity().getAvatarPath()
-//                : subscription.getSubEntity().getAvatarPath();
-
-        String avatarPath = "12";
-
-        subscriptionPaymentDto.setTotalAmount(subscription.getAmount().amount());
-        PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder().id(UUID.randomUUID()).name(partnerName)
-                .avatarPath(avatarPath)
-                .build();
-        subscriptionPaymentDto.setPartnerType(subscription.getPartnerType());
-        subscriptionPaymentDto.setPartnerInfoDto(partnerInfoDto);
-        return subscriptionPaymentDto;
+//        SubscriptionPaymentDto subscriptionPaymentDto = this.modelMapper.map(subscription, SubscriptionPaymentDto.class);
+//        List<Deadlines> deadlines = subscription.getDeadlines();
+//        List<DeadlinesDto> deadlinesDtos =  deadlines.stream().map(this.deadlinesService::toDeadlineDto).toList();
+//
+//        List<String> solutions = subscription.getSolutionContracts().stream().map(solutionContract -> solutionContract.getSolution().getName()).toList();
+//
+//        subscriptionPaymentDto.setSolutions(solutions);
+//
+//        subscriptionPaymentDto.setDeadlinesDtoList(deadlinesDtos);
+////        String partnerName = subscription.getPartnerType() == PartnerType.ORGANIZATION_ENTITY ? subscription.getOrganizationEntity().getName()
+////                                        : subscription.getSubEntity().getName();
+//        String partnerName = "test";
+////        String avatarPath = subscription.getPartnerType() == PartnerType.ORGANIZATION_ENTITY ? subscription.getOrganizationEntity().getAvatarPath()
+////                : subscription.getSubEntity().getAvatarPath();
+//
+//        String avatarPath = "12";
+//
+//        subscriptionPaymentDto.setTotalAmount(subscription.getAmount().amount());
+//        PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder().id(UUID.randomUUID()).name(partnerName)
+//                .avatarPath(avatarPath)
+//                .build();
+//        subscriptionPaymentDto.setPartnerType(subscription.getPartnerType());
+//        subscriptionPaymentDto.setPartnerInfoDto(partnerInfoDto);
+        return null;
     }
 
     @Override
@@ -331,19 +327,54 @@ public class PaymentServiceImpl implements PaymentService {
             throw  new ResourceNotFoundException("deadline not found with id " + receiveDto.id().toString());
         }
 
+        if (deadlines.getSubscription().getPartner().type().equals(PartnerType.PARTNER_SB)) {
+            Set<Deadlines> childs = deadlines.getSubEntityDeadlines().stream().map(c -> {
+                c.setStatus(DeadlineStatus.CONFIRMED_BY_FOODEALS);
+                Subscription subscription = c.getSubscription();
+
+                subscription.setSubscriptionStatus(SubscriptionStatus.VALID);
+                subscription.getDeadlines().forEach(d -> {
+                    if (c.getId() != d.getId() && !d.getStatus().equals(DeadlineStatus.CONFIRMED_BY_FOODEALS)) {
+                        subscription.setSubscriptionStatus(SubscriptionStatus.IN_PROGRESS);
+                    }
+                });
+                this.subscriptionService.save(subscription);
+                return  c;
+            }).collect(Collectors.toSet());
+            this.deadlinesService.saveAll(new ArrayList<>(childs));
+        } else if (deadlines.getSubscription().getPartner().type().equals(PartnerType.SUB_ENTITY)) {
+            Deadlines parent = deadlines.getParentPartner();
+            parent.setStatus(DeadlineStatus.CONFIRMED_BY_FOODEALS);
+            parent.getSubEntityDeadlines().forEach(c -> {
+                if (c.getId() != deadlines.getId() && !c.getStatus().equals(DeadlineStatus.CONFIRMED_BY_FOODEALS)) {
+                    parent.setStatus(DeadlineStatus.IN_VALID);
+                }
+            });
+            Subscription subscription = parent.getSubscription();
+
+            subscription.setSubscriptionStatus(SubscriptionStatus.VALID);
+            subscription.getDeadlines().forEach(d -> {
+                if (parent.getId() != d.getId() && !d.getStatus().equals(DeadlineStatus.CONFIRMED_BY_FOODEALS)) {
+                    subscription.setSubscriptionStatus(SubscriptionStatus.IN_PROGRESS);
+                }
+            });
+            this.subscriptionService.save(subscription);
+            this.deadlinesService.save(parent);
+        }
         deadlines.setStatus(DeadlineStatus.CONFIRMED_BY_FOODEALS);
 
-        this.deadlinesService.save(deadlines);
-
-        Subscription subscription = this.subscriptionService.findById(deadlines.getSubscription().getId());
+        Subscription subscription = deadlines.getSubscription();
 
         subscription.setSubscriptionStatus(SubscriptionStatus.VALID);
         subscription.getDeadlines().forEach(d -> {
-            if (!d.getStatus().equals(DeadlineStatus.CONFIRMED_BY_FOODEALS)) {
+            if (deadlines.getId() != d.getId() && !d.getStatus().equals(DeadlineStatus.CONFIRMED_BY_FOODEALS)) {
                 subscription.setSubscriptionStatus(SubscriptionStatus.IN_PROGRESS);
             }
         });
+        this.subscriptionService.save(subscription);
+        this.deadlinesService.save(deadlines);
     }
+
 
     @Override
     public PaymentFormData getFormData(UUID id, PaymentType type) {
@@ -495,4 +526,186 @@ public class PaymentServiceImpl implements PaymentService {
         commission.setPaymentStatus(PaymentStatus.VALIDATED_BY_BOTH);
         this.partnerCommissionsRepository.save(commission);
     }
+
+    @Override
+    @Transactional
+    public SubscriptionPaymentDto getSubscriptionResponse(int year, Pageable page, UUID id) {
+        // 1. Fetch subscriptions for the given year
+        LocalDate startOfYear = LocalDate.of(year, 1, 1);
+        LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+        // 2. Get all subscriptions for the year
+        List<Subscription> subscriptions = subscriptionService.findByStartDateBetweenAndSubscriptionStatusNot(startOfYear, endOfYear, SubscriptionStatus.NOT_STARTED, id);
+
+        // 3. Calculate total statistics
+        Price totalSubscriptions = calculateTotalSubscriptions(subscriptions);
+        Price totalDeadlines = calculateTotalDeadlines(subscriptions);
+        SubscriptionStatistics statistics = new SubscriptionStatistics(totalSubscriptions, totalDeadlines);
+
+        // 4. Group subscriptions by partner
+        Map<UUID, List<Subscription>> subscriptionsByPartner = subscriptions.stream()
+                .collect(Collectors.groupingBy(s -> s.getPartner().id()));
+
+        // 5. Create SubscriptionsListDto for each partner
+        List<SubscriptionsListDto> subscriptionsList = subscriptionsByPartner.entrySet().stream()
+                .map(entry -> createSubscriptionsListDto(entry.getKey(), entry.getValue(), year))
+                .collect(Collectors.toList());
+
+        // 6. Create final page
+        Page<SubscriptionsListDto> subscriptionsPage = new PageImpl<>(
+                subscriptionsList,
+                page,
+                subscriptions.size()
+        );
+
+        return new SubscriptionPaymentDto(statistics, subscriptionsPage);
+    }
+
+    @Override
+    @Transactional
+    public List<SubscriptionsDto> getSubscriptionDetails(int year, UUID id) {
+        LocalDate startOfYear = LocalDate.of(year, 1, 1);
+        LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+        List<Subscription> subscriptions = subscriptionService.findByStartDateBetweenAndSubscriptionStatusNotAndId(startOfYear, endOfYear, SubscriptionStatus.NOT_STARTED, id);
+
+        Subscription firstSubscription = subscriptions.get(0);
+        PartnerI partner = !firstSubscription.getPartner().type().equals(PartnerType.SUB_ENTITY) ? this.organizationEntityService.findById(firstSubscription.getPartner().id()) : this.subEntityService.getEntityById(firstSubscription.getPartner().id());
+        subscriptions.forEach(s -> {
+            s.setPartnerI(partner);
+        });
+        List<SubscriptionsDto> subscriptionsDto =  subscriptions.stream()
+                .map(s -> {
+                    return this.mapToSubscriptionsDto(s);
+                })
+                .collect(Collectors.toList());
+
+        return subscriptionsDto;
+    }
+
+    @Transactional
+    private Price calculateTotalSubscriptions(List<Subscription> subscriptions) {
+        List<Subscription> filteredSubscriptions = subscriptions.stream()
+                .filter(subscription ->
+                        subscription.getPartner().type().equals(PartnerType.NORMAL_PARTNER)
+                                || (subscription.getPartner().type().equals(PartnerType.SUB_ENTITY)))
+                .collect(Collectors.toList());
+
+// Then check if the filtered list is empty and calculate accordingly
+
+        return filteredSubscriptions.isEmpty()
+                ? Price.ZERO(Currency.getInstance("MAD"))
+                : filteredSubscriptions.stream()
+                .map(Subscription::getAmount)
+                .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add);
+    }
+
+    @Transactional
+    private Price calculateTotalSubscriptionsOfPrincipal(UUID id, int year) {
+
+        LocalDate startOfYear = LocalDate.of(year, 1, 1);
+        LocalDate endOfYear = LocalDate.of(year, 12, 31);
+
+        List<Subscription> subscriptions =  subscriptionService.findByStartDateBetweenAndSubscriptionStatusNot(startOfYear, endOfYear, SubscriptionStatus.NOT_STARTED, id);
+
+        List<Subscription> filter =  subscriptions.stream().filter(s -> s.getPartner().type().equals(PartnerType.SUB_ENTITY)).collect(Collectors.toList());
+
+        return filter.isEmpty()
+                ? Price.ZERO(Currency.getInstance("MAD"))
+                : filter.stream()
+                .map(Subscription::getAmount)
+                .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add);
+    }
+
+    // case 1 -<  some sub not has all subscriptions ->
+    @Transactional
+    private Price calculateTotalDeadlines(List<Subscription> subscriptions) {
+// First, get the filtered subscriptions
+        List<Subscription> filteredSubscriptions = subscriptions.stream()
+                .filter(subscription ->
+                        subscription.getPartner().type().equals(PartnerType.NORMAL_PARTNER)
+                                || (subscription.getPartner().type().equals(PartnerType.SUB_ENTITY)))
+                .collect(Collectors.toList());
+
+// Then check if the filtered list is empty and calculate accordingly
+        Price totalAmount;
+        if (filteredSubscriptions.isEmpty()) {
+            totalAmount = Price.ZERO(Currency.getInstance("MAD"));
+        } else {
+            totalAmount = filteredSubscriptions.stream()
+                    .map(s -> s.getDeadlines().getFirst().getAmount())
+                    .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add);
+        }
+
+        return totalAmount;
+    }
+
+    @Transactional
+    private SubscriptionsListDto createSubscriptionsListDto(UUID partnerId, List<Subscription> partnerSubscriptions, int year) {
+        // Get partner information from the first subscription
+        Subscription firstSubscription = partnerSubscriptions.get(0);
+        PartnerI partner = !firstSubscription.getPartner().type().equals(PartnerType.SUB_ENTITY) ? this.organizationEntityService.findById(firstSubscription.getPartner().id()) : this.subEntityService.getEntityById(firstSubscription.getPartner().id());
+        partnerSubscriptions.forEach(s -> {
+            s.setPartnerI(partner);
+        });
+
+        PartnerInfoDto partnerInfoDto = new PartnerInfoDto(
+                partner.getId(),
+                partner.getName(),
+                partner.getAvatarPath()
+        );
+
+        // Calculate total amount for this partner
+        Price partnerTotal = partner.getPartnerType().equals(PartnerType.PARTNER_SB) ? calculateTotalSubscriptionsOfPrincipal(partnerId, year) :  calculateTotalSubscriptions(partnerSubscriptions);
+
+        return new SubscriptionsListDto(
+                partner.getPartnerType().equals(PartnerType.SUB_ENTITY) ? ((SubEntity) partner).getContract().getId() : ((OrganizationEntity) partner).getContract().getId(),
+                partnerInfoDto,
+                firstSubscription.getPartner().type(),
+                partnerTotal,
+                partnerSubscriptions.stream()
+                        .flatMap(subscription -> subscription.getSolutions().stream())
+                        .map(Solution::getName)  // assuming Solution class has a getName() method
+                        .distinct()  // to remove duplicates if any
+                        .collect(Collectors.toList()),
+                partner.getPartnerType().equals(PartnerType.NORMAL_PARTNER) ||
+                        (partner.subscriptionPayedBySubEntities()  && partner.getPartnerType().equals(PartnerType.SUB_ENTITY))
+                ||  (!partner.subscriptionPayedBySubEntities()  && partner.getPartnerType().equals(PartnerType.PARTNER_SB))
+        );
+    }
+
+    // create ->
+
+    @Transactional
+    private SubscriptionsDto mapToSubscriptionsDto(Subscription subscription) {
+        List<DeadlinesDto> deadlinesDto = subscription.getDeadlines().stream()
+                .map(deadline -> {
+                    LocalDate dueDate = deadline.getDueDate();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("fr", "FR"));
+                    String formattedDate = dueDate.format(formatter);
+
+                    boolean isPaymentEligible = subscription.getPartner().type().equals(PartnerType.NORMAL_PARTNER)
+                            || (subscription.getPartner().type().equals(PartnerType.SUB_ENTITY) && ((PartnerI)subscription.getPartnerI()).subscriptionPayedBySubEntities())
+                            || (subscription.getPartner().type().equals(PartnerType.PARTNER_SB) && ((PartnerI)subscription.getPartnerI()).subscriptionPayedBySubEntities() == false);
+
+                    return new DeadlinesDto(
+                            deadline.getId(),
+                            formattedDate,
+                            deadline.getStatus(),
+                            !(subscription.getPartnerI().getPartnerType().equals(PartnerType.PARTNER_SB)) ? deadline.getAmount() : deadline.getSubEntityDeadlines().stream().map(d -> d.getAmount())
+                            .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add),
+                            isPaymentEligible
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new SubscriptionsDto(
+                subscription.getId(),
+                !(subscription.getPartnerI().getPartnerType().equals(PartnerType.PARTNER_SB)) ? subscription.getAmount() : subscription.getSubEntities().stream().map(d -> d.getAmount())
+                        .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add),
+                subscription.getSolutions().stream().map(s -> s.getName()).toList(),
+                deadlinesDto
+        );
+    }
+
 }

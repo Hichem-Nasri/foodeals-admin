@@ -19,14 +19,4 @@ public class ContractModelMapperConfig {
         this.modelMapper = modelMapper;
     }
 
-    @PostConstruct
-    public void paymentModelMapperConfig() {
-        modelMapper.addMappings(new PropertyMap<Deadlines, DeadlinesDto>() {
-            @Override
-            protected void configure() {
-                map(source.getDueDate(), destination.getDueDate());
-                map(source.getStatus(), destination.getDeadlineStatus());
-            }
-        });
-    }
 }

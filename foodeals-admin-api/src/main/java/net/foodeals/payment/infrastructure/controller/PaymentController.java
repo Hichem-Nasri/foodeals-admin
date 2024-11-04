@@ -58,14 +58,19 @@ public class PaymentController {
     }
 
     @GetMapping("/subscriptions/{year}")
-    public ResponseEntity<Page<SubscriptionPaymentDto>> getSubscriptionPayments(@PathVariable("year") int year, Pageable page) {
-        Page<Subscription> subscriptions = this.paymentService.getSubscriptionPayments(page, year);
-        Page<SubscriptionPaymentDto> paymentsDtos = subscriptions.map(this.paymentService::toSubscriptionPaymentDto);
-        return new ResponseEntity<Page<SubscriptionPaymentDto>>(paymentsDtos, HttpStatus.OK);
+    public ResponseEntity<SubscriptionPaymentDto> getSubscriptionPayments(@PathVariable("year") int year, Pageable pageable, @RequestParam(value = "id", required = false) UUID id) {
+        return new ResponseEntity<SubscriptionPaymentDto>(this.paymentService.getSubscriptionResponse(year, pageable, id), HttpStatus.OK);
+    }
+
+    @GetMapping("/subscriptions/{year}/{id}")
+    public ResponseEntity<List<SubscriptionsDto>> getSubscriptionsDetails(@PathVariable("year") int year, @PathVariable(value = "id") UUID id) {
+        return new ResponseEntity<List<SubscriptionsDto>>(this.paymentService.getSubscriptionDetails(year, id), HttpStatus.OK);
     }
 }
 
 
+// should check pages of commissions.
+// and all paginations from list.
 // create partner with sub payed by sub
 // pay commission by sub
 // recive it

@@ -26,18 +26,11 @@ public class DeadlinesService {
         return this.deadlinesRepository.saveAll(deadlines);
     }
 
-    public DeadlinesDto toDeadlineDto(Deadlines deadline) {
-        DeadlinesDto deadlineDto =  this.modelMapper.map(deadline, DeadlinesDto.class);
-
-        deadlineDto.setDeadlineAmount(deadline.getAmount().amount());
-        return deadlineDto;
-    }
-
     public Deadlines findById(UUID uuid){
         return  this.deadlinesRepository.findById(uuid).orElse(null);
     }
 
-    public void save(Deadlines deadlines) {
-        this.deadlinesRepository.save(deadlines);
+    public Deadlines save(Deadlines deadlines) {
+        return this.deadlinesRepository.save(deadlines);
     }
 }

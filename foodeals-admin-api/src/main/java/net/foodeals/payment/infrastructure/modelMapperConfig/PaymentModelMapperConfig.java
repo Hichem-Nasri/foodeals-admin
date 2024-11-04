@@ -7,6 +7,7 @@ import net.foodeals.common.valueOjects.Price;
 import net.foodeals.contract.application.service.CommissionService;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.domain.entities.Commission;
+import net.foodeals.contract.domain.entities.Deadlines;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.order.application.services.OrderService;
 import net.foodeals.order.domain.entities.Order;
@@ -17,9 +18,7 @@ import net.foodeals.organizationEntity.application.services.OrganizationEntitySe
 import net.foodeals.organizationEntity.application.services.SubEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
-import net.foodeals.payment.application.dto.response.CommissionPaymentDto;
-import net.foodeals.payment.application.dto.response.PartnerInfoDto;
-import net.foodeals.payment.application.dto.response.SubscriptionPaymentDto;
+import net.foodeals.payment.application.dto.response.*;
 import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
@@ -75,13 +74,6 @@ public class PaymentModelMapperConfig {
             boolean payable = (partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) && partnerCommissions.getPartner().commissionPayedBySubEntities() == false) ? false : true;
             return new CommissionPaymentDto(partnerCommissions.getId(), partnerCommissions.getPartner().getId(),  organizationId,formatter.format(partnerCommissions.getDate()), partnerInfoDto, partnerCommissions.getPartner().getPartnerType(), totalAmount, new Price(new BigDecimal(commissionTotal).setScale(3, RoundingMode.HALF_UP), mad), new Price(new BigDecimal(toPay).setScale(3, RoundingMode.HALF_UP), mad), new Price(new BigDecimal(toReceive).setScale(3, RoundingMode.HALF_UP), mad), partnerCommissions.getPaymentStatus(), payable, partnerCommissions.getPartner().commissionPayedBySubEntities());
         }, PartnerCommissions.class, CommissionPaymentDto.class);
-        modelMapper.addMappings(new PropertyMap<Subscription, SubscriptionPaymentDto>() {
-            @Override
-            protected void configure() {
-                map(source.getId(), destination.getId());
-                map(source.getSubscriptionStatus(), destination.getSubscriptionStatus());
-            }
-        });
 
         modelMapper.addConverter(mappingContext -> {
             OrganizationEntity organizationEntity = mappingContext.getSource();

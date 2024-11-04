@@ -1,6 +1,7 @@
 package net.foodeals.organizationEntity.domain.entities;
 
 import jakarta.persistence.*;
+import jakarta.transaction.Transactional;
 import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Coordinates;
@@ -82,7 +83,7 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     private List<PartnerCommissions> commissions = new ArrayList<>();
 
     @Builder.Default
-    @OneToMany(mappedBy = "subEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Subscription> subscriptions = new ArrayList<>();
 
     @ManyToOne
@@ -90,8 +91,6 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
 
     @ManyToMany(cascade = CascadeType.ALL)
     private Set<Solution> solutions = new HashSet<>();
-
-    private String reference;
 
     public SubEntity() {
     }
@@ -112,6 +111,17 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
             case SubEntityType.FOOD_BANK_SB -> PublisherType.FOOD_BANK_SB;
             default -> null;
         };    }
+
+    @Override
+    @Transactional
+    public boolean subscriptionPayedBySubEntities() {
+        return this.contract.isSubscriptionPayedBySubEntities();
+    }
+
+    @Override
+    public boolean singleSubscription() {
+        return this.contract.isSingleSubscription();
+    }
 
     @Override
     public DonationReceiverType getReceiverType() {
@@ -147,3 +157,7 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
         return this.organizationEntity.getContract().isCommissionPayedBySubEntities();
     }
 }
+
+
+
+// subscription -> sub pay -> deadlines 

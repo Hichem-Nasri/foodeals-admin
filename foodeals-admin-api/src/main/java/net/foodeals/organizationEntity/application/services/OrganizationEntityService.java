@@ -81,6 +81,7 @@ public class OrganizationEntityService {
         this.organizationEntityRepository.softDelete(organizationEntity.getId());
     }
 
+    @Transactional
     public OrganizationEntity createAnewOrganizationEntity(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, MultipartFile logo, MultipartFile cover) throws DocumentException, IOException {
         try {
             dtoProcessor.processDto(createAnOrganizationEntityDto);
@@ -124,6 +125,7 @@ public class OrganizationEntityService {
         return organizationEntity;
     }
 
+    @Transactional
     private OrganizationEntity saveDeliveryPartner(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) {
         if (createAnOrganizationEntityDto.getCoveredZonesDtos() != null) {
             List<CoveredZonesDto> coveredZonesDtos = createAnOrganizationEntityDto.getCoveredZonesDtos();
@@ -151,6 +153,7 @@ public class OrganizationEntityService {
         return this.organizationEntityRepository.save(organizationEntity);
     }
 
+    @Transactional
     private OrganizationEntity savePartner(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
         BankInformation bankInformation = BankInformation.builder().beneficiaryName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBeneficiaryName())
                 .bankName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBankName())
@@ -261,6 +264,7 @@ public class OrganizationEntityService {
     }
 
 
+    @Transactional
     public Page<OrganizationEntity> getDeletedOrganizationsPaginated(Pageable pageable, EntityType type) {
         if (type != null) {
             return organizationEntityRepository.findByDeletedAtIsNotNullAndType(pageable, type);
@@ -269,6 +273,7 @@ public class OrganizationEntityService {
         }
     }
 
+    @Transactional
     public DeletionDetailsDTO getDeletionDetails(UUID uuid) {
         OrganizationEntity organization = organizationEntityRepository.findByIdAndDeletedAtIsNotNull(uuid)
                 .orElseThrow(() -> new EntityNotFoundException("Deleted organization not found with uuid: " + uuid));
@@ -279,7 +284,7 @@ public class OrganizationEntityService {
                 organization.getDeletedAt()
         );
     }
-
+    @Transactional
     private OrganizationEntity updatePartner(CreateAnOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
         List<String> activitiesNames = updateOrganizationEntityDto.getActivities();
         Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
