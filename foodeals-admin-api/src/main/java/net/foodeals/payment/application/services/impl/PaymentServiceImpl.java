@@ -679,6 +679,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     private SubscriptionsDto mapToSubscriptionsDto(Subscription subscription) {
         List<DeadlinesDto> deadlinesDto = subscription.getDeadlines().stream()
+                .sorted(Comparator.comparing(Deadlines::getCreatedAt))  // Sort by createdAt
                 .map(deadline -> {
                     LocalDate dueDate = deadline.getDueDate();
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("fr", "FR"));
@@ -692,8 +693,11 @@ public class PaymentServiceImpl implements PaymentService {
                             deadline.getId(),
                             formattedDate,
                             deadline.getStatus(),
-                            !(subscription.getPartnerI().getPartnerType().equals(PartnerType.PARTNER_SB)) ? deadline.getAmount() : deadline.getSubEntityDeadlines().stream().map(d -> d.getAmount())
-                            .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add),
+                            !(subscription.getPartnerI().getPartnerType().equals(PartnerType.PARTNER_SB))
+                                    ? deadline.getAmount()
+                                    : deadline.getSubEntityDeadlines().stream()
+                                    .map(d -> d.getAmount())
+                                    .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add),
                             isPaymentEligible
                     );
                 })
@@ -701,7 +705,10 @@ public class PaymentServiceImpl implements PaymentService {
 
         return new SubscriptionsDto(
                 subscription.getId(),
-                !(subscription.getPartnerI().getPartnerType().equals(PartnerType.PARTNER_SB)) ? subscription.getAmount() : subscription.getSubEntities().stream().map(d -> d.getAmount())
+                !(subscription.getPartnerI().getPartnerType().equals(PartnerType.PARTNER_SB))
+                        ? subscription.getAmount()
+                        : subscription.getSubEntities().stream()
+                        .map(d -> d.getAmount())
                         .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add),
                 subscription.getSolutions().stream().map(s -> s.getName()).toList(),
                 deadlinesDto
