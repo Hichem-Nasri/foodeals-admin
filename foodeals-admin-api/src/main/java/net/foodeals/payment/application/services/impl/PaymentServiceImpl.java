@@ -110,6 +110,7 @@ import net.foodeals.offer.domain.enums.PublisherType;
 import net.foodeals.order.application.services.OrderService;
 import net.foodeals.order.domain.entities.Order;
 import net.foodeals.order.domain.entities.Transaction;
+import net.foodeals.order.domain.enums.OrderStatus;
 import net.foodeals.order.domain.enums.TransactionStatus;
 import net.foodeals.order.domain.enums.TransactionType;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
@@ -418,30 +419,26 @@ public class PaymentServiceImpl implements PaymentService {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month - 1, 1);
         Date date = calendar.getTime();
-        Page<Order> orders = this.orderService.findByOfferPublisherInfoIdAndDate(id, date, page);
-        List<Order> filteredOrders  = orders.getContent().stream()
-                .filter(o -> !o.getTransactions().isEmpty() &&
-                        o.getTransactions().get(0).getStatus().equals(TransactionStatus.COMPLETED))
-                .collect(Collectors.toList());
-        orders = new PageImpl<>(filteredOrders, orders.getPageable(), orders.getTotalElements());
+        PartnerCommissions commissions = this.partnerCommissionsRepository.findCommissionsByDateAndPartnerInfoId(year, month, id);
+        Page<Order> orders = this.orderService.findByOfferPublisherInfoIdAndDateAndStatus(id, date, OrderStatus.COMPLETED, TransactionStatus.COMPLETED, page);
+        PaymentStatistics statistics = this.getPaymentStatistics(new ArrayList<>(List.of(commissions)));
 
-    return orders.map(o -> {
-        Transaction transaction = o.getTransactions().getFirst();
+     orders.map(o -> {
+        Transaction transaction = o.getTransaction();
         UUID organizationId = o.getOffer().getPublisherInfo().type().equals(PublisherType.PARTNER_SB) ? this.subEntityService.getEntityById(id).getOrganizationEntity().getId() : id;
         Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
-        BigDecimal cashAmount = transaction.getType().equals(TransactionType.CASH) ? transaction.getPrice().amount() : BigDecimal.ZERO;
-        BigDecimal cardAmount = transaction.getType().equals(TransactionType.CASH) ? BigDecimal.ZERO : transaction.getPrice().amount();
-        BigDecimal cashCommission = transaction.getType().equals(TransactionType.CASH)
-                ? BigDecimal.valueOf(commission.getCash()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount())
-                : BigDecimal.ZERO;
-        BigDecimal cardCommission = transaction.getType().equals(TransactionType.CASH)
-                ? BigDecimal.ZERO
-                : BigDecimal.valueOf(commission.getCard()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount());
-        BigDecimal amount = transaction.getPrice().amount();
-        System.out.println(commission.getCard());
-
-        return new MonthlyOperationsDto(null, o.getId(), amount, o.getQuantity(), cashAmount, cashCommission, cardAmount, cardCommission);
+        Price cashAmount = transaction.getType().equals(TransactionType.CASH) ? transaction.getPrice() : Price.ZERO(Currency.getInstance("MAD"));
+        Price cardAmount = transaction.getType().equals(TransactionType.CASH) ? Price.ZERO(Currency.getInstance("MAD")) :  transaction.getPrice();
+        Price cashCommission = transaction.getType().equals(TransactionType.CASH)
+                ? new Price(BigDecimal.valueOf(commission.getCash()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount()), Currency.getInstance("MAD"))
+                : Price.ZERO(Currency.getInstance("MAD"));
+        Price cardCommission = transaction.getType().equals(TransactionType.CASH)
+                ? Price.ZERO(Currency.getInstance("MAD"))
+                :  new Price(BigDecimal.valueOf(commission.getCard()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount()));
+        Price amount = transaction.getPrice().amount();
+        ProductInfo productInfo = new ProductInfo(o.getOffer().getTitle(), o.getOffer().getImagePath());
         });
+     return new MonthlyOperationsDto(, o.getId(), amount, o.getQuantity(), cashAmount, cashCommission, cardAmount, cardCommission);
     }
 
     @Override

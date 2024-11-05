@@ -10,7 +10,9 @@ import net.foodeals.order.application.dtos.requests.OrderRequest;
 import net.foodeals.order.application.services.CouponService;
 import net.foodeals.order.application.services.OrderService;
 import net.foodeals.order.domain.entities.Order;
+import net.foodeals.order.domain.enums.OrderStatus;
 import net.foodeals.order.domain.enums.OrderType;
+import net.foodeals.order.domain.enums.TransactionStatus;
 import net.foodeals.order.domain.exceptions.OrderNotFoundException;
 import net.foodeals.order.domain.repositories.OrderRepository;
 import net.foodeals.user.application.services.UserService;
@@ -40,6 +42,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> findByOfferPublisherInfoIdAndDate(UUID publisherId, Date date) {
         return this.repository.findOrdersByPublisherIdAndOrderDate(publisherId, date);
+    }
+
+    @Override
+    public Page<Order> findByOfferPublisherInfoIdAndDateAndStatus(UUID publisherId, Date date, OrderStatus status, TransactionStatus transactionStatus, Pageable pageable) {
+        return this.repository.findOrdersByPublisherIdAndOrderDateAndStatusAndTransactionStatus(publisherId, date, status, transactionStatus, pageable);
     }
 
     @Override

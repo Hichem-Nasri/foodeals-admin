@@ -48,7 +48,7 @@ public class PaymentController {
     }
 
     @GetMapping("/commissions/{id}/monthly-operations/{year}/{month}")
-    public ResponseEntity<Page<MonthlyOperationsDto>> getCommissionPayments(@PathVariable("id") UUID id, @PathVariable("year") int year, @PathVariable int month, Pageable page) {
+    public ResponseEntity<Page<MonthlyOperationsDto>> getCommissionPayments(@PathVariable("id") UUID id, @PathVariable("year") int year, @PathVariable("month") int month, Pageable page) {
         return new ResponseEntity<Page<MonthlyOperationsDto>>(this.paymentService.monthlyOperations(id, year, month, page), HttpStatus.OK);
     }
 

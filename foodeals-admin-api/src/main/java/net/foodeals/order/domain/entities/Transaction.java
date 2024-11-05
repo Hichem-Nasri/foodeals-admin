@@ -39,6 +39,6 @@ public class Transaction extends AbstractEntity<UUID> {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     private Order order;
 }
