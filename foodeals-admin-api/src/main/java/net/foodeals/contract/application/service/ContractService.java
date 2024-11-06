@@ -12,10 +12,7 @@ import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.impl.RegionServiceImpl;
 import net.foodeals.location.domain.repositories.CityRepository;
-import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
-import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
-import net.foodeals.organizationEntity.application.dtos.requests.DeliveryPartnerContract;
-import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.*;
 import net.foodeals.organizationEntity.application.services.*;
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.user.application.services.UserService;
@@ -92,10 +89,10 @@ public class ContractService {
         return contract;
     }
 
-    public Contract updateDeliveryContract(Contract contract, CreateAnOrganizationEntityDto updateOrganizationEntityDto) {
+    public Contract updateDeliveryContract(Contract contract, CreateAnOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
         List<SolutionContract> solutionsContracts = this.solutionContractService.updateDeliveryContract(updateOrganizationEntityDto.getDeliveryPartnerContract(), contract);
-//        byte[] document = this.getContractDocumentDelivery(createAnOrganizationEntityDto);
-//        contract.setDocument(document);
+        byte[] document = this.updateDocumentDelivery(updateOrganizationEntityDto);
+        contract.setDocument(document);
         return this.contractRepository.save(contract);
     }
 
@@ -398,7 +395,7 @@ public class ContractService {
         return contract;
     }
 
-    public Contract createDeliveryPartnerContract(OrganizationEntity organizationEntity, CreateAnOrganizationEntityDto createAnOrganizationEntityDto) {
+    public Contract createDeliveryPartnerContract(OrganizationEntity organizationEntity, CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
         Contract contract = Contract.builder().name(createAnOrganizationEntityDto.getEntityName())
                 .contractStatus(ContractStatus.IN_PROGRESS)
                 .build();
@@ -406,9 +403,95 @@ public class ContractService {
         contract.setOrganizationEntity(organizationEntity);
         List<SolutionContract> solutionsContracts = this.solutionContractService.createDeliveryContracts(createAnOrganizationEntityDto.getDeliveryPartnerContract(), contract);
         contract.getSolutionContracts().addAll(solutionsContracts);
-//        byte[] document = this.getContractDocumentDelivery(createAnOrganizationEntityDto);
-//        contract.setDocument(document);
+        byte[] document = this.getContractDocumentDelivery(createAnOrganizationEntityDto);
+        contract.setDocument(document);
         return this.contractRepository.save(contract);
+    }
+
+    private byte[] getContractDocumentDelivery(CreateAnOrganizationEntityDto dto) throws IOException, DocumentException {
+        String template = new String(Files.readAllBytes(Paths.get("resources/delevery_partner_contract.html")));
+
+
+                        // Replace placeholders with actual values
+                        template = template.replace("{{raison_sociale_partenaire_livraison}}", dto.getEntityName())
+                                .replace("{{adresse_partenaire_livraison}}", dto.getEntityAddressDto().getAddress())
+                                .replace("{{numero_registre_commerce}}", dto.getCommercialNumber())
+                                .replace("{{nom_gerant_responsable}}", dto.getContactDto().getName().firstName() + " " + dto.getContactDto().getName().lastName())
+                                .replace("{{raison_sociale_partenaire}}", dto.getEntityName())
+                                .replace("{{solution}}", String.join(" / ", dto.getSolutions()))
+                                .replace("{{cout_livraison}}", dto.getDeliveryPartnerContract().getFirst().amount() + " MAD")
+                                .replace("{{montant_commission}}", dto.getDeliveryPartnerContract().getFirst().commission() + " MAD")
+                                .replace("{{nom_beneficiaire}}", dto.getEntityBankInformationDto().getBeneficiaryName())
+                                .replace("{{nom_banque}}", dto.getEntityBankInformationDto().getBankName())
+                                .replace("{{numero_compte}}", dto.getEntityBankInformationDto().getRib())
+                                .replace("{{date_signature_foodeals}}", getCurrentDate())
+                                .replace("{{date_signature_partenaire}}", getCurrentDate())
+                                .replace("{{nom_signataire_partenaire}}", dto.getContactDto().getName().firstName() + " " + dto.getContactDto().getName().lastName())
+                                .replace("{{statut_signataire_partenaire}}", "Gérant"); // Assuming the status is always "Gérant"
+
+                // Process covered zones
+                StringBuilder coveredZones = new StringBuilder();
+                for (CoveredZonesDto zone : dto.getCoveredZonesDtos()) {
+                    coveredZones.append("<li>Ville de couverture : <strong>").append(zone.getCity()).append("</strong></li>\n");
+                    coveredZones.append("<li>Zone de couverture : <strong>")
+                            .append(String.join(", ", zone.getRegions()))
+                            .append("</strong></li>\n");
+                }
+                template = template.replace("<li>Ville de couverture : <strong>{{ville}}</strong></li>\n" +
+                                "        <li>Zone de couverture : <strong>{{zones_couverture}}</strong></li>",
+                        coveredZones.toString());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ITextRenderer renderer = new ITextRenderer();
+        renderer.setDocumentFromString(template);
+        renderer.layout();
+        renderer.createPDF(baos);
+        return baos.toByteArray();
+            }
+
+    private byte[] updateDocumentDelivery(CreateAnOrganizationEntityDto dto) throws IOException, DocumentException {
+        String template = new String(Files.readAllBytes(Paths.get("resources/delevery_partner_contract.html")));
+
+
+        // Replace placeholders with actual values
+        template = template.replace("{{raison_sociale_partenaire_livraison}}", dto.getEntityName())
+                .replace("{{adresse_partenaire_livraison}}", dto.getEntityAddressDto().getAddress())
+                .replace("{{numero_registre_commerce}}", dto.getCommercialNumber())
+                .replace("{{nom_gerant_responsable}}", dto.getContactDto().getName().firstName() + " " + dto.getContactDto().getName().lastName())
+                .replace("{{raison_sociale_partenaire}}", dto.getEntityName())
+                .replace("{{solution}}", String.join(" / ", dto.getSolutions()))
+                .replace("{{cout_livraison}}", dto.getDeliveryPartnerContract().getFirst().amount() + " MAD")
+                .replace("{{montant_commission}}", dto.getDeliveryPartnerContract().getFirst().commission() + " MAD")
+                .replace("{{nom_beneficiaire}}", dto.getEntityBankInformationDto().getBeneficiaryName())
+                .replace("{{nom_banque}}", dto.getEntityBankInformationDto().getBankName())
+                .replace("{{numero_compte}}", dto.getEntityBankInformationDto().getRib())
+                .replace("{{date_signature_foodeals}}", getCurrentDate())
+                .replace("{{date_signature_partenaire}}", getCurrentDate())
+                .replace("{{nom_signataire_partenaire}}", dto.getContactDto().getName().firstName() + " " + dto.getContactDto().getName().lastName())
+                .replace("{{statut_signataire_partenaire}}", "Gérant"); // Assuming the status is always "Gérant"
+
+        // Process covered zones
+        StringBuilder coveredZones = new StringBuilder();
+        for (CoveredZonesDto zone : dto.getCoveredZonesDtos()) {
+            coveredZones.append("<li>Ville de couverture : <strong>").append(zone.getCity()).append("</strong></li>\n");
+            coveredZones.append("<li>Zone de couverture : <strong>")
+                    .append(String.join(", ", zone.getRegions()))
+                    .append("</strong></li>\n");
+        }
+        template = template.replace("<li>Ville de couverture : <strong>{{ville}}</strong></li>\n" +
+                        "        <li>Zone de couverture : <strong>{{zones_couverture}}</strong></li>",
+                coveredZones.toString());
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ITextRenderer renderer = new ITextRenderer();
+        renderer.setDocumentFromString(template);
+        renderer.layout();
+        renderer.createPDF(baos);
+        return baos.toByteArray();
+    }
+
+    private String getCurrentDate() {
+        return LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
     // to be implemented
