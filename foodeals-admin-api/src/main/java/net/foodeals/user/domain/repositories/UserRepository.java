@@ -30,4 +30,14 @@ public interface UserRepository extends BaseRepository<User, Integer> {
     Page<User> findByName_FirstNameContainingOrName_LastNameContainingAndRoleNameNot(
             String firstName, String lastName, String roleName, Pageable pageable);
 
+    @Query("SELECT u FROM User u " +
+            "LEFT JOIN FETCH u.role " +
+            "LEFT JOIN FETCH u.organizationEntity " +
+            "LEFT JOIN FETCH u.account " +
+            "LEFT JOIN FETCH u.subEntity " +
+            "LEFT JOIN FETCH u.address " +
+            "LEFT JOIN FETCH u.workingHours " +
+            "WHERE u.id = :userId")
+    Optional<User> findUserProfileById(@Param("userId") Integer userId);
+
 }
