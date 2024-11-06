@@ -1,6 +1,7 @@
 package net.foodeals.order.domain.repositories;
 
 import net.foodeals.common.contracts.BaseRepository;
+import net.foodeals.delivery.domain.enums.DeliveryStatus;
 import net.foodeals.order.domain.entities.Order;
 import net.foodeals.order.domain.enums.OrderStatus;
 import net.foodeals.order.domain.enums.TransactionStatus;
@@ -49,4 +50,40 @@ public interface OrderRepository extends BaseRepository<Order, UUID> {
             @Param("orderStatus") OrderStatus orderStatus,
             @Param("transactionStatus") TransactionStatus transactionStatus
     );
+
+    @Query("SELECT o FROM Order o " +
+            "JOIN o.delivery d " +
+            "JOIN d.deliveryBoy u " +
+            "WHERE u.organizationEntity.id = :organizationId " +
+            "AND d.status = :deliveryStatus "  +
+            "AND DATE(o.createdAt) = :orderDate " +
+            "AND o.status = :orderStatus " +
+            "AND o.transaction.status = :transactionStatus")
+    Page<Order> findOrdersByOrganizationAndDeliveryStatusAndCriteria(
+            @Param("organizationId") UUID organizationId,
+            @Param("deliveryStatus") DeliveryStatus deliveryStatus,
+            @Param("orderDate") Date orderDate,
+            @Param("orderStatus") OrderStatus orderStatus,
+            @Param("transactionStatus") TransactionStatus transactionStatus,
+            Pageable pageable
+    );
+
+    @Query("SELECT o FROM Order o " +
+            "JOIN o.delivery d " +
+            "JOIN d.deliveryBoy u " +
+            "WHERE u.organizationEntity.id = :organizationId " +
+            "AND d.status = :deliveryStatus "  +
+            "AND DATE(o.createdAt) = :orderDate " +
+            "AND o.status = :orderStatus " +
+            "AND o.transaction.status = :transactionStatus")
+    List<Order> findOrdersByOrganizationAndDeliveryStatusAndCriteria(
+            @Param("organizationId") UUID organizationId,
+            @Param("deliveryStatus") DeliveryStatus deliveryStatus,
+            @Param("orderDate") Date orderDate,
+            @Param("orderStatus") OrderStatus orderStatus,
+            @Param("transactionStatus") TransactionStatus transactionStatus
+    );
 }
+
+
+

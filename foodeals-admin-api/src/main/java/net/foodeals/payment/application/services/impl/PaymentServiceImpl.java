@@ -106,6 +106,7 @@ import net.foodeals.contract.domain.entities.Deadlines;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.contract.domain.entities.enums.DeadlineStatus;
 import net.foodeals.contract.domain.entities.enums.SubscriptionStatus;
+import net.foodeals.delivery.domain.enums.DeliveryStatus;
 import net.foodeals.offer.domain.enums.PublisherType;
 import net.foodeals.order.application.services.OrderService;
 import net.foodeals.order.domain.entities.Order;
@@ -118,6 +119,7 @@ import net.foodeals.organizationEntity.application.services.SubEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
 import net.foodeals.payment.application.dto.request.PaymentType;
 import net.foodeals.payment.application.dto.request.ReceiveDto;
@@ -416,7 +418,52 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    public MonthlyOperationsDto monthlyOperations(UUID id, int year, int month, Pageable page) {
+    public MonthlyOperationsDto monthlyOperations(UUID id, int year, int month, Pageable page, PartnerType type) {
+        return switch (type) {
+            case PartnerType.PARTNER_SB, PartnerType.NORMAL_PARTNER, PartnerType.SUB_ENTITY -> partner(id, year, month, page);
+//            case PartnerType.DELIVERY_PARTNER -> deliveryPartner(id, year, month, page);
+            default -> null;
+        };
+    }
+
+//    private MonthlyOperationsDto deliveryPartner(UUID id, int year, int month, Pageable page) {
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.set(year, month - 1, 1);
+//        Date date = calendar.getTime();
+//        PartnerCommissions commissions = this.partnerCommissionsRepository.findCommissionsByDateAndPartnerInfoId(year, month, id);
+//        Page<Order> orders = this.orderService.findOrdersByOrganizationAndDeliveryStatusAndCriteria(id, DeliveryStatus.DELIVERED,date, OrderStatus.COMPLETED, TransactionStatus.COMPLETED, page);
+//        PaymentStatistics statistics = this.getPaymentStatistics(new ArrayList<>(List.of(commissions)));
+//        PartnerInfoDto  partnerInfoDto;
+//        if (commissions.getPartnerInfo().type().equals(PartnerType.SUB_ENTITY)) {
+//            SubEntity subEntity = this.subEntityService.getEntityById(commissions.getPartnerInfo().id());
+//            partnerInfoDto = new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath());
+//        } else {
+//            OrganizationEntity partner = this.organizationEntityService.findById(commissions.getPartnerInfo().id());
+//            partnerInfoDto = new PartnerInfoDto(partner.getId(), partner.getName(), partner.getAvatarPath());
+//        }
+//
+//        Page<OperationsDto> operationsDtos = orders.map(o -> {
+//            Transaction transaction = o.getTransaction();
+//            UUID organizationId = o.getOffer().getPublisherInfo().type().equals(PublisherType.PARTNER_SB) ? this.subEntityService.getEntityById(id).getOrganizationEntity().getId() : id;
+//            Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
+//            Price cashAmount = transaction.getType().equals(TransactionType.CASH) ? transaction.getPrice() : Price.ZERO(Currency.getInstance("MAD"));
+//            Price cardAmount = transaction.getType().equals(TransactionType.CASH) ? Price.ZERO(Currency.getInstance("MAD")) : transaction.getPrice();
+//            Price cashCommission = transaction.getType().equals(TransactionType.CASH)
+//                    ? new Price(BigDecimal.valueOf(commission.getCash()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount()), Currency.getInstance("MAD"))
+//                    : Price.ZERO(Currency.getInstance("MAD"));
+//            Price cardCommission = transaction.getType().equals(TransactionType.CASH)
+//                    ? Price.ZERO(Currency.getInstance("MAD"))
+//                    : new Price(BigDecimal.valueOf(commission.getCard()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount()), Currency.getInstance("MAD"));
+//            Price amount = transaction.getPrice();
+//            ProductInfo productInfo = new ProductInfo(o.getOffer().getTitle(), o.getOffer().getImagePath());
+//            return new OperationsDto(productInfo, o.getId(), amount, o.getQuantity(), cashAmount, cashCommission, cardAmount, cardCommission);
+//        });
+//        CommissionPaymentDto dto = this.modelMapper.map(commissions, CommissionPaymentDto.class);
+//        PaymentsDetailsDto detailsDto = new PaymentsDetailsDto(dto.getId(), dto.isPayable(), dto.getPaymentStatus(), dto.getToPay().amount().compareTo(dto.getToReceive().amount()) > 0 ? PaymentDirection.FOODEALS_TO_PARTENER : PaymentDirection.PARTNER_TO_FOODEALS);
+//        return new MonthlyOperationsDto(partnerInfoDto, statistics, operationsDtos, detailsDto);
+//    }
+
+    private MonthlyOperationsDto partner(UUID id, int year, int month, Pageable page) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month - 1, 1);
         Date date = calendar.getTime();
@@ -432,25 +479,25 @@ public class PaymentServiceImpl implements PaymentService {
             partnerInfoDto = new PartnerInfoDto(partner.getId(), partner.getName(), partner.getAvatarPath());
         }
 
-     Page<OperationsDto> operationsDtos = orders.map(o -> {
-         Transaction transaction = o.getTransaction();
-         UUID organizationId = o.getOffer().getPublisherInfo().type().equals(PublisherType.PARTNER_SB) ? this.subEntityService.getEntityById(id).getOrganizationEntity().getId() : id;
-         Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
-         Price cashAmount = transaction.getType().equals(TransactionType.CASH) ? transaction.getPrice() : Price.ZERO(Currency.getInstance("MAD"));
-         Price cardAmount = transaction.getType().equals(TransactionType.CASH) ? Price.ZERO(Currency.getInstance("MAD")) : transaction.getPrice();
-         Price cashCommission = transaction.getType().equals(TransactionType.CASH)
-                 ? new Price(BigDecimal.valueOf(commission.getCash()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount()), Currency.getInstance("MAD"))
-                 : Price.ZERO(Currency.getInstance("MAD"));
-         Price cardCommission = transaction.getType().equals(TransactionType.CASH)
-                 ? Price.ZERO(Currency.getInstance("MAD"))
-                 : new Price(BigDecimal.valueOf(commission.getCard()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount()), Currency.getInstance("MAD"));
-         Price amount = transaction.getPrice();
-         ProductInfo productInfo = new ProductInfo(o.getOffer().getTitle(), o.getOffer().getImagePath());
-         return new OperationsDto(productInfo, o.getId(), amount, o.getQuantity(), cashAmount, cashCommission, cardAmount, cardCommission);
-     });
-     CommissionPaymentDto dto = this.modelMapper.map(commissions, CommissionPaymentDto.class);
-     PaymentsDetailsDto detailsDto = new PaymentsDetailsDto(dto.getId(), dto.isPayable(), dto.getPaymentStatus(), dto.getToPay().amount().compareTo(dto.getToReceive().amount()) > 0 ? PaymentDirection.FOODEALS_TO_PARTENER : PaymentDirection.PARTNER_TO_FOODEALS);
-     return new MonthlyOperationsDto(partnerInfoDto, statistics, operationsDtos, detailsDto);
+        Page<OperationsDto> operationsDtos = orders.map(o -> {
+            Transaction transaction = o.getTransaction();
+            UUID organizationId = o.getOffer().getPublisherInfo().type().equals(PublisherType.PARTNER_SB) ? this.subEntityService.getEntityById(id).getOrganizationEntity().getId() : id;
+            Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
+            Price cashAmount = transaction.getType().equals(TransactionType.CASH) ? transaction.getPrice() : Price.ZERO(Currency.getInstance("MAD"));
+            Price cardAmount = transaction.getType().equals(TransactionType.CASH) ? Price.ZERO(Currency.getInstance("MAD")) : transaction.getPrice();
+            Price cashCommission = transaction.getType().equals(TransactionType.CASH)
+                    ? new Price(BigDecimal.valueOf(commission.getCash()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount()), Currency.getInstance("MAD"))
+                    : Price.ZERO(Currency.getInstance("MAD"));
+            Price cardCommission = transaction.getType().equals(TransactionType.CASH)
+                    ? Price.ZERO(Currency.getInstance("MAD"))
+                    : new Price(BigDecimal.valueOf(commission.getCard()).divide(BigDecimal.valueOf(100)).multiply(transaction.getPrice().amount()), Currency.getInstance("MAD"));
+            Price amount = transaction.getPrice();
+            ProductInfo productInfo = new ProductInfo(o.getOffer().getTitle(), o.getOffer().getImagePath());
+            return new OperationsDto(productInfo, o.getId(), amount, o.getQuantity(), cashAmount, cashCommission, cardAmount, cardCommission);
+        });
+        CommissionPaymentDto dto = this.modelMapper.map(commissions, CommissionPaymentDto.class);
+        PaymentsDetailsDto detailsDto = new PaymentsDetailsDto(dto.getId(), dto.isPayable(), dto.getPaymentStatus(), dto.getToPay().amount().compareTo(dto.getToReceive().amount()) > 0 ? PaymentDirection.FOODEALS_TO_PARTENER : PaymentDirection.PARTNER_TO_FOODEALS);
+        return new MonthlyOperationsDto(partnerInfoDto, statistics, operationsDtos, detailsDto);
     }
 
     @Override
@@ -485,17 +532,23 @@ public class PaymentServiceImpl implements PaymentService {
                 }
                 UUID organizationId = !partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) ? partnerCommissions.getPartner().getId() : ((SubEntity) partnerCommissions.getPartner()).getOrganizationEntity().getId();
                 Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
-                List<Order> orderList = this.orderService.findByOfferPublisherInfoIdAndDateAndStatus(partnerCommissions.getPartner().getId(), partnerCommissions.getDate(), OrderStatus.COMPLETED, TransactionStatus.COMPLETED);
-                List<Transaction> transactions = orderList.stream()
-                        .map(order -> order.getTransaction())
-                        .collect(Collectors.toList());
-                BigDecimal paymentsWithCash = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CASH))
-                        .map(transaction -> transaction.getPrice().amount()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                BigDecimal paymentsWithCard = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CARD))
-                        .map(transaction -> transaction.getPrice().amount()).reduce(BigDecimal.ZERO, BigDecimal::add);
-                Double commissionTotal = ((Double) (commission.getCard().doubleValue() / 100)) * paymentsWithCard.doubleValue() + ((Double) (commission.getCash().doubleValue() / 100)) * paymentsWithCash.doubleValue();
-                total.updateAndGet(current -> current.add(paymentsWithCash.add(paymentsWithCard)));
-                totalCommission.updateAndGet(current -> current.add(new BigDecimal(commissionTotal)));
+                if (partnerCommissions.getPartnerInfo().type().equals(PartnerType.DELIVERY_PARTNER)) {
+                    List<Order> orderList = this.orderService.findOrdersByOrganizationAndDeliveryStatusAndCriteria(partnerCommissions.getPartner().getId(), DeliveryStatus.DELIVERED, partnerCommissions.getDate(), OrderStatus.COMPLETED, TransactionStatus.COMPLETED);
+                    total.updateAndGet(current -> current.add(new BigDecimal(orderList.size() * commission.getDeliveryAmount())));
+                    totalCommission.updateAndGet(current -> current.add(new BigDecimal(orderList.size() * commission.getDeliveryCommission())));
+                } else {
+                    List<Order> orderList = this.orderService.findByOfferPublisherInfoIdAndDateAndStatus(partnerCommissions.getPartner().getId(), partnerCommissions.getDate(), OrderStatus.COMPLETED, TransactionStatus.COMPLETED);
+                    List<Transaction> transactions = orderList.stream()
+                            .map(order -> order.getTransaction())
+                            .collect(Collectors.toList());
+                    BigDecimal paymentsWithCash = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CASH))
+                            .map(transaction -> transaction.getPrice().amount()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                    BigDecimal paymentsWithCard = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CARD))
+                            .map(transaction -> transaction.getPrice().amount()).reduce(BigDecimal.ZERO, BigDecimal::add);
+                    Double commissionTotal = ((Double) (commission.getCard().doubleValue() / 100)) * paymentsWithCard.doubleValue() + ((Double) (commission.getCash().doubleValue() / 100)) * paymentsWithCash.doubleValue();
+                    total.updateAndGet(current -> current.add(paymentsWithCash.add(paymentsWithCard)));
+                    totalCommission.updateAndGet(current -> current.add(new BigDecimal(commissionTotal)));
+                }
             }
         });
         return new PaymentStatistics(new Price(total.get().setScale(3, RoundingMode.HALF_UP), Currency.getInstance("MAD")), new Price(totalCommission.get().setScale(3, RoundingMode.HALF_UP),Currency.getInstance("MAD")));
