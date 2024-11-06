@@ -16,5 +16,7 @@ public interface OrderService extends CrudService<Order, UUID, OrderRequest> {
     List<Order> findByOfferPublisherInfoIdAndDate(UUID publisherId, Date date);
     Page<Order> findByOfferPublisherInfoIdAndDateAndStatus(UUID publisherId, Date date, OrderStatus status, TransactionStatus transactionStatus, Pageable pageable);
     Page<Order> findByOfferPublisherInfoIdAndDate(UUID publisherId, Date date, Pageable pageable);
+    List<Order> findByOfferPublisherInfoIdAndDateAndStatus(UUID publisherId, Date date, OrderStatus status, TransactionStatus transactionStatus);
+
 
 }

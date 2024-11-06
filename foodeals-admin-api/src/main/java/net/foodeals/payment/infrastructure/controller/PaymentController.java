@@ -48,8 +48,8 @@ public class PaymentController {
     }
 
     @GetMapping("/commissions/{id}/monthly-operations/{year}/{month}")
-    public ResponseEntity<Page<MonthlyOperationsDto>> getCommissionPayments(@PathVariable("id") UUID id, @PathVariable("year") int year, @PathVariable("month") int month, Pageable page) {
-        return new ResponseEntity<Page<MonthlyOperationsDto>>(this.paymentService.monthlyOperations(id, year, month, page), HttpStatus.OK);
+    public ResponseEntity<MonthlyOperationsDto> getCommissionPayments(@PathVariable("id") UUID id, @PathVariable("year") int year, @PathVariable("month") int month, Pageable page) {
+        return new ResponseEntity<MonthlyOperationsDto>(this.paymentService.monthlyOperations(id, year, month, page), HttpStatus.OK);
     }
 
     @PostMapping(value = "/receive")
@@ -63,8 +63,8 @@ public class PaymentController {
     }
 
     @GetMapping("/subscriptions/{year}/{id}")
-    public ResponseEntity<List<SubscriptionsDto>> getSubscriptionsDetails(@PathVariable("year") int year, @PathVariable(value = "id") UUID id) {
-        return new ResponseEntity<List<SubscriptionsDto>>(this.paymentService.getSubscriptionDetails(year, id), HttpStatus.OK);
+    public ResponseEntity<SubscriptionDetails> getSubscriptionsDetails(@PathVariable("year") int year, @PathVariable(value = "id") UUID id) {
+        return new ResponseEntity<SubscriptionDetails>(this.paymentService.getSubscriptionDetails(year, id), HttpStatus.OK);
     }
 }
 

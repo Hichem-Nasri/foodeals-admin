@@ -48,20 +48,26 @@ public class SubEntityModelMapperCnf {
             Optional<User> responsible = subEntitie.getUsers().stream().filter(user -> user.getRole().getName().equals("MANAGER")).findFirst();
 
             ResponsibleInfoDto responsibleInfoDto = ResponsibleInfoDto.builder().build();
-            responsible.ifPresent(user -> {
+            if (responsible.isPresent()) {
+                User user = responsible.get();
                 responsibleInfoDto.setName(user.getName());
                 responsibleInfoDto.setAvatarPath(user.getAvatarPath());
                 responsibleInfoDto.setPhone(user.getPhone());
                 responsibleInfoDto.setEmail(user.getEmail());
-            });
+            } else {
+                Contact user = subEntitie.getContacts().getFirst();
+                responsibleInfoDto.setName(user.getName());
+                responsibleInfoDto.setAvatarPath("");
+                responsibleInfoDto.setPhone(user.getPhone());
+                responsibleInfoDto.setEmail(user.getEmail());
+            }
             List<String> solutions = subEntitie.getSolutions().stream().map(solution -> solution.getName()).toList();
             String city = subEntitie.getAddress().getRegion().getCity().getName();
-//            ContractStatus contractStatus = subEntitie.getContract().getContractStatus();
             Integer users = subEntitie.getUsers().size();
             SubEntityType subEntityType = subEntitie.getType();
             Integer donations = this.donationService.countByDonor_Id(subEntitie.getId());
             Integer recovered = this.donationService.countByReceiver_Id(subEntitie.getId());
-            return new AssociationsSubEntitiesDto(date.toString(), partnerInfoDto, responsibleInfoDto, users, donations, recovered, city, solutions, subEntityType);
+            return new AssociationsSubEntitiesDto(date.toString(), partnerInfoDto, responsibleInfoDto, users, donations, recovered, city, solutions);
         }, SubEntity.class, AssociationsSubEntitiesDto.class);
 
         mapper.addConverter(mappingContext -> {

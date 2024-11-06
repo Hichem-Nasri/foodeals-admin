@@ -9,6 +9,6 @@ import java.util.List;
 
 public record AssociationsSubEntitiesDto(String createdAt, PartnerInfoDto partnerInfoDto, ResponsibleInfoDto responsibleInfoDto,
                                          Integer users, Integer donations, Integer recovered,
-                                         String city, List<String> solutions, SubEntityType type) {
+                                         String city, List<String> solutions) {
 }
 

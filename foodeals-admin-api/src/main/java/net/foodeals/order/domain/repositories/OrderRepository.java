@@ -36,4 +36,17 @@ public interface OrderRepository extends BaseRepository<Order, UUID> {
             @Param("orderStatus") OrderStatus orderStatus,
             @Param("transactionStatus") TransactionStatus transactionStatus,
             Pageable pageable
-    );}
+    );
+
+    @Query("SELECT o FROM Order o JOIN o.transaction t WHERE o.offer.publisherInfo.id = :publisherId " +
+            "AND EXTRACT(MONTH FROM o.createdAt) = EXTRACT(MONTH FROM CAST(:orderDate AS timestamp)) " +
+            "AND EXTRACT(YEAR FROM o.createdAt) = EXTRACT(YEAR FROM CAST(:orderDate AS timestamp)) " +
+            "AND o.status = :orderStatus " +
+            "AND t.status = :transactionStatus")
+    List<Order> findOrdersByPublisherIdAndOrderDateAndStatusAndTransactionStatus(
+            @Param("publisherId") UUID publisherId,
+            @Param("orderDate") Date orderDate,
+            @Param("orderStatus") OrderStatus orderStatus,
+            @Param("transactionStatus") TransactionStatus transactionStatus
+    );
+}

@@ -6,7 +6,7 @@ import net.foodeals.payment.application.dto.response.PartnerInfoDto;
 
 import java.util.List;
 
-public record AssociationsDto(String createdAt, PartnerInfoDto partnerInfoDto, ResponsibleInfoDto responsibleInfoDto,
+public record AssociationsDto(String createdAt, PartnerInfoDto partner, ResponsibleInfoDto responsible,
                               Integer users, Integer donations, Integer recovered, Integer subEntities, Integer associations,
                               ContractStatus status, String city, List<String> solutions, EntityType type) {
 }
