@@ -20,7 +20,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Controller
@@ -41,8 +43,15 @@ public class OrganizationEntityController {
     }
 
     @PostMapping(value = "/associations/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<UUID> createAssociation(@RequestPart("createAssociationDto") CreateAssociationDto createAssociationDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) {
+    @Transactional
+    public ResponseEntity<UUID> createAssociation(@RequestPart("dto") CreateAssociationDto createAssociationDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) {
         return new ResponseEntity<UUID>(this.organizationEntityService.createAssociation(createAssociationDto, logo, cover), HttpStatus.OK);
+    }
+
+    @PutMapping(value = "/associations/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
+    public ResponseEntity<UUID> updateAssociation(@PathVariable("id") UUID id, @RequestPart("dto") CreateAssociationDto createAssociationDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) {
+        return new ResponseEntity<UUID>(this.organizationEntityService.updateAssociation(id, createAssociationDto, cover, logo), HttpStatus.OK);
     }
 
     @PutMapping("/partners/edit/{id}")
@@ -59,7 +68,7 @@ public class OrganizationEntityController {
         return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ?   this.modelMapper.convertToDeliveryFormData(organizationEntity) : this.modelMapper.convertToFormData(organizationEntity), HttpStatus.OK);
     }
 
-    @DeleteMapping("/partners/{uuid}")
+    @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> deleteOrganization(
             @PathVariable UUID uuid,
             @RequestBody DeleteOrganizationRequest request) {
@@ -69,9 +78,27 @@ public class OrganizationEntityController {
 
     @GetMapping("/partners/deleted")
     @Transactional
-    public ResponseEntity<Page<?>> getDeletedOrganizationsPaginated(Pageable pageable, @RequestParam(value = "type", required = false) EntityType type) {
+    public ResponseEntity<Page<?>> getDeletedOrganizationsPaginated(Pageable pageable, @RequestParam(value = "type", required = true) List<EntityType> type) {
         Page<OrganizationEntity> deletedOrganizations = organizationEntityService.getDeletedOrganizationsPaginated(pageable, type);
-        return new ResponseEntity<>(type != null && type.equals(EntityType.DELIVERY_PARTNER) ? deletedOrganizations.map(this.modelMapper::mapDeliveryPartners): deletedOrganizations.map(this.modelMapper::mapOrganizationEntity), HttpStatus.CREATED);
+
+        // Create sets of related types
+        Set<EntityType> associationTypes = Set.of(EntityType.ASSOCIATION, EntityType.FOOD_BANK_ASSO, EntityType.FOOD_BANK);
+        Set<EntityType> deliveryTypes = Set.of(EntityType.DELIVERY_PARTNER);
+        Set<EntityType> partnerTypes = Set.of(EntityType.NORMAL_PARTNER, EntityType.PARTNER_WITH_SB);
+
+        // Check if type list has any common elements with our defined sets
+        if (!Collections.disjoint(type, associationTypes)) {
+            return new ResponseEntity<>(deletedOrganizations.map(d -> this.modelMapper.mapToAssociation(d)), HttpStatus.OK);
+        }
+        else if (!Collections.disjoint(type, deliveryTypes)) {
+            return new ResponseEntity<>(deletedOrganizations.map(d -> this.modelMapper.mapDeliveryPartners(d)), HttpStatus.OK);
+        }
+        else if (!Collections.disjoint(type, partnerTypes)) {
+            return new ResponseEntity<>(deletedOrganizations.map(d -> this.modelMapper.mapOrganizationEntity(d)), HttpStatus.OK);
+        }
+        else {
+            return null;
+        }
     }
 
     @GetMapping("/partners/{id}")
@@ -82,7 +109,7 @@ public class OrganizationEntityController {
         return new ResponseEntity<OrganizationEntityDto>(organizationEntityDto, HttpStatus.OK);
     }
 
-    @GetMapping("/partners/{uuid}/deletion-details")
+    @GetMapping("/{uuid}/deletion-details")
     public ResponseEntity<DeletionDetailsDTO> getDeletionDetails(@PathVariable UUID uuid) {
         DeletionDetailsDTO deletionDetails = organizationEntityService.getDeletionDetails(uuid);
         return ResponseEntity.ok(deletionDetails);
@@ -121,6 +148,7 @@ public class OrganizationEntityController {
     }
 
     @GetMapping("/associations")
+    @Transactional
     public ResponseEntity<Page<AssociationsDto>> getAssociations(Pageable pageable) {
         Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getAssociations(pageable);
         Page<AssociationsDto> associationsDtos = organizationEntities.map(this.modelMapper::mapToAssociation);

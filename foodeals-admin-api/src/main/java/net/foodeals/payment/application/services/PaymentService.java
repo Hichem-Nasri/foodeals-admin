@@ -23,7 +23,7 @@ public interface PaymentService {
 
     Page<CommissionPaymentDto> convertCommissionToDto(Page<PartnerCommissions> payments);
 
-    Page<MonthlyOperationsDto> monthlyOperations(UUID id, int year, int month, Pageable page);
+    MonthlyOperationsDto monthlyOperations(UUID id, int year, int month, Pageable page);
 
     List<PartnerCommissions> getCommissionPaymentsByOrganizationId(UUID id, int year, int month);
 
@@ -45,5 +45,5 @@ public interface PaymentService {
 
     SubscriptionPaymentDto getSubscriptionResponse(int year, Pageable pageable, UUID id);
 
-    List<SubscriptionsDto> getSubscriptionDetails(int year, UUID id);
+    SubscriptionDetails getSubscriptionDetails(int year, UUID id);
 }

@@ -214,12 +214,20 @@ public class OrganizationEntityModelMapper {
                     .findFirst();
 
             ResponsibleInfoDto responsibleInfoDto = ResponsibleInfoDto.builder().build();
-            responsible.ifPresent(user -> {
+            if (responsible.isPresent()) {
+                User user = responsible.get();
+                    responsibleInfoDto.setName(user.getName());
+                    responsibleInfoDto.setAvatarPath(user.getAvatarPath());
+                    responsibleInfoDto.setPhone(user.getPhone());
+                    responsibleInfoDto.setEmail(user.getEmail());
+            } else {
+                Contact user = organizationEntity.getContacts().getFirst();
                 responsibleInfoDto.setName(user.getName());
-                responsibleInfoDto.setAvatarPath(user.getAvatarPath());
+                responsibleInfoDto.setAvatarPath("");
                 responsibleInfoDto.setPhone(user.getPhone());
                 responsibleInfoDto.setEmail(user.getEmail());
-            });
+            }
+
 
             List<String> solutions = organizationEntity.getSolutions().stream()
                     .map(solution -> solution.getName())
@@ -353,6 +361,7 @@ public class OrganizationEntityModelMapper {
         return mapper.map(entity, OrganizationEntityFormData.class);
     }
 
+    @Transactional
     public DeliveryPartnerDto mapDeliveryPartners(OrganizationEntity organizationEntity) {
         OffsetDateTime dateTime = OffsetDateTime.parse(organizationEntity.getCreatedAt().toString());
         LocalDate date = dateTime.toLocalDate();
@@ -399,6 +408,7 @@ public class OrganizationEntityModelMapper {
         return deliveryPartnerDto;
     }
 
+    @Transactional
     public AssociationsDto mapToAssociation(OrganizationEntity organizationEntity) {
         return this.mapper.map(organizationEntity, AssociationsDto.class);
     }

@@ -12,8 +12,8 @@ import java.util.List;
 public record CreateAssociationDto(
         @NotBlank String companyName,
         @NotNull @Processable List<String> activities,
-        @NotNull ContactDto manager1,
-        @NotNull ContactDto manager2,
+        @NotNull ContactDto responsible,
+        @NotNull Integer managerID,
         @NotNull EntityAddressDto associationAddress,
         @NotNull EntityType entityType,
         Integer numberOfPoints,

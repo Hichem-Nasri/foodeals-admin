@@ -13,6 +13,7 @@ import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.impl.RegionServiceImpl;
 import net.foodeals.location.domain.repositories.CityRepository;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
+import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.requests.DeliveryPartnerContract;
 import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.services.*;
@@ -140,6 +141,20 @@ public class ContractService {
         placeholders.put("[Taux de commission/espèce]", proMarket != null ? proMarket.getContractCommissionDto().getWithCash().toString() + "%" : "");
         placeholders.put("[montant de l'abonnement pro_donate]", proDonate != null  ? proDonate.getContractSubscriptionDto().getAnnualPayment().toString()  + "dh": "");
         placeholders.put("[le nombre d’échéances pro_donate]", proDonate != null  ? proDonate.getContractSubscriptionDto().getNumberOfDueDates().toString() : "");
+        placeholders.put("[Responsabilité de paiement commission]", !createAnOrganizationEntityDto.getCommissionPayedBySubEntities() ?
+                "Le partenaire, en tant que détenteur du compte principal, sera responsable du\n" +
+                        "\n" +
+                        "paiement pour tous les sous-comptes liés, selon les modalités suivantes:" :
+                "Chaque sous-compte est individuellement responsable de son propre paiement, selon\n" +
+                        "\n" +
+                        "les modalités suivantes:");
+        placeholders.put("[Responsabilité de paiement subscription]", !createAnOrganizationEntityDto.getSubscriptionPayedBySubEntities() ?
+                "Le partenaire, en tant que détenteur du compte principal, sera responsable du\n" +
+                        "\n" +
+                        "paiement pour tous les sous-comptes liés, selon les modalités suivantes:" :
+                "Chaque sous-compte est individuellement responsable de son propre paiement, selon\n" +
+                        "\n" +
+                        "les modalités suivantes:");
 
         placeholders.put("[montant de l'abonnement pro_market]", proMarket != null ? proMarket.getContractSubscriptionDto().getAnnualPayment().toString() + "dh" : "");
         placeholders.put("[le nombre d’échéances pro_market]", proMarket != null ? proMarket.getContractSubscriptionDto().getNumberOfDueDates().toString() :  "");
@@ -207,6 +222,21 @@ public class ContractService {
     }
 
     @Transactional
+    public Contract updateAssociationContract(CreateAssociationDto updateAssociationDto, OrganizationEntity organizationEntity) {
+        Contract contract = organizationEntity.getContract();
+        contract.setMaxNumberOfSubEntities(updateAssociationDto.numberOfPoints());
+        UserContract userContract = contract.getUserContracts();
+        if (userContract.getUser().getId() != updateAssociationDto.managerID()) {
+            User manager = this.userService.findById(updateAssociationDto.managerID());
+            User old = userContract.getUser();
+            old.getUserContracts().remove(userContract);
+            userContract.setUser(manager);
+            this.userContractService.save(userContract);
+        }
+        return contract;
+    }
+
+    @Transactional
     public byte[] updateDocument(Contract contract) throws IOException, DocumentException {
         String templatePath = "resources/contract.html";
         String activities =  contract.getOrganizationEntity().getActivities().stream().map(f -> f.getName()).collect(Collectors.joining(" , "));
@@ -248,6 +278,21 @@ public class ContractService {
         placeholders.put("[Taux de commission/espèce]", proMarket != null ? proMarket.getCommission().getCash().toString() + "%" : "");
         placeholders.put("[montant de l'abonnement pro_donate]", proDonate != null  ? proDonate.getSubscription().getAmount().amount().toString()  + "dh": "");
         placeholders.put("[le nombre d’échéances pro_donate]", proDonate != null  ? proDonate.getSubscription().getNumberOfDueDates().toString() : "");
+
+        placeholders.put("[Responsabilité de paiement commission]", !contract.isCommissionPayedBySubEntities() ?
+                "Le partenaire, en tant que détenteur du compte principal, sera responsable du\n" +
+                        "\n" +
+                        "paiement pour tous les sous-comptes liés, selon les modalités suivantes:" :
+                "Chaque sous-compte est individuellement responsable de son propre paiement, selon\n" +
+                        "\n" +
+                        "les modalités suivantes:");
+        placeholders.put("[Responsabilité de paiement subscription]", !contract.isSubscriptionPayedBySubEntities() ?
+                "Le partenaire, en tant que détenteur du compte principal, sera responsable du\n" +
+                        "\n" +
+                        "paiement pour tous les sous-comptes liés, selon les modalités suivantes:" :
+                "Chaque sous-compte est individuellement responsable de son propre paiement, selon\n" +
+                        "\n" +
+                        "les modalités suivantes:");
 
         placeholders.put("[montant de l'abonnement pro_market]", proMarket != null ? proMarket.getSubscription().getAmount().amount().toString() + "dh" : "");
         placeholders.put("[le nombre d’échéances pro_market]", proMarket != null ? proMarket.getSubscription().getNumberOfDueDates().toString() :  "");
@@ -340,12 +385,17 @@ public class ContractService {
         this.contractRepository.save(contract);
     }
 
-    public Contract createAssociationContract(Integer maxNumberOfPoints, OrganizationEntity organizationEntity) {
+    public Contract createAssociationContract(Integer maxNumberOfPoints, OrganizationEntity organizationEntity, User manager) {
         Contract contract = Contract.builder().maxNumberOfSubEntities(maxNumberOfPoints)
                 .organizationEntity(organizationEntity)
                 .contractStatus(ContractStatus.IN_PROGRESS)
                 .build();
-        return this.contractRepository.save(contract);
+        contract =  this.contractRepository.save(contract);
+        UserContract userContract = UserContract.builder().user(manager).contract(contract).build();
+        this.userContractService.save(userContract);
+        manager.getUserContracts().add(userContract);
+        this.userService.save(manager);
+        return contract;
     }
 
     public Contract createDeliveryPartnerContract(OrganizationEntity organizationEntity, CreateAnOrganizationEntityDto createAnOrganizationEntityDto) {

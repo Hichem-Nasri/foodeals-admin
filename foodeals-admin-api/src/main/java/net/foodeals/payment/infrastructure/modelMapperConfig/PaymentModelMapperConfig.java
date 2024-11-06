@@ -12,6 +12,7 @@ import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.order.application.services.OrderService;
 import net.foodeals.order.domain.entities.Order;
 import net.foodeals.order.domain.entities.Transaction;
+import net.foodeals.order.domain.enums.OrderStatus;
 import net.foodeals.order.domain.enums.TransactionStatus;
 import net.foodeals.order.domain.enums.TransactionType;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
@@ -56,14 +57,14 @@ public class PaymentModelMapperConfig {
             UUID organizationId = !partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) ? partnerCommissions.getPartner().getId() : ((SubEntity) partnerCommissions.getPartner()).getOrganizationEntity().getId();
             Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
             SimpleDateFormat formatter = new SimpleDateFormat("M/yyyy");
-            List<Order> orderList = this.orderService.findByOfferPublisherInfoIdAndDate(partnerCommissions.getPartner().getId(), partnerCommissions.getDate());
+            List<Order> orderList = this.orderService.findByOfferPublisherInfoIdAndDateAndStatus(partnerCommissions.getPartner().getId(), partnerCommissions.getDate(), OrderStatus.COMPLETED, TransactionStatus.COMPLETED);
             List<Transaction> transactions = orderList.stream()
-                    .flatMap(order -> order.getTransactions().stream())
+                    .map(order -> order.getTransaction())
                     .collect(Collectors.toList());
             Currency mad = Currency.getInstance("MAD");
-            Price paymentsWithCash = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CASH) && transaction.getStatus().equals(TransactionStatus.COMPLETED))
+            Price paymentsWithCash = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CASH))
                     .map(transaction -> transaction.getPrice()).reduce(Price.ZERO(mad), Price::add);
-            Price paymentsWithCard = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CARD) && transaction.getStatus().equals(TransactionStatus.COMPLETED))
+            Price paymentsWithCard = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CARD))
                     .map(transaction -> transaction.getPrice()).reduce(Price.ZERO(mad), Price::add);
             Double commissionTotal = ((Double)(commission.getCard().doubleValue() / 100)) * paymentsWithCard.amount().doubleValue()  + ((Double)(commission.getCash().doubleValue() / 100)) * paymentsWithCash.amount().doubleValue();
             Double difference = (paymentsWithCard.amount().doubleValue() - commissionTotal);

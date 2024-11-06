@@ -24,4 +24,10 @@ public interface PartnerCommissionsRepository extends JpaRepository<PartnerCommi
             @Param("month") int month,
             @Param("organizationId") UUID organizationId
     );
-}
+
+    @Query("SELECT pc FROM PartnerCommissions pc WHERE YEAR(pc.date) = :year AND MONTH(pc.date) = :month AND pc.partnerInfo.id = :partnerId")
+    PartnerCommissions findCommissionsByDateAndPartnerInfoId(
+            @Param("year") int year,
+            @Param("month") int month,
+            @Param("partnerId") UUID partnerId
+    );}

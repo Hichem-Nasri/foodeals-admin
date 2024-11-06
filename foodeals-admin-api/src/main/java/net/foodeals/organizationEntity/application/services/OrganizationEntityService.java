@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.domain.entities.Contract;
+import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.delivery.application.services.impl.CoveredZonesService;
 import net.foodeals.delivery.domain.entities.CoveredZones;
@@ -40,6 +41,7 @@ import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
 import net.foodeals.user.domain.entities.enums.DeletionReason;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -265,12 +267,8 @@ public class OrganizationEntityService {
 
 
     @Transactional
-    public Page<OrganizationEntity> getDeletedOrganizationsPaginated(Pageable pageable, EntityType type) {
-        if (type != null) {
-            return organizationEntityRepository.findByDeletedAtIsNotNullAndType(pageable, type);
-        } else {
-            return organizationEntityRepository.findByDeletedAtIsNotNull(pageable);
-        }
+    public Page<OrganizationEntity> getDeletedOrganizationsPaginated(Pageable pageable, List<EntityType> type) {
+        return  this.organizationEntityRepository.findByDeletedAtIsNotNullAndTypeIn(pageable, type);
     }
 
     @Transactional
@@ -367,7 +365,7 @@ public class OrganizationEntityService {
         UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
         UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), false, "MANAGER", organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
-        if (!organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER)) {
+        if (!organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) && !organizationEntity.getType().equals(EntityType.FOOD_BANK) && !organizationEntity.getType().equals(EntityType.ASSOCIATION)) {
             Solution pro_market = this.solutionService.findByName("pro_market");
             if (organizationEntity.getSolutions().contains(pro_market)) {
                 Date date = new Date();
@@ -409,6 +407,7 @@ public class OrganizationEntityService {
         return this.organizationEntityRepository.findByType(EntityType.DELIVERY_PARTNER, pageable);
     }
 
+    @Transactional
     public UUID createAssociation(CreateAssociationDto createAssociationDto, MultipartFile logo, MultipartFile cover) {
         AddressRequest addressRequest = new AddressRequest(createAssociationDto.associationAddress().getCountry(), createAssociationDto.associationAddress().getAddress(), createAssociationDto.associationAddress().getCity(), createAssociationDto.associationAddress().getRegion(), createAssociationDto.associationAddress().getIframe());
         Address address = this.addressService.create(addressRequest);
@@ -422,20 +421,10 @@ public class OrganizationEntityService {
                 .commercialNumber(createAssociationDto.pv())
                 .build();
         organizationEntity = this.organizationEntityRepository.save(organizationEntity);
-        Contact manager1 = this.contactsService.create(createAssociationDto.manager1(), organizationEntity, true);
-        Contact manager2 = this.contactsService.create(createAssociationDto.manager2(), organizationEntity, true);
+        Contact manager1 = this.contactsService.create(createAssociationDto.responsible(), organizationEntity, true);
         organizationEntity.getContacts().add(manager1);
-        organizationEntity.getContacts().add(manager2);
+        User manager = this.userService.findById(createAssociationDto.managerID());
 
-        String pass1 = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserAddress userAddress1 = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
-        UserRequest userRequest1 = new UserRequest(manager1.getName(), manager1.getEmail(), manager1.getPhone(), pass1,  false, "MANAGER", organizationEntity.getId(), userAddress1);
-        this.userService.createOrganizationEntityUser(userRequest1);
-
-        String pass2 = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserAddress userAddress2 = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
-        UserRequest userRequest2 = new UserRequest(manager2.getName(), manager2.getEmail(), manager2.getPhone(), pass2,  false, "MANAGER", organizationEntity.getId(), userAddress2);
-        this.userService.createOrganizationEntityUser(userRequest2);
 
         OrganizationEntity finalOrganizationEntity = organizationEntity;
         activities.forEach(activity -> {
@@ -446,14 +435,126 @@ public class OrganizationEntityService {
             solution.getOrganizationEntities().add(finalOrganizationEntity);
             this.solutionService.save(solution);
         });
-        Contract contract = this.contractService.createAssociationContract(createAssociationDto.numberOfPoints(), organizationEntity);
+        Contract contract = this.contractService.createAssociationContract(createAssociationDto.numberOfPoints(), organizationEntity, manager);
         organizationEntity.setContract(contract);
-        return this.organizationEntityRepository.save(organizationEntity). getId();
+        return this.organizationEntityRepository.save(organizationEntity).getId();
+    }
+
+    @Transactional
+    public UUID updateAssociation(UUID organizationId, CreateAssociationDto updateAssociationDto, MultipartFile cover, MultipartFile logo) {
+
+        OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(organizationId).orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
+
+        // Update Address
+        AddressRequest addressRequest = new AddressRequest(updateAssociationDto.associationAddress().getCountry(), updateAssociationDto.associationAddress().getAddress(), updateAssociationDto.associationAddress().getCity(), updateAssociationDto.associationAddress().getRegion(), updateAssociationDto.associationAddress().getIframe());
+        Address address = this.addressService.update(organizationEntity.getAddress().getId(), addressRequest);
+        // Update Activities
+        List<String> activitiesNames = updateAssociationDto.activities();
+        Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
+
+        Set<Activity> activitiesToRemove = organizationEntity.getActivities()
+                .stream()
+                .filter(activity -> !activitiesNames.contains(activity.getName()))
+                .collect(Collectors.toSet());
+
+        OrganizationEntity finalOrganizationEntity = organizationEntity;
+        Set<Activity> activitiesToAdd = activities.stream()
+                .filter(activity -> !finalOrganizationEntity.getActivities().contains(activity))
+                .collect(Collectors.toSet());
+
+        OrganizationEntity finalOrganizationEntity1 = organizationEntity;
+        activitiesToRemove.forEach(activity -> {
+            activity.getOrganizationEntities().remove(finalOrganizationEntity1);
+            finalOrganizationEntity1.getActivities().remove(activity);
+            this.activityService.save(activity);
+        });
+        OrganizationEntity finalOrganizationEntity2 = organizationEntity;
+        activitiesToAdd.forEach(activity -> {
+            activity.getOrganizationEntities().add(finalOrganizationEntity2);
+            finalOrganizationEntity2.getActivities().add(activity);
+            this.activityService.save(activity);
+        });
+
+        List<String> solutionsNames = updateAssociationDto.solutions();
+        Set<Solution> solutions = this.solutionService.getSolutionsByNames(solutionsNames);
+
+        Set<Solution> solutionsToRemove = organizationEntity.getSolutions()
+                .stream()
+                .filter(solution -> !solutionsNames.contains(solution.getName()))
+                .collect(Collectors.toSet());
+
+        OrganizationEntity finalOrganizationEntity5 = organizationEntity;
+        Set<Solution> solutionsToAdd = solutions.stream()
+                .filter(solution -> !finalOrganizationEntity5.getSolutions().contains(solution))
+                .collect(Collectors.toSet());
+
+        OrganizationEntity finalOrganizationEntity3 = organizationEntity;
+        solutionsToRemove.forEach(solution -> {
+            solution.getOrganizationEntities().remove(finalOrganizationEntity3);
+            finalOrganizationEntity3.getSolutions().remove(solution);
+            this.solutionService.save(solution);
+        });
+        OrganizationEntity finalOrganizationEntity4 = organizationEntity;
+        solutionsToAdd.forEach(solution -> {
+            solution.getOrganizationEntities().add(finalOrganizationEntity4);
+            finalOrganizationEntity4.getSolutions().add(solution);
+            this.solutionService.save(solution);
+        });
+        Contact contact = organizationEntity.getContacts().getFirst();
+        this.contactsService.update(contact, updateAssociationDto.responsible());
+        
+
+        // Update Company Name
+        organizationEntity.setName(updateAssociationDto.companyName());
+
+        // Update Entity Type
+        organizationEntity.setType(updateAssociationDto.entityType());
+
+        // Update Commercial Number
+        organizationEntity.setCommercialNumber(updateAssociationDto.pv());
+
+        // Update Contract
+        Contract contract = this.contractService.updateAssociationContract(updateAssociationDto, organizationEntity);
+        organizationEntity =  this.organizationEntityRepository.save(organizationEntity);
+
+
+        System.out.println("Updated Organization Details:");
+        System.out.println("ID: " + organizationEntity.getId());
+        System.out.println("Company Name: " + organizationEntity.getName());
+        System.out.println("Entity Type: " + organizationEntity.getType());
+        System.out.println("Commercial Number (PV): " + organizationEntity.getCommercialNumber());
+
+        System.out.println("\nUpdated Address:");
+        System.out.println("Country: " + organizationEntity.getAddress().getRegion().getCity().getCountry());
+        System.out.println("Address: " + organizationEntity.getAddress().getAddress());
+        System.out.println("City: " + organizationEntity.getAddress().getRegion().getCity());
+        System.out.println("Region: " + organizationEntity.getAddress().getRegion());
+        System.out.println("Iframe: " + organizationEntity.getAddress().getIframe());
+
+        System.out.println("\nUpdated Activities:");
+        organizationEntity.getActivities().forEach(activity -> System.out.println("- " + activity.getName()));
+
+        System.out.println("\nUpdated Solutions:");
+        organizationEntity.getSolutions().forEach(solution -> System.out.println("- " + solution.getName()));
+
+        System.out.println("\nUpdated Contact:");
+        Contact updatedContact = organizationEntity.getContacts().getFirst();
+        System.out.println("Name: " + updatedContact.getName().firstName() + " " + updatedContact.getName().lastName());
+        System.out.println("Email: " + updatedContact.getEmail());
+        System.out.println("Phone: " + updatedContact.getPhone());
+
+        System.out.println("\nUpdated Contract:");
+        Contract updatedContract = organizationEntity.getContract();
+        System.out.println("Max Number of Sub Entities: " + updatedContract.getMaxNumberOfSubEntities());
+        System.out.println("Manager ID: " + updatedContract.getUserContracts().getUser().getId());
+
+        System.out.println("\nUpdate operation completed. Organization saved with ID: " + organizationEntity.getId());
+        return this.organizationEntityRepository.save(organizationEntity).getId();
     }
 
 
     public Page<OrganizationEntity> getAssociations(Pageable pageable) {
-        return this.organizationEntityRepository.findByType(List.of(EntityType.ASSOCIATION, EntityType.FOOD_BANK), pageable);
+        return this.organizationEntityRepository.findByType(List.of(EntityType.ASSOCIATION, EntityType.FOOD_BANK, EntityType.FOOD_BANK_ASSO), pageable);
     }
 }
 

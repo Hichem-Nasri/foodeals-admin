@@ -54,8 +54,8 @@ public class Order extends AbstractEntity<UUID> {
     @ManyToOne(cascade = CascadeType.ALL)
     private Coupon coupon;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Transaction> transactions;
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "order", cascade = CascadeType.ALL)
+    private Transaction transaction;
 
     public Order() {
 
@@ -113,8 +113,8 @@ public class Order extends AbstractEntity<UUID> {
         return this;
     }
 
-    public Order setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
+    public Order setTransaction(Transaction transactions) {
+        this.transaction = transactions;
         return this;
     }
 }
