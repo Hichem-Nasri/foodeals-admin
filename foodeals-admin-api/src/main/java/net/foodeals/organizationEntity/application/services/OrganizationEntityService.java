@@ -46,6 +46,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -128,7 +130,7 @@ public class OrganizationEntityService {
     }
 
     @Transactional
-    private OrganizationEntity saveDeliveryPartner(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) {
+    private OrganizationEntity saveDeliveryPartner(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
         if (createAnOrganizationEntityDto.getCoveredZonesDtos() != null) {
             List<CoveredZonesDto> coveredZonesDtos = createAnOrganizationEntityDto.getCoveredZonesDtos();
             coveredZonesDtos.forEach(coveredZonesDto -> {
@@ -253,9 +255,11 @@ public class OrganizationEntityService {
             bankInformation = this.bankInformationService.update(bankInformation, updateOrganizationEntityDto.getEntityBankInformationDto());
             organizationEntity.setBankInformation(bankInformation);
         }
-        Contract contract = this.contractService.updateDeliveryContract(organizationEntity.getContract(), updateOrganizationEntityDto);
-        organizationEntity.setContract(contract);
-        organizationEntity = this.organizationEntityRepository.save(organizationEntity);
+        try {
+            Contract contract = this.contractService.updateDeliveryContract(organizationEntity.getContract(), updateOrganizationEntityDto);
+        } catch (Exception e) {
+            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         return this.organizationEntityRepository.save(organizationEntity);
     }
 
