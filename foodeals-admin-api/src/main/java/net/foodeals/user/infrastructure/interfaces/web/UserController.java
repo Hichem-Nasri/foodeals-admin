@@ -101,4 +101,10 @@ public class UserController {
         return new ResponseEntity<Page<AssociationsUsersDto>>(associationsUsersDtoPage, HttpStatus.OK);
     }
 
+    @GetMapping("/{userId}/profile")
+    public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable Integer userId) {
+        User user = service.findById(userId);
+        return ResponseEntity.ok(this.service.mapUserToUserProfileDTO(user));
+    }
+
 }

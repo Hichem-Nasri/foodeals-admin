@@ -12,11 +12,13 @@ import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.order.domain.entities.Order;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
+import net.foodeals.user.domain.entities.enums.Gender;
 import net.foodeals.user.domain.valueObjects.Name;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,6 +41,10 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @Embedded
     private Name name;
 
+    public void setAvatarPath(String avatarPath) {
+        this.avatarPath = avatarPath;
+    }
+
     private String avatarPath;
 
     @Column(unique = true)
@@ -47,6 +53,8 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     private String phone;
 
     private String password;
+
+    private String nationality;
 
     @Column(name = "is_email_verified")
     private Boolean isEmailVerified;
@@ -95,6 +103,49 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
 
     @OneToMany(mappedBy = "lead")
     private List<Event> events;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
+    }
+
+    public void setEmailVerified(Boolean emailVerified) {
+        isEmailVerified = emailVerified;
+    }
+
+    @Column(name = "national_id")
+    private String nationalId;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WorkingHours> workingHours;
+
+    // ... (existing methods)
+
+    public User setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+        return this;
+    }
+
+    public User setGender(Gender gender) {
+        this.gender = gender;
+        return this;
+    }
+
+    public User setNationalId(String nationalId) {
+        this.nationalId = nationalId;
+        return this;
+    }
+
+    public User setWorkingHours(List<WorkingHours> workingHours) {
+        this.workingHours = workingHours;
+        return this;
+    }
+
 
 
 

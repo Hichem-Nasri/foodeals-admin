@@ -5,6 +5,10 @@
 //import net.foodeals.location.domain.entities.Address;
 //import net.foodeals.order.domain.enums.OrderStatus;
 //import net.foodeals.payment.domain.entities.Enum.PaymentResponsibility;
+//import net.foodeals.user.domain.entities.UserStatus;
+//import net.foodeals.user.domain.entities.WorkingHours;
+//import net.foodeals.user.domain.entities.enums.Gender;
+//import net.foodeals.user.domain.repositories.RoleRepository;
 //import org.springframework.boot.context.event.ApplicationReadyEvent;
 //import org.springframework.context.event.EventListener;//package net.foodeals.organizationEntity.seeder;
 //
@@ -51,6 +55,7 @@
 //import org.springframework.context.event.EventListener;
 //
 //import java.math.BigDecimal;
+//import java.time.DayOfWeek;
 //import java.util.*;
 //
 //@Seeder
@@ -68,6 +73,7 @@
 //    private final OrderRepository orderRepository;
 //    private final ContactRepository contactRepository;
 //    private final PartnerCommissionsRepository pr;
+//    private final RoleRepository role;
 ////
 //    @EventListener(ApplicationReadyEvent.class)
 //    @Transactional
@@ -158,18 +164,64 @@
 //    @Transactional
 //    public void createOrga() {
 ////        System.out.println("seed ");
-//        OrganizationEntity firstOrganization = this.organizationEntityRepository.findById(UUID.fromString("599fb3f9-4b40-466c-990d-d3c3196dd56a")).orElse(null);
+//        OrganizationEntity firstOrganization = this.organizationEntityRepository.findById(UUID.fromString("280acdf6-9ccb-4b3e-ab0c-2bbc8f3e5594")).orElse(null);
 //        UUID publisherId = firstOrganization.getId();
+//        User user = new User();
 //
-//        SubEntity subEntity = new SubEntity();
-//        AddressRequest addressRequest = new AddressRequest("morocco", "", "casablanca", "maarif", "tes");
-//        Address address = this.addressService.create(addressRequest);
+//            // Set basic fields
+//            user.setName(new Name("John", "Doe"));
+//            user.setAvatarPath("/avatars/john-doe.jpg");
+//            user.setEmail("john.doe@example.com");
+//            user.setPhone("+1234567890");
+//            user.setRole(this.role.findByName("MANAGER").get());
+//            user.setStatus(UserStatus.ACTIVE);
+//            user.setGender(Gender.MALE);
+//            user.setNationalId("ABC123456789");
+//            user.setNationality("American");
 //
-//        subEntity.setOrganizationEntity(firstOrganization);
-//        subEntity.setType(SubEntityType.FOOD_BANK_SB);
-//        subEntity.setAddress(address);
-//        subEntity.setContacts(new ArrayList<>(List.of(new Contact())));
-//        subEntity = this.subEntityRepository.save(subEntity);
+//            // Create and set working hours
+//            List<WorkingHours> workingHours = new ArrayList<>();
+//
+//            // Monday
+//            WorkingHours monday = new WorkingHours();
+//            monday.setDayOfWeek(DayOfWeek.MONDAY);
+//            monday.setMorningStart("09h");
+//            monday.setMorningEnd("12h");
+//            monday.setAfternoonStart("13h");
+//            monday.setAfternoonEnd("17h");
+//            monday.setUser(user);
+//            workingHours.add(monday);
+//
+//            // Tuesday
+//            WorkingHours tuesday = new WorkingHours();
+//            tuesday.setDayOfWeek(DayOfWeek.TUESDAY);
+//            tuesday.setMorningStart("09h");
+//            tuesday.setMorningEnd("12h");
+//            tuesday.setAfternoonStart("13h");
+//            tuesday.setAfternoonEnd("17h");
+//            tuesday.setUser(user);
+//            workingHours.add(tuesday);
+//
+//            user.setWorkingHours(workingHours);
+//            user = this.userService.save(user);
+//
+//            firstOrganization.getUsers().add(user);
+//            user.setOrganizationEntity(firstOrganization);
+//            this.organizationEntityRepository.save(firstOrganization);
+//            this.userService.save(user);
+//            System.out.println(user.getId());
+//
+//        }
+//
+////        SubEntity subEntity = new SubEntity();
+////        AddressRequest addressRequest = new AddressRequest("morocco", "", "casablanca", "maarif", "tes");
+////        Address address = this.addressService.create(addressRequest);
+////
+////        subEntity.setOrganizationEntity(firstOrganization);
+////        subEntity.setType(SubEntityType.FOOD_BANK_SB);
+////        subEntity.setAddress(address);
+////        subEntity.setContacts(new ArrayList<>(List.of(new Contact())));
+////        subEntity = this.subEntityRepository.save(subEntity);
 ////        PartnerCommissions partnerCommissions = PartnerCommissions.builder()
 ////                .partnerInfo(new PartnerInfo(firstOrganization.getId(), subEntity.getId(), subEntity.getPartnerType()))
 ////                .paymentStatus(PaymentStatus.IN_VALID)
@@ -238,7 +290,6 @@
 ////        offer.getOrders().add(order2);
 ////        this.offerRepository.save(offer);
 ////        System.out.println("seed ");
-//
 //    }
 //////
 //////    @EventListener(ApplicationReadyEvent.class)
@@ -340,7 +391,6 @@
 ////////        offer.getOrders().add(order2);
 ////////        this.offerRepository.save(offer);
 ////////        System.out.println("seed ");
-//    }
 //////
 //////
 //////}
