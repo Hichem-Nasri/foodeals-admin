@@ -67,7 +67,7 @@ public class SubEntityModelMapperCnf {
             SubEntityType subEntityType = subEntitie.getType();
             Integer donations = this.donationService.countByDonor_Id(subEntitie.getId());
             Integer recovered = this.donationService.countByReceiver_Id(subEntitie.getId());
-            return new AssociationsSubEntitiesDto(date.toString(), partnerInfoDto, responsibleInfoDto, users, donations, recovered, city, solutions);
+            return new AssociationsSubEntitiesDto(partnerInfoDto.getId(), date.toString(), partnerInfoDto, responsibleInfoDto, users, donations, recovered, city, solutions);
         }, SubEntity.class, AssociationsSubEntitiesDto.class);
 
         mapper.addConverter(mappingContext -> {

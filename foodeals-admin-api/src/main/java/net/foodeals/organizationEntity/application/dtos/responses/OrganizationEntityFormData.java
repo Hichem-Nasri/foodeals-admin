@@ -9,6 +9,7 @@ import net.foodeals.organizationEntity.application.dtos.requests.EntityAddressDt
 import net.foodeals.organizationEntity.application.dtos.requests.EntityBankInformationDto;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.processors.annotations.Processable;
+import net.foodeals.user.application.dtos.responses.UserInfoDto;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class OrganizationEntityFormData {
 
     private String commercialNumber;
 
-    private Integer managerId; // valid
+    private UserInfoDto manager; // valid
 
     private ContactDto contactDto; // valid
 

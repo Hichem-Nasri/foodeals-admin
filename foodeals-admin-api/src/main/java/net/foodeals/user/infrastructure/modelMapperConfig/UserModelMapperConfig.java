@@ -96,7 +96,7 @@ public class UserModelMapperConfig {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            return new AssociationsUsersDto(createdAt, roleName, city, region, userInfoDto);
+            return new AssociationsUsersDto( user.getId(),createdAt, roleName, city, region, userInfoDto);
         }, User.class, AssociationsUsersDto.class);
 
         modelMapper.addMappings(new PropertyMap<Address, ClientAddressDto>() {

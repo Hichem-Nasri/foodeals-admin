@@ -37,6 +37,13 @@ public class OrganizationEntityController {
         this.modelMapper = modelMapper;
     }
 
+
+        @GetMapping("/associations/form-data/{id}")
+        public ResponseEntity<AssociationFormData> getAssociationFormData(@PathVariable UUID id) {
+            OrganizationEntity organizationEntity = organizationEntityService.findById(id);
+            return new ResponseEntity<>(this.modelMapper.mapToAssociationFormData(organizationEntity), HttpStatus.OK);
+        }
+
     @PostMapping(value = "/partners/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addAnOrganizationEntity(@RequestPart("dto") CreateAnOrganizationEntityDto createAnOrganizationEntityDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) throws DocumentException, IOException {
             OrganizationEntity  organizationEntity = this.organizationEntityService.createAnewOrganizationEntity(createAnOrganizationEntityDto, logo, cover);
