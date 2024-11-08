@@ -3,6 +3,7 @@ package net.foodeals.order.application.services.impl;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.delivery.application.services.DeliveryService;
+import net.foodeals.delivery.domain.enums.DeliveryStatus;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.offer.application.services.OfferService;
 import net.foodeals.offer.domain.entities.Offer;
@@ -57,6 +58,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> findByOfferPublisherInfoIdAndDateAndStatus(UUID publisherId, Date date, OrderStatus status, TransactionStatus transactionStatus) {
         return this.repository.findOrdersByPublisherIdAndOrderDateAndStatusAndTransactionStatus(publisherId, date, status, transactionStatus);
+    }
+
+    @Override
+    public Page<Order> findOrdersByOrganizationAndDeliveryStatusAndCriteria(UUID organizationId, DeliveryStatus deliveryStatus, Date orderDate, OrderStatus orderStatus, TransactionStatus transactionStatus, Pageable pageable) {
+        return this.repository.findOrdersByOrganizationAndDeliveryStatusAndCriteria(organizationId, deliveryStatus, orderDate, orderStatus, transactionStatus, pageable);
+    }
+
+    @Override
+    public List<Order> findOrdersByOrganizationAndDeliveryStatusAndCriteria(UUID organizationId, DeliveryStatus deliveryStatus, Date orderDate, OrderStatus orderStatus, TransactionStatus transactionStatus) {
+        return this.repository.findOrdersByOrganizationAndDeliveryStatusAndCriteria(organizationId, deliveryStatus, orderDate, orderStatus, transactionStatus);
     }
 
     @Override

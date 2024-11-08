@@ -129,6 +129,7 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
         return switch (type) {
             case EntityType.PARTNER_WITH_SB -> PartnerType.PARTNER_SB;
             case EntityType.NORMAL_PARTNER -> PartnerType.NORMAL_PARTNER;
+            case EntityType.DELIVERY_PARTNER -> PartnerType.DELIVERY_PARTNER;
             default -> null;
         };
     }

@@ -3,6 +3,7 @@ package net.foodeals.crm.application.dto.requests;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
+import net.foodeals.crm.domain.entities.enums.ProspectType;
 import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
 import net.foodeals.organizationEntity.application.dtos.requests.EntityAddressDto;
 import net.foodeals.processors.annotations.Processable;
@@ -20,6 +21,7 @@ public record ProspectRequest(
         @NotNull AddressDto address,
         ProspectStatus status,
         @Nullable @Processable List<String> solutions,
-        @Nullable EventRequest event
+        @Nullable EventRequest event,
+        ProspectType type
 ) {
 }

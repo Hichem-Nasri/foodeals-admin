@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.domain.repositories;
 
 import net.foodeals.common.contracts.BaseRepository;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
+import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityFilter;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
@@ -19,6 +20,25 @@ public interface OrganizationEntityRepository extends BaseRepository<Organizatio
 
     @Query("SELECT o FROM OrganizationEntity o WHERE o.type IN (:types)")
     Page<OrganizationEntity> findByType(List<EntityType> types, Pageable pageable);
+
+        @Query("SELECT DISTINCT o FROM OrganizationEntity o " +
+                "LEFT JOIN o.solutions s " +
+                "LEFT JOIN o.address.region.city c " +
+                "LEFT JOIN o.users u " +
+                "JOIN o.contacts ct " +
+                "WHERE (coalesce(:#{#filter.startDate}, null) IS NULL OR o.createdAt >= :#{#filter.startDate}) " +
+                "AND (coalesce(:#{#filter.endDate}, null) IS NULL OR o.createdAt <= :#{#filter.endDate}) " +
+                "AND (:#{#filter.types} IS NULL OR o.type IN :#{#filter.types}) " +
+                "AND (:#{#filter.names} IS NULL OR o.name IN :#{#filter.names}) " +
+                "AND (:#{#filter.solutions} IS NULL OR s.name IN :#{#filter.solutions}) " +
+                "AND (:#{#filter.cityId} IS NULL OR c.id = :#{#filter.cityId}) " +
+                "AND (:#{#filter.email} IS NULL OR ct.email = :#{#filter.email}) " +
+                "AND (:#{#filter.phone} IS NULL OR ct.phone = :#{#filter.phone}) " +
+                "AND (:#{#filter.collabId} IS NULL OR u.id = :#{#filter.collabId})")
+        Page<OrganizationEntity> findWithFilters(
+                @Param("filter") OrganizationEntityFilter filter,
+                Pageable pageable
+        );
 
     Page<OrganizationEntity> findByDeletedAtIsNotNull(Pageable pageable);
     Optional<OrganizationEntity> findByIdAndDeletedAtIsNotNull(UUID uuid);

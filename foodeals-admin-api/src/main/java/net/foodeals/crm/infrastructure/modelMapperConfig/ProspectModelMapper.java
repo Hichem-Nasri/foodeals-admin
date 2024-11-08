@@ -85,7 +85,7 @@ public class ProspectModelMapper {
                     .map((Event event) -> this.modelMapper.map(event, EventResponse.class))
                     .toList()
                     : null;
-            return new ProspectResponse(prospect.getId(), date.toString(), prospect.getName(), category, contactInfo, addressDto, creatorInfoDto, managerInfoDto, status, eventResponses, solutionNames);
+            return new ProspectResponse(prospect.getId(), date.toString(), prospect.getName(), category, contactInfo, addressDto, creatorInfoDto, managerInfoDto, status, eventResponses, solutionNames, prospect.getType());
         }, Prospect.class, ProspectResponse.class);
     }
 }

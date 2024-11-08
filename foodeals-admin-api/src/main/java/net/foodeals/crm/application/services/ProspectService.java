@@ -3,12 +3,15 @@ package net.foodeals.crm.application.services;
 import net.foodeals.common.contracts.CrudService;
 import net.foodeals.crm.application.dto.requests.*;
 import net.foodeals.crm.application.dto.responses.EventResponse;
+import net.foodeals.crm.application.dto.responses.ProspectFilter;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
 import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
+import net.foodeals.crm.domain.entities.enums.ProspectType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ProspectService extends CrudService<ProspectResponse, UUID, ProspectRequest> {
@@ -28,7 +31,9 @@ public interface ProspectService extends CrudService<ProspectResponse, UUID, Pro
 
     void deleteEvent(UUID prospectId, UUID eventId);
 
-    ProspectStatisticDto statistics();
+    ProspectStatisticDto statistics(List<ProspectType> type);
 
     String changeStatus(UUID id, ProspectStatusRequest status);
+    Page<ProspectResponse> findAllWithFilters(ProspectFilter filter, Pageable pageable);
+
 }

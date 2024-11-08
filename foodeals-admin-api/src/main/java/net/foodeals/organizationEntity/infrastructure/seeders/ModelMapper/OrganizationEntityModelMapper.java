@@ -353,10 +353,11 @@ public class OrganizationEntityModelMapper {
         }, OrganizationEntity.class, DeliveryFormData.class);
     }
 
+    @Transactional
     public OrganizationEntityDto mapOrganizationEntity(OrganizationEntity source) {
         return this.mapper.map(source, OrganizationEntityDto.class);
     }
-
+    @Transactional
     public OrganizationEntityFormData convertToFormData(OrganizationEntity entity) {
         return mapper.map(entity, OrganizationEntityFormData.class);
     }

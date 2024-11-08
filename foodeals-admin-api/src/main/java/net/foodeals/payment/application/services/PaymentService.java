@@ -5,6 +5,7 @@ import net.foodeals.payment.application.dto.request.PaymentRequest;
 import net.foodeals.payment.application.dto.request.PaymentType;
 import net.foodeals.payment.application.dto.request.ReceiveDto;
 import net.foodeals.payment.application.dto.response.*;
+import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import org.apache.coyote.BadRequestException;
 import org.springframework.data.domain.Page;
@@ -23,7 +24,7 @@ public interface PaymentService {
 
     Page<CommissionPaymentDto> convertCommissionToDto(Page<PartnerCommissions> payments);
 
-    MonthlyOperationsDto monthlyOperations(UUID id, int year, int month, Pageable page);
+    MonthlyOperationsDto monthlyOperations(UUID id, int year, int month, Pageable page, PartnerType type);
 
     List<PartnerCommissions> getCommissionPaymentsByOrganizationId(UUID id, int year, int month);
 

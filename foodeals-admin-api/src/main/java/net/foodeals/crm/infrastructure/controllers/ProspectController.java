@@ -4,17 +4,24 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import net.foodeals.crm.application.dto.requests.*;
 import net.foodeals.crm.application.dto.responses.EventResponse;
+import net.foodeals.crm.application.dto.responses.ProspectFilter;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
 import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
 import net.foodeals.crm.application.services.ProspectService;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
+import net.foodeals.crm.domain.entities.enums.ProspectType;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,10 +38,6 @@ public final class ProspectController {
         return new ResponseEntity<ProspectResponse>(this.prospectService.create(prospectRequest), HttpStatus.CREATED);
     }
 
-    @GetMapping("/prospects")
-    public ResponseEntity<Page<ProspectResponse>> getAll(Pageable pageable) {
-        return new ResponseEntity<Page<ProspectResponse>>(this.prospectService.findAll(pageable), HttpStatus.OK);
-    }
 
     @GetMapping("/prospects/{id}")
     public ResponseEntity<ProspectResponse> getById(@PathVariable UUID id) {
@@ -44,6 +47,41 @@ public final class ProspectController {
     @PutMapping("/prospects/{id}")
     public ResponseEntity<ProspectResponse> update(@PathVariable UUID id, @RequestBody ProspectRequest prospectRequest) {
         return new ResponseEntity<>(this.prospectService.update(id, prospectRequest), HttpStatus.OK);
+    }
+
+    @GetMapping("/prospects")
+    public ResponseEntity<Page<ProspectResponse>> getAll(
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(value = "names", required = false) List<String> names,
+            @RequestParam(value = "categories", required = false) List<String> categories,
+            @RequestParam(value = "cityId", required = false) UUID cityId,
+            @RequestParam(value = "countryId", required = false) UUID countryId,
+            @RequestParam(value = "creatorId", required = false) Integer creatorId,
+            @RequestParam(value = "leadId", required = false) Integer leadId,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "statuses", required = false) List<ProspectStatus> statuses,
+            @RequestParam(value = "types", required = false) List<ProspectType> types,
+            Pageable pageable) {
+
+
+        ProspectFilter filter = ProspectFilter.builder()
+                .startDate(startDate != null ?  startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null)
+                .endDate(endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null)
+                .names(names)
+                .categories(categories)
+                .cityId(cityId)
+                .countryId(countryId)
+                .creatorId(creatorId)
+                .leadId(leadId)
+                .types(types)
+                .email(email)
+                .phone(phone)
+                .statuses(statuses)
+                .build();
+
+        return new ResponseEntity<>(this.prospectService.findAllWithFilters(filter, pageable), HttpStatus.OK);
     }
 
     @PatchMapping("/prospects/{id}")
@@ -96,7 +134,7 @@ public final class ProspectController {
     }
 
     @GetMapping("/prospects/statistics")
-    public ResponseEntity<ProspectStatisticDto> statistics() {
-        return new ResponseEntity<ProspectStatisticDto>(this.prospectService.statistics(), HttpStatus.OK);
+    public ResponseEntity<ProspectStatisticDto> statistics(@RequestParam(value = "type", required = true) List<ProspectType> type) {
+        return new ResponseEntity<ProspectStatisticDto>(this.prospectService.statistics(type), HttpStatus.OK);
     }
 }

@@ -1,6 +1,7 @@
 package net.foodeals.order.application.services;
 
 import net.foodeals.common.contracts.CrudService;
+import net.foodeals.delivery.domain.enums.DeliveryStatus;
 import net.foodeals.order.application.dtos.requests.OrderRequest;
 import net.foodeals.order.domain.entities.Order;
 import net.foodeals.order.domain.enums.OrderStatus;
@@ -17,6 +18,20 @@ public interface OrderService extends CrudService<Order, UUID, OrderRequest> {
     Page<Order> findByOfferPublisherInfoIdAndDateAndStatus(UUID publisherId, Date date, OrderStatus status, TransactionStatus transactionStatus, Pageable pageable);
     Page<Order> findByOfferPublisherInfoIdAndDate(UUID publisherId, Date date, Pageable pageable);
     List<Order> findByOfferPublisherInfoIdAndDateAndStatus(UUID publisherId, Date date, OrderStatus status, TransactionStatus transactionStatus);
+    Page<Order> findOrdersByOrganizationAndDeliveryStatusAndCriteria(
+            UUID organizationId,
+            DeliveryStatus deliveryStatus,
+            Date orderDate,
+            OrderStatus orderStatus,
+            TransactionStatus transactionStatus,
+            Pageable pageable
+    );
 
-
+        List<Order> findOrdersByOrganizationAndDeliveryStatusAndCriteria(
+            UUID organizationId,
+            DeliveryStatus deliveryStatus,
+            Date orderDate,
+            OrderStatus orderStatus,
+            TransactionStatus transactionStatus
+    );
 }

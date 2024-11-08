@@ -1,14 +1,17 @@
 package net.foodeals.crm.domain.repositories;
 
 import net.foodeals.common.contracts.BaseRepository;
+import net.foodeals.crm.application.dto.responses.ProspectFilter;
 import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
+import net.foodeals.crm.domain.entities.enums.ProspectType;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.awt.print.Pageable;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -18,4 +21,33 @@ public interface ProspectRepository extends BaseRepository<Prospect, UUID> {
     Integer countDistinctLeadsByStatus(@Param("status") ProspectStatus status);
 
     Integer countByStatusAndDeletedAtIsNull(ProspectStatus status);
+
+    @Query("SELECT DISTINCT p FROM Prospect p " +
+            "JOIN p.activities a " +
+            "JOIN p.address.region.city c " +
+            "JOIN c.country co " +
+            "JOIN p.contacts ct " +
+            "WHERE (coalesce(:#{#filter.startDate}, null) IS NULL OR p.createdAt >= :#{#filter.startDate}) " +
+            "AND (coalesce(:#{#filter.endDate}, null) IS NULL OR p.createdAt <= :#{#filter.endDate}) " +
+            "AND (:#{#filter.names} IS NULL OR p.name IN :#{#filter.names}) " +
+            "AND (:#{#filter.categories} IS NULL OR a.name IN :#{#filter.categories}) " +
+            "AND (:#{#filter.types} IS NULL OR p.type IN :#{#filter.types}) " +
+            "AND (:#{#filter.cityId} IS NULL OR c.id = :#{#filter.cityId}) " +
+            "AND (:#{#filter.countryId} IS NULL OR co.id = :#{#filter.countryId}) " +
+            "AND (:#{#filter.creatorId} IS NULL OR p.creator.id = :#{#filter.creatorId}) " +
+            "AND (:#{#filter.leadId} IS NULL OR p.lead.id = :#{#filter.leadId}) " +
+            "AND (:#{#filter.email} IS NULL OR ct.email = :#{#filter.email}) " +
+            "AND (:#{#filter.phone} IS NULL OR ct.phone = :#{#filter.phone}) " +
+            "AND (:#{#filter.statuses} IS NULL OR p.status IN :#{#filter.statuses})")
+    Page<Prospect> findAllWithFilters(
+            @Param("filter") ProspectFilter filter,
+            Pageable pageable
+    );
+
+    // Count prospects by status and type, excluding deleted ones
+    Long countByStatusAndTypeInAndDeletedAtIsNull(ProspectStatus status, List<ProspectType> type);
+
+    // Count prospects by type, excluding deleted ones
+    Long countByTypeIn(List<ProspectType> type);
+
 }

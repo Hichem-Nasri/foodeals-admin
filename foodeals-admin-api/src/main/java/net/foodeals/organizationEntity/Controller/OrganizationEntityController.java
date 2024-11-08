@@ -14,16 +14,17 @@ import net.foodeals.organizationEntity.infrastructure.seeders.ModelMapper.Organi
 import org.modelmapper.internal.bytebuddy.implementation.bytecode.StackSize;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.util.*;
 
 @Controller
 @RequestMapping("/api/v1/organizations")
@@ -117,10 +118,54 @@ public class OrganizationEntityController {
 
     @GetMapping("/partners")
     @Transactional
-    public ResponseEntity<Page<OrganizationEntityDto>> getOrganizationEntities(Pageable pageable) {
-        Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getOrganizationEntities(List.of(EntityType.NORMAL_PARTNER, EntityType.PARTNER_WITH_SB), pageable);
-        Page<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.map(this.modelMapper::mapOrganizationEntity);
-        return new ResponseEntity<Page<OrganizationEntityDto>>(organizationEntitiesDto, HttpStatus.OK);
+    public ResponseEntity<Page<OrganizationEntityDto>> getOrganizationEntities(
+            @RequestParam(value = "startDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate startDate,
+
+            @RequestParam(value = "endDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate endDate,
+
+            @RequestParam(value = "types", required = false)
+            List<EntityType> types,
+
+            @RequestParam(value = "names", required = false)
+            List<String> names,
+
+            @RequestParam(value = "solutions", required = false)
+            List<String> solutions,
+
+            @RequestParam(value = "cityId", required = false)
+            UUID cityId,
+
+            @RequestParam(value = "collabId", required = false)
+            Long collabId,
+
+            @RequestParam(value = "email", required = false)
+            String email,
+
+            @RequestParam(value = "phone", required = false)
+            String phone,
+
+            Pageable pageable
+    ) {
+        types = types != null ? types : List.of(EntityType.NORMAL_PARTNER, EntityType.PARTNER_WITH_SB);
+        OrganizationEntityFilter filter = OrganizationEntityFilter.builder()
+                .startDate(startDate != null ? startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null)
+                .endDate(endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null)
+                .types(types)
+                .names(names)
+                .email(email)
+                .phone(phone)
+                .solutions(solutions)
+                .cityId(cityId)
+                .collabId(collabId)
+                .build();
+
+        Page<OrganizationEntity> organizationEntities = organizationEntityService.getOrganizationEntitiesFilters(filter, pageable);
+        Page<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.map(modelMapper::mapOrganizationEntity);
+        return ResponseEntity.ok(organizationEntitiesDto);
     }
 
     // elevery partner update, update contract, getcontract

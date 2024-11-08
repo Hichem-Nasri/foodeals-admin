@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.foodeals.common.models.AbstractEntity;
+import net.foodeals.crm.domain.entities.enums.ProspectType;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.organizationEntity.domain.entities.Activity;
 import net.foodeals.organizationEntity.domain.entities.Contact;
@@ -54,6 +55,9 @@ public class Prospect extends AbstractEntity<UUID> {
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Event> events = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    private ProspectType type;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @Builder.Default
