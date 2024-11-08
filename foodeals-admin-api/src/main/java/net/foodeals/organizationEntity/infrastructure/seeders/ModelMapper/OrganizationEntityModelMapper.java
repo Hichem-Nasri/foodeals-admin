@@ -82,7 +82,7 @@ public class OrganizationEntityModelMapper {
 
             formData.setCommercialNumber(organizationEntity.getCommercialNumber());
             User manager = organizationEntity.getContract().getUserContracts().getUser();
-            UserInfoDto userInfoDto = new UserInfoDto(manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
+            UserInfoDto userInfoDto = new UserInfoDto(manager.getId(), manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
             formData.setManager(userInfoDto);
             formData.setActivities(organizationEntity.getActivities().stream().map(Activity::getName).collect(Collectors.toList()));
             formData.setMaxNumberOfSubEntities(organizationEntity.getContract().getMaxNumberOfSubEntities());
@@ -369,7 +369,7 @@ public class OrganizationEntityModelMapper {
 
             formData.setPv(organizationEntity.getCommercialNumber());
             User manager = organizationEntity.getContract().getUserContracts().getUser();
-            UserInfoDto userInfoDto = new UserInfoDto(manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
+            UserInfoDto userInfoDto = new UserInfoDto(manager.getId(), manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
             formData.setManager(userInfoDto);
             formData.setNumberOfPoints(organizationEntity.getContract().getMaxNumberOfSubEntities());
             // Map EntityAddressDto

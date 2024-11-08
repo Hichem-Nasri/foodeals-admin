@@ -80,7 +80,7 @@ public class UserModelMapperConfig {
             List<String> solutions = user.getOrganizationEntity().getSolutions().stream().map(solution -> solution.getName()).toList();
             String city = user.getAddress().getRegion().getCity().getName();
             String region = user.getAddress().getRegion().getName();
-            UserInfoDto userInfoDto = new UserInfoDto(user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+            UserInfoDto userInfoDto = new UserInfoDto(user.getId(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
@@ -91,7 +91,7 @@ public class UserModelMapperConfig {
             final User user = context.getSource();
             String city = user.getAddress().getRegion().getCity().getName();
             String region = user.getAddress().getRegion().getName();
-            UserInfoDto userInfoDto = new UserInfoDto(user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+            UserInfoDto userInfoDto = new UserInfoDto(user.getId(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
             String roleName = user.getRole().getName();
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
