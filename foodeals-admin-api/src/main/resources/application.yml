@@ -51,3 +51,11 @@ app:
 logging:
   level:
     root: ERROR
+
+  jpa:
+    properties:
+      hibernate:
+        type:
+          preferred-instant-jdbc-type: TIMESTAMP
+        jdbc:
+          time_zone: UTC

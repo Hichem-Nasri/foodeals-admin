@@ -3,6 +3,7 @@ package net.foodeals.crm.application.services.implementation;
 import lombok.AllArgsConstructor;
 import net.foodeals.crm.application.dto.requests.*;
 import net.foodeals.crm.application.dto.responses.EventResponse;
+import net.foodeals.crm.application.dto.responses.ProspectFilter;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
 import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
 import net.foodeals.crm.application.services.EventService;
@@ -10,6 +11,7 @@ import net.foodeals.crm.application.services.ProspectService;
 import net.foodeals.crm.domain.entities.Event;
 import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
+import net.foodeals.crm.domain.entities.enums.ProspectType;
 import net.foodeals.crm.domain.repositories.ProspectRepository;
 import net.foodeals.location.application.dtos.requests.AddressRequest;
 import net.foodeals.location.application.services.AddressService;
@@ -35,6 +37,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.logging.Filter;
 import java.util.stream.Collectors;
 
 @Service
@@ -63,9 +66,10 @@ public final class ProspectServiceImp implements ProspectService {
         return null;
     }
 
+
     @Override
     public Page<ProspectResponse> findAll(Pageable pageable) {
-        return this.prospectRepository.findAll(pageable).map(prospect -> this.modelMapper.map(prospect, ProspectResponse.class));
+        return null;
     }
 
     @Override
@@ -209,17 +213,27 @@ public final class ProspectServiceImp implements ProspectService {
     }
 
     @Override
-    public ProspectStatisticDto statistics() {
-        Role role = this.roleService.findByName("LEAD");
-        return new ProspectStatisticDto(this.prospectRepository.countByStatusAndDeletedAtIsNull(ProspectStatus.IN_PROGRESS), this.prospectRepository.count(), this.prospectRepository.countByStatusAndDeletedAtIsNull(ProspectStatus.CANCELED), this.prospectRepository.countByStatusAndDeletedAtIsNull(ProspectStatus.VALID));
-    }
+    public ProspectStatisticDto statistics(List<ProspectType> type) {
 
+        Long inProgressCount = this.prospectRepository.countByStatusAndTypeInAndDeletedAtIsNull(ProspectStatus.IN_PROGRESS, type);
+        Long totalCount = this.prospectRepository.countByTypeIn(type);
+        Long canceledCount = this.prospectRepository.countByStatusAndTypeInAndDeletedAtIsNull(ProspectStatus.CANCELED, type);
+        Long validCount = this.prospectRepository.countByStatusAndTypeInAndDeletedAtIsNull(ProspectStatus.VALID, type);
+
+        return new ProspectStatisticDto(inProgressCount, totalCount, canceledCount, validCount);
+    }
     @Override
     public String changeStatus(UUID id, ProspectStatusRequest dto) {
         Prospect prospect = this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("prospect not found with id " + id.toString()));
         prospect.setStatus(dto.status());
         this.prospectRepository.save(prospect);
         return "status changed successfully";
+    }
+
+    @Override
+    public Page<ProspectResponse> findAllWithFilters(ProspectFilter filter, Pageable pageable) {
+        Page<Prospect> prospects = prospectRepository.findAllWithFilters(filter, pageable);
+        return prospects.map(p -> this.modelMapper.map(p, ProspectResponse.class));
     }
 
     @Override
@@ -230,6 +244,7 @@ public final class ProspectServiceImp implements ProspectService {
     @Override
     public ProspectResponse create(ProspectRequest dto) {
         Prospect prospect = Prospect.builder().name(dto.companyName())
+                .type(dto.type())
                 .status(ProspectStatus.IN_PROGRESS)
                 .build();
         final Contact contact = Contact.builder().name(dto.responsible().getName())
@@ -299,6 +314,7 @@ public final class ProspectServiceImp implements ProspectService {
 
         prospect.setName(dto.companyName());
         prospect.setStatus(dto.status());
+        prospect.setType(dto.type());
 
         Contact contact = prospect.getContacts().get(0);
         contact.setName(dto.responsible().getName());

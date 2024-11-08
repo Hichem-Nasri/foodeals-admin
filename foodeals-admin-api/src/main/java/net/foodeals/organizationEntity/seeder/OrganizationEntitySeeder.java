@@ -164,47 +164,47 @@
 //    @Transactional
 //    public void createOrga() {
 ////        System.out.println("seed ");
-//        OrganizationEntity firstOrganization = this.organizationEntityRepository.findById(UUID.fromString("280acdf6-9ccb-4b3e-ab0c-2bbc8f3e5594")).orElse(null);
+//        OrganizationEntity firstOrganization = this.organizationEntityRepository.findById(UUID.fromString("c8db6cd5-4d68-41cb-9dfd-d88b0bdee036")).orElse(null);
 //        UUID publisherId = firstOrganization.getId();
 //        User user = new User();
-//
-//            // Set basic fields
-//            user.setName(new Name("John", "Doe"));
-//            user.setAvatarPath("/avatars/john-doe.jpg");
-//            user.setEmail("john.doe@example.com");
-//            user.setPhone("+1234567890");
-//            user.setRole(this.role.findByName("MANAGER").get());
-//            user.setStatus(UserStatus.ACTIVE);
-//            user.setGender(Gender.MALE);
-//            user.setNationalId("ABC123456789");
-//            user.setNationality("American");
-//
-//            // Create and set working hours
-//            List<WorkingHours> workingHours = new ArrayList<>();
-//
-//            // Monday
-//            WorkingHours monday = new WorkingHours();
-//            monday.setDayOfWeek(DayOfWeek.MONDAY);
-//            monday.setMorningStart("09h");
-//            monday.setMorningEnd("12h");
-//            monday.setAfternoonStart("13h");
-//            monday.setAfternoonEnd("17h");
-//            monday.setUser(user);
-//            workingHours.add(monday);
-//
-//            // Tuesday
-//            WorkingHours tuesday = new WorkingHours();
-//            tuesday.setDayOfWeek(DayOfWeek.TUESDAY);
-//            tuesday.setMorningStart("09h");
-//            tuesday.setMorningEnd("12h");
-//            tuesday.setAfternoonStart("13h");
-//            tuesday.setAfternoonEnd("17h");
-//            tuesday.setUser(user);
-//            workingHours.add(tuesday);
-//
-//            user.setWorkingHours(workingHours);
+////
+////            // Set basic fields
+////            user.setName(new Name("John", "Doe"));
+////            user.setAvatarPath("/avatars/john-doe.jpg");
+////            user.setEmail("john.doe@example.com");
+////            user.setPhone("+1234567890");
+////            user.setRole(this.role.findByName("MANAGER").get());
+////            user.setStatus(UserStatus.ACTIVE);
+////            user.setGender(Gender.MALE);
+////            user.setNationalId("ABC123456789");
+////            user.setNationality("American");
+////
+////            // Create and set working hours
+////            List<WorkingHours> workingHours = new ArrayList<>();
+////
+////            // Monday
+////            WorkingHours monday = new WorkingHours();
+////            monday.setDayOfWeek(DayOfWeek.MONDAY);
+////            monday.setMorningStart("09h");
+////            monday.setMorningEnd("12h");
+////            monday.setAfternoonStart("13h");
+////            monday.setAfternoonEnd("17h");
+////            monday.setUser(user);
+////            workingHours.add(monday);
+////
+////            // Tuesday
+////            WorkingHours tuesday = new WorkingHours();
+////            tuesday.setDayOfWeek(DayOfWeek.TUESDAY);
+////            tuesday.setMorningStart("09h");
+////            tuesday.setMorningEnd("12h");
+////            tuesday.setAfternoonStart("13h");
+////            tuesday.setAfternoonEnd("17h");
+////            tuesday.setUser(user);
+////            workingHours.add(tuesday);
+////
+////            user.setWorkingHours(workingHours);
 //            user = this.userService.save(user);
-//
+////
 //            firstOrganization.getUsers().add(user);
 //            user.setOrganizationEntity(firstOrganization);
 //            this.organizationEntityRepository.save(firstOrganization);

@@ -25,6 +25,7 @@ import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.responses.DeletionDetailsDTO;
+import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityFilter;
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
@@ -354,6 +355,12 @@ public class OrganizationEntityService {
     public Page<OrganizationEntity> getOrganizationEntities(List<EntityType> entityTypes, Pageable pageable) {
         return this.organizationEntityRepository.findByTypeIn(entityTypes, pageable);
     }
+
+    @Transactional
+    public Page<OrganizationEntity> getOrganizationEntitiesFilters(OrganizationEntityFilter filter, Pageable pageable) {
+        return this.organizationEntityRepository.findWithFilters(filter, pageable);
+    }
+
 
     @Transactional
     public String validateOrganizationEntity(UUID id, MultipartFile document) {
