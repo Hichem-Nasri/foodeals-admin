@@ -26,6 +26,7 @@ import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.payment.application.dto.response.PartnerInfoDto;
+import net.foodeals.user.application.dtos.responses.UserInfoDto;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
 import net.foodeals.user.domain.valueObjects.Name;
@@ -80,8 +81,9 @@ public class OrganizationEntityModelMapper {
             formData.setFeatures(organizationEntity.getFeatures().stream().map(Features::getName).collect(Collectors.toList()));
 
             formData.setCommercialNumber(organizationEntity.getCommercialNumber());
-            formData.setManagerId(organizationEntity.getContract().getUserContracts().getUser().getId());
-
+            User manager = organizationEntity.getContract().getUserContracts().getUser();
+            UserInfoDto userInfoDto = new UserInfoDto(manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
+            formData.setManager(userInfoDto);
             formData.setActivities(organizationEntity.getActivities().stream().map(Activity::getName).collect(Collectors.toList()));
             formData.setMaxNumberOfSubEntities(organizationEntity.getContract().getMaxNumberOfSubEntities());
             formData.setMaxNumberOfAccounts(organizationEntity.getContract().getMaxNumberOfAccounts());
@@ -251,7 +253,7 @@ public class OrganizationEntityModelMapper {
                     SubEntityType.FOOD_BANK_ASSOCIATION
             );
 
-            return new AssociationsDto(
+            return new AssociationsDto(partnerInfoDto.getId(),
                     date.toString(),
                     partnerInfoDto,
                     responsibleInfoDto,
@@ -351,6 +353,39 @@ public class OrganizationEntityModelMapper {
 
             return formData;
         }, OrganizationEntity.class, DeliveryFormData.class);
+
+        mapper.addConverter(mappingContext -> {
+            OrganizationEntity organizationEntity = mappingContext.getSource();
+            AssociationFormData formData = new AssociationFormData();
+            formData.setId(organizationEntity.getId());
+            formData.setType(organizationEntity.getType());
+            formData.setName(organizationEntity.getName());
+            formData.setAvatarPath(organizationEntity.getAvatarPath());
+            formData.setCoverPath(organizationEntity.getCoverPath());
+
+            formData.setStatus(organizationEntity.getContract().getContractStatus());
+
+            formData.setSolutions(organizationEntity.getSolutions().stream().map(Solution::getName).collect(Collectors.toList()));
+
+            formData.setPv(organizationEntity.getCommercialNumber());
+            User manager = organizationEntity.getContract().getUserContracts().getUser();
+            UserInfoDto userInfoDto = new UserInfoDto(manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
+            formData.setManager(userInfoDto);
+            formData.setNumberOfPoints(organizationEntity.getContract().getMaxNumberOfSubEntities());
+            // Map EntityAddressDto
+            formData.setAddress(mapper.map(organizationEntity.getAddress(), EntityAddressDto.class));
+
+            // Map ContactDto (assuming the first contact is the main contact)
+            if (!organizationEntity.getContacts().isEmpty()) {
+                formData.setContactDto(mapper.map(organizationEntity.getContacts().get(0), ContactDto.class));
+            }
+
+            // Map EntityBankInformationD
+
+
+
+            return formData;
+        }, OrganizationEntity.class, AssociationFormData.class);
     }
 
     @Transactional
@@ -417,5 +452,9 @@ public class OrganizationEntityModelMapper {
     @Transactional
     public DeliveryFormData convertToDeliveryFormData(OrganizationEntity organizationEntity) {
         return  this.mapper.map(organizationEntity, DeliveryFormData.class);
+    }
+
+    public AssociationFormData mapToAssociationFormData(OrganizationEntity organizationEntity) {
+        return this.mapper.map(organizationEntity, AssociationFormData.class);
     }
 }
