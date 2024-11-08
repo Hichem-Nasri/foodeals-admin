@@ -47,4 +47,8 @@ public interface PaymentService {
     SubscriptionPaymentDto getSubscriptionResponse(int year, Pageable pageable, UUID id);
 
     SubscriptionDetails getSubscriptionDetails(int year, UUID id);
+
+    DeliveryPaymentResponse getDeliveryPayments(int year, Pageable page, UUID id);
+
+    Page<DeliveryPaymentDto> convertToDeliveryCommission(Page<PartnerCommissions> commissionsPage);
 }

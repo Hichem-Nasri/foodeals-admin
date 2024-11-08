@@ -376,9 +376,9 @@ public class OrganizationEntityService {
         UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
         UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), false, "MANAGER", organizationEntity.getId(), userAddress);
         User manager = this.userService.create(userRequest);
-        if (!organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) && !organizationEntity.getType().equals(EntityType.FOOD_BANK) && !organizationEntity.getType().equals(EntityType.ASSOCIATION)) {
+        if (!organizationEntity.getType().equals(EntityType.FOOD_BANK) && !organizationEntity.getType().equals(EntityType.ASSOCIATION)) {
             Solution pro_market = this.solutionService.findByName("pro_market");
-            if (organizationEntity.getSolutions().contains(pro_market)) {
+            if (organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) || organizationEntity.getSolutions().contains(pro_market)) {
                 Date date = new Date();
                 PartnerCommissions partnerCommissions = PartnerCommissions.builder()
                         .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType()))
@@ -388,7 +388,9 @@ public class OrganizationEntityService {
                         .build();
                 organizationEntity.getCommissions().add(partnerCommissions);
             }
-            this.contractService.validateContract(organizationEntity.getContract());
+            if (!organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER)) {
+                this.contractService.validateContract(organizationEntity.getContract());
+            }
         }
         organizationEntity.getContract().setContractStatus(ContractStatus.VALIDATED);
         this.organizationEntityRepository.save(organizationEntity);

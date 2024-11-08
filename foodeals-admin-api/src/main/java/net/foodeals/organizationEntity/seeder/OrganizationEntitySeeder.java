@@ -1,6 +1,8 @@
 //package net.foodeals.organizationEntity.seeder;
 //
 //import jakarta.transaction.Transactional;
+//import net.foodeals.delivery.domain.entities.Delivery;
+//import net.foodeals.delivery.domain.enums.DeliveryStatus;
 //import net.foodeals.location.application.dtos.requests.AddressRequest;
 //import net.foodeals.location.domain.entities.Address;
 //import net.foodeals.order.domain.enums.OrderStatus;
@@ -74,7 +76,8 @@
 //    private final ContactRepository contactRepository;
 //    private final PartnerCommissionsRepository pr;
 //    private final RoleRepository role;
-////
+//
+//    //
 //    @EventListener(ApplicationReadyEvent.class)
 //    @Transactional
 //    public void createAssociation() {
@@ -160,11 +163,12 @@
 ////        this.offerRepository.save(offer);
 ////        System.out.println("seed ");
 //    }
+//
 //    @EventListener(ApplicationReadyEvent.class)
 //    @Transactional
 //    public void createOrga() {
 ////        System.out.println("seed ");
-//        OrganizationEntity firstOrganization = this.organizationEntityRepository.findById(UUID.fromString("c8db6cd5-4d68-41cb-9dfd-d88b0bdee036")).orElse(null);
+//        OrganizationEntity firstOrganization = this.organizationEntityRepository.findById(UUID.fromString("7c18e112-326c-464a-84f6-f3baf4a8533e")).orElse(null);
 //        UUID publisherId = firstOrganization.getId();
 //        User user = new User();
 ////
@@ -203,15 +207,13 @@
 ////            workingHours.add(tuesday);
 ////
 ////            user.setWorkingHours(workingHours);
-//            user = this.userService.save(user);
+//        user = this.userService.save(user);
 ////
-//            firstOrganization.getUsers().add(user);
-//            user.setOrganizationEntity(firstOrganization);
-//            this.organizationEntityRepository.save(firstOrganization);
-//            this.userService.save(user);
-//            System.out.println(user.getId());
-//
-//        }
+//        firstOrganization.getUsers().add(user);
+//        user.setOrganizationEntity(firstOrganization);
+//        this.organizationEntityRepository.save(firstOrganization);
+//        user = this.userService.save(user);
+//        System.out.println(user.getId());
 //
 ////        SubEntity subEntity = new SubEntity();
 ////        AddressRequest addressRequest = new AddressRequest("morocco", "", "casablanca", "maarif", "tes");
@@ -238,59 +240,64 @@
 ////        this.organizationEntityRepository.save(firstOrganization);
 ////
 ////        // Create Offer
-////        Offer offer = new Offer();
-////        offer.setPrice(new Price(BigDecimal.valueOf(100), Currency.getInstance("MAD")));
-////        offer.setSalePrice(new Price(BigDecimal.valueOf(80), Currency.getInstance("MAD")));
-////        offer.setReduction(20);
-////        offer.setPublisherInfo(new PublisherInfo(subEntity.getId(), subEntity.getPublisherType()));
-////        offer = this.offerRepository.save(offer);
+//        Offer offer = new Offer();
+//        offer.setPrice(new Price(BigDecimal.valueOf(100), Currency.getInstance("MAD")));
+//        offer.setSalePrice(new Price(BigDecimal.valueOf(80), Currency.getInstance("MAD")));
+//        offer.setReduction(20);
+//        offer = this.offerRepository.save(offer);
 ////
 ////        // Create Order 1
-////        Order order1 = new Order();
-////        order1.setPrice(new Price(BigDecimal.valueOf(50), Currency.getInstance("MAD")));
-////        order1.setStatus(OrderStatus.COMPLETED);
-////        order1.setOffer(offer);  // Attach the order to the offer
+//        Order order1 = new Order();
+//        order1.setPrice(new Price(BigDecimal.valueOf(50), Currency.getInstance("MAD")));
+//        order1.setStatus(OrderStatus.COMPLETED);
+//        order1.setOffer(offer);
+//        Delivery d = new Delivery(user, DeliveryStatus.DELIVERED);
+//        order1.setDelivery(d);
+//        // Attach the order to the offer
 ////
 ////        // Create Order 2
-////        Order order2 = new Order();
-////        order2.setPrice(new Price(BigDecimal.valueOf(30), Currency.getInstance("MAD")));
-////        order2.setStatus(OrderStatus.COMPLETED);
-////        order2.setOffer(offer);  // Attach the order to the offer
+//        Order order2 = new Order();
+//        order2.setPrice(new Price(BigDecimal.valueOf(30), Currency.getInstance("MAD")));
+//        order2.setStatus(OrderStatus.COMPLETED);
+//        order2.setOffer(offer);
+//        order2.setDelivery(d);
+//        // Attach the order to the offer
 ////
 ////        // Create Transaction for Order 1
-////        Transaction transaction1 = new Transaction();
-////        transaction1.setPaymentId("PAY123");
-////        transaction1.setReference("REF123");
-////        transaction1.setContext("Context1");
-////        transaction1.setPrice(new Price(BigDecimal.valueOf(20), Currency.getInstance("MAD")));
-////        transaction1.setStatus(TransactionStatus.COMPLETED);
-////        transaction1.setType(TransactionType.CASH);
-////        transaction1.setOrder(order1);  // Attach transaction to order
+//        Transaction transaction1 = new Transaction();
+//        transaction1.setPaymentId("PAY123");
+//        transaction1.setReference("REF123");
+//        transaction1.setContext("Context1");
+//        transaction1.setPrice(new Price(BigDecimal.valueOf(20), Currency.getInstance("MAD")));
+//        transaction1.setStatus(TransactionStatus.COMPLETED);
+//        transaction1.setType(TransactionType.CARD);
+//        transaction1.setOrder(order1);  // Attach transaction to order
 ////
 ////
 ////
-////        order1.setTransaction(transaction1);
+//        order1.setTransaction(transaction1);
 ////
 ////        // Create Transaction for Order 2
-////        Transaction transaction4 = new Transaction();
-////        transaction4.setPaymentId("PAY126");
-////        transaction4.setReference("REF126");
-////        transaction4.setContext("Context4");
-////        transaction4.setPrice(new Price(BigDecimal.valueOf(10), Currency.getInstance("MAD")));
-////        transaction4.setStatus(TransactionStatus.COMPLETED);
-////        transaction4.setType(TransactionType.CASH);
-////        transaction4.setOrder(order2);
+//        Transaction transaction4 = new Transaction();
+//        transaction4.setPaymentId("PAY126");
+//        transaction4.setReference("REF126");
+//        transaction4.setContext("Context4");
+//        transaction4.setPrice(new Price(BigDecimal.valueOf(10), Currency.getInstance("MAD")));
+//        transaction4.setStatus(TransactionStatus.COMPLETED);
+//        transaction4.setType(TransactionType.CARD);
+//        transaction4.setOrder(order2);
 ////
-////        order2.setTransaction(transaction4);
+//        order2.setTransaction(transaction4);
 ////
 ////        // Save the orders
-////        order1 = this.orderRepository.save(order1);
-////        order2 = this.orderRepository.save(order2);
-////        offer.getOrders().add(order1);
-////        offer.getOrders().add(order2);
-////        this.offerRepository.save(offer);
+//        order1 = this.orderRepository.save(order1);
+//        order2 = this.orderRepository.save(order2);
+//        offer.getOrders().add(order1);
+//        offer.getOrders().add(order2);
+//        this.offerRepository.save(offer);
 ////        System.out.println("seed ");
 //    }
+//}
 //////
 //////    @EventListener(ApplicationReadyEvent.class)
 //////    @Transactional

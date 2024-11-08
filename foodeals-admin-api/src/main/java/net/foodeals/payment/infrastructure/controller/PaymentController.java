@@ -1,5 +1,6 @@
 package net.foodeals.payment.infrastructure.controller;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
@@ -41,6 +42,13 @@ public class PaymentController {
     public ResponseEntity<CommissionDto> getCommissionPayments(@PathVariable("year") int year, @PathVariable int month, Pageable page, @RequestParam(value = "id", required = false) UUID id) {
         List<PartnerCommissions> payments = id == null ? this.paymentService.getCommissionPayments(year, month) : this.paymentService.getCommissionPaymentsByOrganizationId(id, year, month);
         return new ResponseEntity<CommissionDto>(this.paymentService.getCommissionResponse(payments, page), HttpStatus.OK);
+
+    }
+
+    @Transactional
+    @GetMapping("/commissions/delivery/{id}/{year}")
+    public ResponseEntity<DeliveryPaymentResponse> getDeliveryPayments(@PathVariable("year") int year, Pageable page, @PathVariable(value = "id") UUID id) {
+        return new ResponseEntity<DeliveryPaymentResponse>(this.paymentService.getDeliveryPayments(year, page, id), HttpStatus.OK);
 
     }
 
