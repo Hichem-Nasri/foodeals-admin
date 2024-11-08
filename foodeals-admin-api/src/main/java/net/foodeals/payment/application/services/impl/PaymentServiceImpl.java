@@ -119,7 +119,6 @@ import net.foodeals.organizationEntity.application.services.SubEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
-import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
 import net.foodeals.payment.application.dto.request.PaymentType;
 import net.foodeals.payment.application.dto.request.ReceiveDto;
@@ -444,7 +443,7 @@ public class PaymentServiceImpl implements PaymentService {
 //
 //        Page<OperationsDto> operationsDtos = orders.map(o -> {
 //            Transaction transaction = o.getTransaction();
-//            UUID organizationId = o.getOffer().getPublisherInfo().type().equals(PublisherType.PARTNER_SB) ? this.subEntityService.getEntityById(id).getOrganizationEntity().getId() : id;
+//            UUID organizationId = o.getOffer().getPublisherInfo().type().equals(PublisherType.PARTNER_SB) ? this.subEntityService.getEntityById(id).getOrganizationEntity().getId() : o.getOffer().getPublisherInfo().id();
 //            Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
 //            Price cashAmount = transaction.getType().equals(TransactionType.CASH) ? transaction.getPrice() : Price.ZERO(Currency.getInstance("MAD"));
 //            Price cardAmount = transaction.getType().equals(TransactionType.CASH) ? Price.ZERO(Currency.getInstance("MAD")) : transaction.getPrice();
@@ -644,6 +643,48 @@ public class PaymentServiceImpl implements PaymentService {
         PartnerInfoDto partnerInfoDto = new PartnerInfoDto(partner.getId(), partner.getName(), partner.getAvatarPath());
 
         return new SubscriptionDetails(partnerInfoDto, subscriptionsDto);
+    }
+
+    @Override
+    @Transactional
+    public DeliveryPaymentResponse getDeliveryPayments(int year, Pageable page, UUID id) {
+        List<PartnerCommissions> commissions = this.partnerCommissionsRepository.findCommissionsByDateAndOrganization(year, id);
+        int start = (int) page.getOffset();
+        int end = Math.min((start + page.getPageSize()), commissions.size());
+        List<PartnerCommissions> pageContent = commissions.subList(start, end);
+        Page<PartnerCommissions> commissionsPage = new PageImpl<>(pageContent, page, pageContent.size());
+        Page<DeliveryPaymentDto> commissionsDtos = this.convertToDeliveryCommission(commissionsPage);
+//        PaymentStatistics statistics = this.getPaymentStatistics(commissions);
+        return new DeliveryPaymentResponse(null, commissionsDtos);
+        }
+
+    @Override
+    @Transactional
+    public Page<DeliveryPaymentDto> convertToDeliveryCommission(Page<PartnerCommissions> commissionsPage) {
+        Commission commission = this.commissionService.getCommissionByPartnerId(commissionsPage.getContent().getFirst().getPartnerInfo().id());
+        Currency mad = Currency.getInstance("MAD");
+        SimpleDateFormat formatter = new SimpleDateFormat("M/yyyy");
+        return commissionsPage.map(c -> {
+            List<Order> orderList = this.orderService.findOrdersByOrganizationAndDeliveryStatusAndCriteria(c.getPartnerInfo().id(), DeliveryStatus.DELIVERED, c.getDate(), OrderStatus.COMPLETED, TransactionStatus.COMPLETED);
+            List<Transaction> transactions = orderList.stream()
+                    .map(order -> order.getTransaction())
+                    .collect(Collectors.toList());
+            // cash 200 20
+            // card 10
+            // 210 - 60
+            Float paymentsWithCash = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CASH))
+                    .collect(Collectors.toList()).size() * commission.getDeliveryAmount();
+            Float paymentsWithCard = transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CARD))
+                    .collect(Collectors.toList()).size() * commission.getDeliveryAmount();
+            Double commissionTotal = (transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CARD))
+                    .collect(Collectors.toList()).size() + transactions.stream().filter(transaction -> transaction.getType().equals(TransactionType.CASH))
+                    .collect(Collectors.toList()).size()) * Double.valueOf(commission.getDeliveryCommission());
+            Double difference = (paymentsWithCard.doubleValue() - commissionTotal);
+            Double toPay = difference < 0 ? 0 : difference;
+            Double toReceive = difference < 0 ? Math.abs(difference) : 0;
+
+            return new DeliveryPaymentDto(formatter.format(c.getDate()), new Price(new BigDecimal(commission.getDeliveryAmount()), mad), new Price(new BigDecimal(commission.getDeliveryCommission()), mad), Long.valueOf(orderList.size()), new Price(new BigDecimal(orderList.size() * commission.getDeliveryCommission()), mad), new Price(new BigDecimal(toPay), mad), new Price(new BigDecimal(toReceive), mad), c.getPaymentStatus());
+        });
     }
 
     @Transactional

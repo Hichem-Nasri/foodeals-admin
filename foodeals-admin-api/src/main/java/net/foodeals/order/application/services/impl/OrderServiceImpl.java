@@ -71,6 +71,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Long countByOrganizationIdAndDeliveryStatusAndOrderDateAndOrderStatusAndTransactionStatus(UUID organizationId, DeliveryStatus deliveryStatus, Date orderDate, OrderStatus orderStatus, TransactionStatus transactionStatus) {
+        return this.repository.countOrdersByOrganizationAndDeliveryStatusAndCriteria(organizationId, deliveryStatus, orderDate, orderStatus, transactionStatus);
+    }
+
+    @Override
     public List<Order> findAll() {
         return repository.findAll();
     }

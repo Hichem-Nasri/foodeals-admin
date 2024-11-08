@@ -34,4 +34,12 @@ public interface OrderService extends CrudService<Order, UUID, OrderRequest> {
             OrderStatus orderStatus,
             TransactionStatus transactionStatus
     );
+
+        Long countByOrganizationIdAndDeliveryStatusAndOrderDateAndOrderStatusAndTransactionStatus(
+                UUID organizationId,
+                DeliveryStatus deliveryStatus,
+                Date orderDate,
+                OrderStatus orderStatus,
+                TransactionStatus transactionStatus
+        );
 }
