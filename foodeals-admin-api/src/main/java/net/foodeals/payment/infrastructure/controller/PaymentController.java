@@ -45,6 +45,31 @@ public class PaymentController {
 
     }
 
+
+        // Endpoint to retrieve available months by partner ID only
+        @GetMapping("/commissions/available-months/partners")
+        public ResponseEntity<List<String>> getAvailableMonthsByPartner(
+                @RequestParam UUID partnerId) {
+            List<String> months = paymentService.getAvailableMonthsByPartner(partnerId);
+            return ResponseEntity.ok(months);
+        }
+
+        // Endpoint to retrieve available months by organization ID only
+        @GetMapping("/commissions/available-months/organizations")
+        public ResponseEntity<List<String>> getAvailableMonthsByOrganization(
+                @RequestParam UUID organizationId) {
+            List<String> months = paymentService.getAvailableMonthsByOrganization(organizationId);
+            return ResponseEntity.ok(months);
+        }
+
+
+        // Endpoint to retrieve all available months without filters
+        @GetMapping("/commissions/available-months")
+        public ResponseEntity<List<String>> getAllAvailableMonths() {
+            List<String> months = paymentService.getAvailableMonths();
+            return ResponseEntity.ok(months);
+        }
+
     @Transactional
     @GetMapping("/commissions/delivery/{id}/{year}")
     public ResponseEntity<DeliveryPaymentResponse> getDeliveryPayments(@PathVariable("year") int year, Pageable page, @PathVariable(value = "id") UUID id) {
