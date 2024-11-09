@@ -18,6 +18,8 @@ import java.util.UUID;
 public interface PaymentService {
 
     List<String> getAvailableMonths();
+    List<Integer> getAvailableYears();
+
 
     List<String> getAvailableMonthsByPartner(UUID partnerId);
 

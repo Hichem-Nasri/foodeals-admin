@@ -640,6 +640,12 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
+    public List<Integer> getAvailableYears() {
+        return subscriptionService.findDistinctYears();
+    }
+
+    @Override
+    @Transactional
     public SubscriptionDetails getSubscriptionDetails(int year, UUID id) {
         LocalDate startOfYear = LocalDate.of(year, 1, 1);
         LocalDate endOfYear = LocalDate.of(year, 12, 31);

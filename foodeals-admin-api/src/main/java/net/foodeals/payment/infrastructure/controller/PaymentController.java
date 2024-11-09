@@ -70,6 +70,14 @@ public class PaymentController {
             return ResponseEntity.ok(months);
         }
 
+    @GetMapping("/subscriptions/available-years")
+    public ResponseEntity<List<String>> getAllAvailableYears() {
+        List<Integer> years = paymentService.getAvailableYears();
+        return ResponseEntity.ok(years.stream().map(i -> {
+            return i.toString();
+        }).toList());
+    }
+
     @Transactional
     @GetMapping("/commissions/delivery/{id}/{year}")
     public ResponseEntity<DeliveryPaymentResponse> getDeliveryPayments(@PathVariable("year") int year, Pageable page, @PathVariable(value = "id") UUID id) {

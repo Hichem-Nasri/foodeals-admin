@@ -10,8 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public interface SubscriptionRepository extends BaseRepository<Subscription, UUID> {
     List<Subscription> findByStartDateBetweenAndSubscriptionStatusNot(LocalDate startDate, LocalDate endDate, SubscriptionStatus status);
@@ -20,5 +19,22 @@ public interface SubscriptionRepository extends BaseRepository<Subscription, UUI
 
     List<Subscription> findByPartner_IdAndStartDateBetweenAndSubscriptionStatusNot(UUID id, LocalDate startDate, LocalDate endDate, SubscriptionStatus status);
 
+
+        @Query("SELECT DISTINCT YEAR(s.startDate) FROM Subscription s WHERE s.startDate IS NOT NULL")
+        List<Integer> findAvailableStartYears();
+
+        @Query("SELECT DISTINCT YEAR(s.endDate) FROM Subscription s WHERE s.endDate IS NOT NULL")
+        List<Integer> findAvailableEndYears();
+
+        // Optional: Combine both start and end years into a single list
+        default List<Integer> findAvailableYears() {
+            List<Integer> startYears = findAvailableStartYears();
+            List<Integer> endYears = findAvailableEndYears();
+
+            Set<Integer> allYears = new HashSet<>(startYears);
+            allYears.addAll(endYears);
+
+            return new ArrayList<>(allYears);
+        }
 }
 // 23 ->
