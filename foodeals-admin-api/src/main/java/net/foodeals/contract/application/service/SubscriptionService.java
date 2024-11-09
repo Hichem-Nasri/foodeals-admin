@@ -103,4 +103,8 @@ public class SubscriptionService {
     public List<Subscription> findByStartDateBetweenAndSubscriptionStatusNotAndId(LocalDate startDate, LocalDate  end, SubscriptionStatus status, UUID id) {
         return this.subscriptionRepository.findByPartner_IdAndStartDateBetweenAndSubscriptionStatusNot(id, startDate, end, status);
     }
+
+    public List<Integer> findDistinctYears() {
+        return this.subscriptionRepository.findAvailableYears();
+    }
 }

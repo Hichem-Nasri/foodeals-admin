@@ -16,6 +16,15 @@ import java.util.List;
 import java.util.UUID;
 
 public interface PaymentService {
+
+    List<String> getAvailableMonths();
+    List<Integer> getAvailableYears();
+
+
+    List<String> getAvailableMonthsByPartner(UUID partnerId);
+
+    List<String> getAvailableMonthsByOrganization(UUID organizationId);
+
     List<PartnerCommissions> getCommissionPayments(int year, int month);
 
     SubscriptionPaymentDto toSubscriptionPaymentDto(Subscription subscription);

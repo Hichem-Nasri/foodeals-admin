@@ -182,7 +182,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     public List<PartnerCommissions> getCommissionPayments(int year, int month) {
-        return this.partnerCommissionsRepository.findCommissionsByDate(year, month);
+        return this.partnerCommissionsRepository.findCommissionsByDateAndPartnerInfoTypeNot(year, month, PartnerType.DELIVERY_PARTNER);
     }
 
 
@@ -235,6 +235,16 @@ public class PaymentServiceImpl implements PaymentService {
 //        subscriptionPaymentDto.setPartnerInfoDto(partnerInfoDto);
         return null;
     }
+    @Override
+    @Transactional
+            public List<String> getAvailableMonthsByPartner(UUID partnerId) {
+            return partnerCommissionsRepository.findDistinctMonthsByPartner(partnerId);
+        }
+    @Override
+    @Transactional
+        public List<String> getAvailableMonthsByOrganization(UUID organizationId) {
+            return partnerCommissionsRepository.findDistinctMonthsByOrganization(organizationId);
+        }
 
     @Override
     @Transactional
@@ -501,7 +511,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<PartnerCommissions> getCommissionPaymentsByOrganizationId(UUID id, int year, int month) {
-        return this.partnerCommissionsRepository.findCommissionsByDateAndOrganization(year, month, id);
+        return this.partnerCommissionsRepository.findCommissionsByDateAndOrganizationAndPartnerInfoTypeNot(year, month, id, PartnerType.DELIVERY_PARTNER);
     }
 
     @Override
@@ -620,6 +630,18 @@ public class PaymentServiceImpl implements PaymentService {
         );
 
         return new SubscriptionPaymentDto(statistics, subscriptionsPage);
+    }
+
+    @Override
+    @Transactional
+    public List<String> getAvailableMonths() {
+            return partnerCommissionsRepository.findDistinctMonths();
+        }
+
+    @Override
+    @Transactional
+    public List<Integer> getAvailableYears() {
+        return subscriptionService.findDistinctYears();
     }
 
     @Override

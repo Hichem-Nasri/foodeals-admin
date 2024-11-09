@@ -2,6 +2,7 @@ package net.foodeals.payment.domain.repository;
 
 
 import net.foodeals.contract.domain.entities.Subscription;
+import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,11 +19,12 @@ public interface PartnerCommissionsRepository extends JpaRepository<PartnerCommi
 
     @Query("SELECT s FROM PartnerCommissions s WHERE EXTRACT(YEAR FROM s.date) = :year " +
             "AND EXTRACT(MONTH FROM s.date) = :month " +
-            "AND s.partnerInfo.organizationId = :organizationId")
-    List<PartnerCommissions> findCommissionsByDateAndOrganization(
+            "AND s.partnerInfo.organizationId = :organizationId AND s.partnerInfo.type != :type" )
+    List<PartnerCommissions> findCommissionsByDateAndOrganizationAndPartnerInfoTypeNot(
             @Param("year") int year,
             @Param("month") int month,
-            @Param("organizationId") UUID organizationId
+            @Param("organizationId") UUID organizationId,
+            @Param("type") PartnerType type
     );
 
     @Query("SELECT pc FROM PartnerCommissions pc WHERE YEAR(pc.date) = :year AND MONTH(pc.date) = :month AND pc.partnerInfo.id = :partnerId")
@@ -32,6 +34,14 @@ public interface PartnerCommissionsRepository extends JpaRepository<PartnerCommi
             @Param("partnerId") UUID partnerId
     );
 
+
+    @Query("SELECT pc FROM PartnerCommissions pc WHERE YEAR(pc.date) = :year AND MONTH(pc.date) = :month AND pc.partnerInfo.type != :type")
+    List<PartnerCommissions> findCommissionsByDateAndPartnerInfoTypeNot(
+            @Param("year") int year,
+            @Param("month") int month,
+            @Param("type") PartnerType type
+            );
+
     @Query("SELECT s FROM PartnerCommissions s WHERE EXTRACT(YEAR FROM s.date) = :year " +
             "AND s.partnerInfo.organizationId = :organizationId")
     List<PartnerCommissions> findCommissionsByDateAndOrganization(
@@ -39,4 +49,20 @@ public interface PartnerCommissionsRepository extends JpaRepository<PartnerCommi
             @Param("organizationId") UUID organizationId
     );
 
-}
+        // Get distinct months without any filters
+        @Query("SELECT DISTINCT TO_CHAR(p.date, 'YYYY-MM') FROM PartnerCommissions p")
+        List<String> findDistinctMonths();
+
+        // Get distinct months by partnerId only
+        @Query("SELECT DISTINCT TO_CHAR(p.date, 'YYYY-MM') " +
+                "FROM PartnerCommissions p " +
+                "WHERE p.partnerInfo.id = :partnerId")
+        List<String> findDistinctMonthsByPartner(@Param("partnerId") UUID partnerId);
+
+        // Get distinct months by organizationId only
+        @Query("SELECT DISTINCT TO_CHAR(p.date, 'YYYY-MM') " +
+                "FROM PartnerCommissions p " +
+                "WHERE p.partnerInfo.organizationId = :organizationId")
+        List<String> findDistinctMonthsByOrganization(@Param("organizationId") UUID organizationId);
+
+    }
