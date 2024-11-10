@@ -21,6 +21,10 @@ public interface PaymentService {
     List<Integer> getAvailableYears();
 
 
+    Page<PartnerInfoDto> searchPartnersByNameCommission(String name, List<PartnerType> types, Pageable pageable, UUID id);
+
+    Page<PartnerInfoDto> searchPartnersByNameSubscription(String name, List<PartnerType> types, Pageable pageable, UUID id);
+
     List<String> getAvailableMonthsByPartner(UUID partnerId);
 
     List<String> getAvailableMonthsByOrganization(UUID organizationId);

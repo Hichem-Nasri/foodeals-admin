@@ -64,7 +64,7 @@ public class PartnerCommissionsUtil {
     private void createCommissionForNormalPartner(OrganizationEntity partner, Date date) {
         OrganizationEntity freshPartner = entityManager.find(OrganizationEntity.class, partner.getId(), LockModeType.PESSIMISTIC_WRITE);
         PartnerCommissions partnerCommissions = PartnerCommissions.builder()
-                .partnerInfo(new PartnerInfo(freshPartner.getId(), freshPartner.getId(), freshPartner.getPartnerType()))
+                .partnerInfo(new PartnerInfo(freshPartner.getId(), freshPartner.getId(), freshPartner.getPartnerType(), freshPartner.getName()))
                 .paymentStatus(PaymentStatus.IN_VALID)
                 .paymentResponsibility(freshPartner.commissionPayedBySubEntities() ? PaymentResponsibility.PAYED_BY_SUB_ENTITIES : PaymentResponsibility.PAYED_BY_PARTNER)
                 .date(date)
@@ -78,7 +78,7 @@ public class PartnerCommissionsUtil {
     private void createCommissionForPartnerWithSB(OrganizationEntity partner, Date date) {
         OrganizationEntity freshPartner = entityManager.find(OrganizationEntity.class, partner.getId(), LockModeType.PESSIMISTIC_WRITE);
         PartnerCommissions parentCommission = PartnerCommissions.builder()
-                .partnerInfo(new PartnerInfo(freshPartner.getId(), freshPartner.getId(), freshPartner.getPartnerType()))
+                .partnerInfo(new PartnerInfo(freshPartner.getId(), freshPartner.getId(), freshPartner.getPartnerType(), freshPartner.getName()))
                 .paymentStatus(PaymentStatus.IN_VALID)
                 .paymentResponsibility(freshPartner.commissionPayedBySubEntities() ? PaymentResponsibility.PAYED_BY_SUB_ENTITIES : PaymentResponsibility.PAYED_BY_PARTNER)
                 .date(date)
@@ -91,7 +91,7 @@ public class PartnerCommissionsUtil {
         for (SubEntity subEntity : freshPartner.getSubEntities()) {
             SubEntity freshSubEntity = entityManager.find(SubEntity.class, subEntity.getId(), LockModeType.PESSIMISTIC_WRITE);
             PartnerCommissions subEntityCommission = PartnerCommissions.builder()
-                    .partnerInfo(new PartnerInfo(freshPartner.getId(), freshSubEntity.getId(), freshSubEntity.getPartnerType()))
+                    .partnerInfo(new PartnerInfo(freshPartner.getId(), freshSubEntity.getId(), freshSubEntity.getPartnerType(), freshSubEntity.getName()))
                     .paymentStatus(PaymentStatus.IN_VALID)
                     .date(date)
                     .paymentResponsibility(freshPartner.commissionPayedBySubEntities() ? PaymentResponsibility.PAYED_BY_SUB_ENTITIES : PaymentResponsibility.PAYED_BY_PARTNER)

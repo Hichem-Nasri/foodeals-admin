@@ -3,6 +3,8 @@ package net.foodeals.contract.domain.repositories;
 import net.foodeals.common.contracts.BaseRepository;
 import net.foodeals.contract.domain.entities.Subscription;
 import net.foodeals.contract.domain.entities.enums.SubscriptionStatus;
+import net.foodeals.payment.domain.entities.Enum.PartnerType;
+import net.foodeals.payment.domain.entities.PartnerCommissions;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,5 +38,11 @@ public interface SubscriptionRepository extends BaseRepository<Subscription, UUI
 
             return new ArrayList<>(allYears);
         }
+
+    @Query("SELECT s FROM Subscription s WHERE s.partner.name LIKE %:name% AND s.partner.type IN :types AND s.subscriptionStatus <> 'NOT_STARTED'")
+    Page<Subscription> findByPartnerNameAndTypeIn(@Param("name") String name, @Param("types") List<PartnerType> types, Pageable pageable);
+
+    @Query("SELECT s FROM Subscription s WHERE s.partner.id = :id AND s.partner.type IN :types AND s.subscriptionStatus <> 'NOT_STARTED'")
+    Optional<Subscription> findByPartnerIdAndTypeIn(@Param("id") UUID id, @Param("types") List<PartnerType> types);
 }
 // 23 ->

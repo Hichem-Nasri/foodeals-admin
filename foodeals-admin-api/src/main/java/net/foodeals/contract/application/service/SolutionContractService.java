@@ -153,7 +153,7 @@ public class SolutionContractService {
             if (oneSubscription) {
                 List<SolutionContract> solutionContractsList = new ArrayList<>(globalSubscription.getSolutionContracts());
                 globalSubscription.getSolutions().add(solution);
-                globalSubscription.setPartner(new PartnerInfo(contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getPartnerType()));
+                globalSubscription.setPartner(new PartnerInfo(contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getPartnerType(),  contract.getOrganizationEntity().getName()));
                 solutionContract.setSubscription(globalSubscription);
                 solutionContractsList.add(solutionContract);
                 globalSubscription.setSolutionContracts(solutionContractsList);
@@ -161,7 +161,7 @@ public class SolutionContractService {
                 Subscription subscription = this.subscriptionService.createSubscription(solutionsContractDto.getContractSubscriptionDto());
                 subscription.getSolutions().add(solution);
                 organizationEntity.getSubscriptions().add(subscription);
-                subscription.setPartner(new PartnerInfo(contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getPartnerType()));
+                subscription.setPartner(new PartnerInfo(contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getId(), contract.getOrganizationEntity().getPartnerType(), contract.getOrganizationEntity().getName()));
                 List<SolutionContract> solutionContractList = new ArrayList<SolutionContract>();
                 solutionContractList.add(solutionContract);
                 subscription.setSolutionContracts(solutionContractList);

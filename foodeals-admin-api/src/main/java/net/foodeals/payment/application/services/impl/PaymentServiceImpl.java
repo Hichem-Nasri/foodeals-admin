@@ -638,6 +638,66 @@ public class PaymentServiceImpl implements PaymentService {
             return partnerCommissionsRepository.findDistinctMonths();
         }
 
+        @Override
+        @Transactional
+        public Page<PartnerInfoDto> searchPartnersByNameCommission(String name, List<PartnerType> types, Pageable pageable, UUID id) {
+            if (id != null) {
+                // If an ID is provided, fetch the specific partner
+                Optional<PartnerCommissions> partnerOptional = partnerCommissionsRepository.findCommissionsByPartnerInfoId(id);
+                if (partnerOptional.isPresent()) {
+                    PartnerCommissions partner = partnerOptional.get();
+                    PartnerInfoDto partnerInfoDto = mapCommissionToPartnerInfoDto(partner);
+                    return new PageImpl<>(Collections.singletonList(partnerInfoDto), pageable, 1);
+                } else {
+                    return new PageImpl<>(Collections.emptyList(), pageable, 0); // No partner found
+                }
+            } else {
+                // If no ID is provided, perform the search by name and types
+                return partnerCommissionsRepository.findByPartnerNameAndTypeIn(name, types, pageable).map(this::mapCommissionToPartnerInfoDto);
+            }
+        }
+
+    @Override
+    @Transactional
+    public Page<PartnerInfoDto> searchPartnersByNameSubscription(String name, List<PartnerType> types, Pageable pageable, UUID id) {
+        if (id != null) {
+            // If an ID is provided, fetch the specific partner
+            Optional<Subscription> partnerOptional = subscriptionService.findSubscriptionByPartnerInfoId(id, types);
+            if (partnerOptional.isPresent()) {
+                Subscription partner = partnerOptional.get();
+                PartnerInfoDto partnerInfoDto = mapSubscriptionToPartnerInfoDto(partner);
+                return new PageImpl<>(Collections.singletonList(partnerInfoDto), pageable, 1);
+            } else {
+                return new PageImpl<>(Collections.emptyList(), pageable, 0); // No partner found
+            }
+        } else {
+            // If no ID is provided, perform the search by name and types
+            return subscriptionService.findByPartnerNameAndTypeIn(name, types, pageable).map(this::mapSubscriptionToPartnerInfoDto);
+        }
+    }
+
+        private PartnerInfoDto mapCommissionToPartnerInfoDto(PartnerCommissions partner) {
+            if (partner.getPartnerInfo().type().equals(PartnerType.SUB_ENTITY)) {
+                SubEntity subEntity = this.subEntityService.getEntityById(partner.getPartnerInfo().id());
+                return new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath());
+            } else {
+                OrganizationEntity organizationEntity = this.organizationEntityService.findById(partner.getPartnerInfo().id());
+                return new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
+            }
+        }
+
+    private PartnerInfoDto mapSubscriptionToPartnerInfoDto(Subscription partner) {
+        if (partner.getPartner().type().equals(PartnerType.SUB_ENTITY)) {
+            SubEntity subEntity = this.subEntityService.getEntityById(partner.getPartner().id());
+            return new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath());
+        } else {
+            OrganizationEntity organizationEntity = this.organizationEntityService.findById(partner.getPartner().id());
+            return new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
+        }
+    }
+
+
+
     @Override
     @Transactional
     public List<Integer> getAvailableYears() {
