@@ -11,6 +11,7 @@ import net.foodeals.contract.domain.entities.enums.SubscriptionStatus;
 import net.foodeals.contract.domain.repositories.SubscriptionRepository;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
+import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import net.foodeals.payment.domain.entities.Enum.PaymentResponsibility;
 import net.foodeals.payment.domain.entities.PartnerInfo;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -57,7 +58,7 @@ public class SubscriptionService {
         subscription.setNumberOfDueDates(contractSubscriptionDto.getNumberOfDueDates());
         OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(subscription.getPartner().id()).orElseThrow(() -> new ResourceNotFoundException("organization not found"));
         subscription.setPartnerI(organizationEntity);
-        subscription.setPartner(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType()));
+        subscription.setPartner(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType(), organizationEntity.getName()));
         return this.subscriptionRepository.save(subscription);
     }
 
@@ -106,5 +107,13 @@ public class SubscriptionService {
 
     public List<Integer> findDistinctYears() {
         return this.subscriptionRepository.findAvailableYears();
+    }
+
+    public Optional<Subscription> findSubscriptionByPartnerInfoId(UUID id, List<PartnerType> types) {
+        return this.subscriptionRepository.findByPartnerIdAndTypeIn(id, types);
+    }
+
+    public Page<Subscription> findByPartnerNameAndTypeIn(String name, List<PartnerType> types, Pageable pageable) {
+        return this.subscriptionRepository.findByPartnerNameAndTypeIn(name, types, pageable);
     }
 }

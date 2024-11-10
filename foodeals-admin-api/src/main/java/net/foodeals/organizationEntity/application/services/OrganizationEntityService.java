@@ -381,7 +381,7 @@ public class OrganizationEntityService {
             if (organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) || organizationEntity.getSolutions().contains(pro_market)) {
                 Date date = new Date();
                 PartnerCommissions partnerCommissions = PartnerCommissions.builder()
-                        .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType()))
+                        .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType(), organizationEntity.getName()))
                         .paymentStatus(PaymentStatus.IN_VALID)
                         .paymentResponsibility(organizationEntity.commissionPayedBySubEntities() ? PaymentResponsibility.PAYED_BY_SUB_ENTITIES : PaymentResponsibility.PAYED_BY_PARTNER)
                         .date(date)

@@ -2,8 +2,6 @@ package net.foodeals.payment.infrastructure.controller;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import net.foodeals.contract.domain.entities.Subscription;
-import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
 import net.foodeals.payment.application.dto.request.PaymentType;
 import net.foodeals.payment.application.dto.request.ReceiveDto;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,6 +40,24 @@ public class PaymentController {
         List<PartnerCommissions> payments = id == null ? this.paymentService.getCommissionPayments(year, month) : this.paymentService.getCommissionPaymentsByOrganizationId(id, year, month);
         return new ResponseEntity<CommissionDto>(this.paymentService.getCommissionResponse(payments, page), HttpStatus.OK);
 
+    }
+
+        @GetMapping("/commissions/search")
+        public ResponseEntity<Page<PartnerInfoDto>> searchPartners(
+                @RequestParam(name = "name", required = true) String name,
+                @RequestParam(name = "types", required = true) List<PartnerType> types,
+                @RequestParam(name = "id", required = false) UUID id,
+                Pageable pageable) {
+            return ResponseEntity.ok(paymentService.searchPartnersByNameCommission(name, types, pageable, id));
+        }
+
+    @GetMapping("/subscriptions/search")
+    public ResponseEntity<Page<PartnerInfoDto>> searchPartnersSubscription(
+            @RequestParam(name = "name", required = true) String name,
+            @RequestParam(name = "types", required = true) List<PartnerType> types,
+            @RequestParam(name = "id", required = false) UUID id,
+            Pageable pageable) {
+        return ResponseEntity.ok(paymentService.searchPartnersByNameSubscription(name, types, pageable, id));
     }
 
 
@@ -84,6 +99,10 @@ public class PaymentController {
         return new ResponseEntity<DeliveryPaymentResponse>(this.paymentService.getDeliveryPayments(year, page, id), HttpStatus.OK);
 
     }
+
+    // partners names from commissions and subscriptions by type in query list.
+    // subscription and commission.
+    //
 
     @GetMapping("/form-data/{id}")
     public ResponseEntity<PaymentFormData> getFormData(@PathVariable("id") UUID id, @RequestParam(value = "type", required = true) PaymentType type) {

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface PartnerCommissionsRepository extends JpaRepository<PartnerCommissions, UUID> {
@@ -26,6 +27,8 @@ public interface PartnerCommissionsRepository extends JpaRepository<PartnerCommi
             @Param("organizationId") UUID organizationId,
             @Param("type") PartnerType type
     );
+        @Query("SELECT p FROM PartnerCommissions p WHERE p.partnerInfo.name LIKE %:name%")
+        Page<PartnerCommissions> findByPartnerName(String name, Pageable pageable);
 
     @Query("SELECT pc FROM PartnerCommissions pc WHERE YEAR(pc.date) = :year AND MONTH(pc.date) = :month AND pc.partnerInfo.id = :partnerId")
     PartnerCommissions findCommissionsByDateAndPartnerInfoId(
@@ -33,6 +36,14 @@ public interface PartnerCommissionsRepository extends JpaRepository<PartnerCommi
             @Param("month") int month,
             @Param("partnerId") UUID partnerId
     );
+
+    @Query("SELECT pc FROM PartnerCommissions pc WHERE  pc.partnerInfo.id = :partnerId")
+    Optional<PartnerCommissions> findCommissionsByPartnerInfoId(
+            @Param("partnerId") UUID partnerId
+    );
+
+    @Query("SELECT p FROM PartnerCommissions p WHERE p.partnerInfo.name LIKE %:name% AND p.partnerInfo.type IN :types")
+    Page<PartnerCommissions> findByPartnerNameAndTypeIn(String name, List<PartnerType> types, Pageable pageable);
 
 
     @Query("SELECT pc FROM PartnerCommissions pc WHERE YEAR(pc.date) = :year AND MONTH(pc.date) = :month AND pc.partnerInfo.type != :type")

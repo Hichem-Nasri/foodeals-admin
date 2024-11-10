@@ -14,4 +14,5 @@ public record PartnerInfo(@Column(name = "organization_Id") UUID organizationId,
                           UUID id,
                           @Enumerated(EnumType.STRING)
                           @Column(name = "partner_type")
-                          PartnerType type) {}
+                          PartnerType type,   @Column(name = "partner_name")
+                          String name) {}
