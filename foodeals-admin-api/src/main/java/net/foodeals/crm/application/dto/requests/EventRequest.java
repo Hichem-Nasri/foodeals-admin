@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.util.UUID;
 
-public record EventRequest(@NotBlank String object, @NotBlank String message, Integer lead, @NotBlank String dateAndTime) {
+public record EventRequest(@NotBlank String object, @NotBlank String message, @NotBlank String dateAndTime) {
 }
