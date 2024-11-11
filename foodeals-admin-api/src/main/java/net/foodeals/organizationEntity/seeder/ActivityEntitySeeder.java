@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.repositories.CityRepository;
 import net.foodeals.organizationEntity.domain.entities.Activity;
+import net.foodeals.organizationEntity.domain.entities.enums.ActivityType;
 import net.foodeals.organizationEntity.domain.repositories.ActivityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -30,6 +31,7 @@ public class ActivityEntitySeeder {
         if (!this.activityRepository.existsByName("Activity 1")) {
             Activity activity1 = Activity.builder()
                     .name("Activity 1")
+                    .type(ActivityType.PARTNER) // Set the type here
                     .build();
             this.activityRepository.save(activity1);
         }
@@ -37,6 +39,7 @@ public class ActivityEntitySeeder {
         if (!this.activityRepository.existsByName("Activity 2")) {
             Activity activity2 = Activity.builder()
                     .name("Activity 2")
+                    .type(ActivityType.ASSOCIATION) // Set the type here
                     .build();
             this.activityRepository.save(activity2);
         }
@@ -44,6 +47,7 @@ public class ActivityEntitySeeder {
         if (!this.activityRepository.existsByName("Activity 3")) {
             Activity activity3 = Activity.builder()
                     .name("Activity 3")
+                    .type(ActivityType.PARTNER) // Set the type here
                     .build();
             this.activityRepository.save(activity3);
         }

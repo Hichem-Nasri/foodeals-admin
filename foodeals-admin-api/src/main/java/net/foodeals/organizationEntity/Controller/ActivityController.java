@@ -28,10 +28,13 @@ public class ActivityController {
     }
 
     @GetMapping("/Activities")
-    public ResponseEntity<Page<ActivityResponseDto>> getAllActivities(Pageable pageable) {
-        Page<Activity> activities = this.activityService.findAll(pageable);
-        Page<ActivityResponseDto> activityResponses = activities.map(activity -> this.modelMapper.map(activity, ActivityResponseDto.class));
-        return new ResponseEntity<Page<ActivityResponseDto>>(activityResponses, HttpStatus.OK);
+    public ResponseEntity<Page<ActivityResponseDto>> getAllActivities(
+            @RequestParam(required = true) List<String> types,
+            Pageable pageable) {
+        Page<Activity> activities = this.activityService.findAllByTypes(types, pageable);
+        Page<ActivityResponseDto> activityResponses = activities.map(activity ->
+                this.modelMapper.map(activity, ActivityResponseDto.class));
+        return new ResponseEntity<>(activityResponses, HttpStatus.OK);
     }
 
     @GetMapping("/Activity/{id}")

@@ -5,6 +5,7 @@ import lombok.*;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.offer.domain.entities.Offer;
+import net.foodeals.organizationEntity.domain.entities.enums.ActivityType;
 import net.foodeals.product.domain.entities.ProductCategory;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -45,6 +46,9 @@ public class Activity extends AbstractEntity<UUID> {
     @ManyToMany(mappedBy = "activities",fetch = FetchType.LAZY)
     @Builder.Default
     private Set<Prospect> prospects = new HashSet<>();
+
+    @Enumerated(EnumType.STRING)
+    private ActivityType type;
 
     Activity() {
     }

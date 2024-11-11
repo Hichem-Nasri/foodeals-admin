@@ -26,7 +26,8 @@ public class ProductModelMapperConfig {
                     category.getSlug(),
                     new ActivityResponse(
                             category.getActivity().getId(),
-                            category.getActivity().getName()
+                            category.getActivity().getName(),
+                            category.getActivity().getType()
                     )
             );
         }, ProductCategory.class, ProductCategoryResponse.class);
