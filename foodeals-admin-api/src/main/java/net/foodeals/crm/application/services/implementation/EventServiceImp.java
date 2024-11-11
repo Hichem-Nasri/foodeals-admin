@@ -12,6 +12,8 @@ import net.foodeals.user.domain.entities.User;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -78,20 +80,23 @@ public final class EventServiceImp implements EventService {
 
     @Override
     public Event create(EventRequest dto) {
-        User lead = this.userService.findById(dto.lead());
+
+        final String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        final User creator = this.userService.findByEmail(email);
+
         Event event = Event.builder()
-                .lead(lead)
+                .lead(creator)
                 .dateAndHour(dto.dateAndTime())
                 .object(dto.object())
                 .message(dto.message())
                 .build();
-        if (lead.getEvents() == null) {
-            lead.setEvents(new ArrayList<>(List.of(event)));
+        if (creator.getEvents() == null) {
+            creator.setEvents(new ArrayList<>(List.of(event)));
         } else {
-            lead.getEvents().add(event);
+            creator.getEvents().add(event);
         }
         eventRepository.save(event);
-        userService.save(lead);
+        userService.save(creator);
         return event;
     }
 
@@ -102,8 +107,12 @@ public final class EventServiceImp implements EventService {
         event.setObject(dto.object());
         event.setMessage(dto.message());
 
-        if (event.getLead().getId() != dto.lead()) {
-            User newlead = this.userService.findById(dto.lead());
+
+        final String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        final User newlead = this.userService.findByEmail(email);
+
+        if (event.getLead().getId() != newlead.getId()) {
             event.getLead().getEvents().remove(event);
             this.userService.save(event.getLead());
             if (newlead.getEvents() == null) {
