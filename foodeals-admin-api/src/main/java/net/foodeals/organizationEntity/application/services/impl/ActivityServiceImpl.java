@@ -41,6 +41,11 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
+    public Page<Activity> findAllByTypes(List<String> types, Pageable pageable) {
+        return this.repository.findByTypeIn(types, pageable); // Assuming you have this method in your repository
+    }
+
+    @Override
     public Activity findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ActivityNotFoundException(id));
@@ -48,7 +53,7 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public Activity create(ActivityRequest dto) {
-        Activity activity = Activity.builder().name(dto.name().toLowerCase()).build();
+        Activity activity = Activity.builder().name(dto.name().toLowerCase()).type(dto.type()).build();
         return this.repository.save(activity);
     }
 
@@ -58,6 +63,7 @@ public class ActivityServiceImpl implements ActivityService {
                 .orElseThrow(() -> new ActivityNotFoundException(id));
 
         activity.setName(dto.name().toLowerCase());
+        activity.setType(dto.type());
         return this.repository.save(activity);
     }
 

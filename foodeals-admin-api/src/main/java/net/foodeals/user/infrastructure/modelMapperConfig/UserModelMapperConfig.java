@@ -84,7 +84,7 @@ public class UserModelMapperConfig {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            return new DeliveryPartnerUserDto(createdAt, user.getRole().getName(), "OFFLINE", city, region, solutions, userInfoDto);
+            return new DeliveryPartnerUserDto(createdAt, user.getRole().getName(), user.getStatus(), city, region, solutions, userInfoDto);
         }, User.class, DeliveryPartnerUserDto.class);
 
         modelMapper.addConverter(context -> {
