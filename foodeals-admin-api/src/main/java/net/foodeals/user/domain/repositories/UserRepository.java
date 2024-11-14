@@ -18,9 +18,7 @@ public interface UserRepository extends BaseRepository<User, Integer> {
     @Query("SELECT u FROM User u " +
             "JOIN u.organizationEntity oe " +
             "WHERE (:#{#filter.query} IS NULL OR CONCAT(u.name.firstName, ' ', u.name.lastName) LIKE CONCAT('%', :#{#filter.query}, '%')) " +
-            "AND (:#{#filter.types} IS NULL OR oe.type IN :#{#filter.types}) " +
-            "AND (:#{#filter.roleName} IS NULL OR u.role.name = :#{#filter.roleName}) " +
-            "AND (:#{#filter.organizationUuid} IS NULL OR oe.id = :#{#filter.organizationUuid})")
+            "AND (:#{#filter.types} IS NULL OR oe.type IN :#{#filter.types}) ")
     Page<User> findWithFilters(
             @Param("filter") UserFilter filter,
             Pageable pageable
@@ -53,4 +51,10 @@ public interface UserRepository extends BaseRepository<User, Integer> {
             "WHERE u.id = :userId")
     Optional<User> findUserProfileById(@Param("userId") Integer userId);
 
+    @Query("SELECT u FROM User u " +
+            "JOIN u.organizationEntity oe " +
+            "WHERE (:organizationId IS NULL OR oe.id = :organizationId) " +
+            "AND (:name IS NULL OR LOWER(CONCAT(u.name.firstName, ' ', u.name.lastName)) LIKE LOWER(CONCAT('%', :name, '%')))" +
+            "AND u.role.name = :roleName")
+    Page<User> getSellsManagers(@Param("organizationId") UUID organizationId, @Param("name") String name, @Param("roleName") String roleName, Pageable pageable);
 }

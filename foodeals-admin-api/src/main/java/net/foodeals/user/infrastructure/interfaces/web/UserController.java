@@ -29,11 +29,18 @@ public class UserController {
     public ResponseEntity<Page<SimpleUserDto>> searchUsers(
             @RequestParam(required = false, name = "name") String name,
             @RequestParam(required = false, name = "types") List<EntityType> types,
-            @RequestParam(required = false, name = "roleName") String roleName,
-            @RequestParam(required = false, name = "organizationUuid") UUID organizationUuid,
             Pageable pageable) {
-        UserFilter filter = new UserFilter(name, types, roleName, organizationUuid);
+        UserFilter filter = new UserFilter(name, types);
         Page<User> users = service.filterUsers(filter, pageable);
+        Page<SimpleUserDto> userResponses = users.map(u -> this.mapper.map(u, SimpleUserDto.class));
+        return ResponseEntity.ok(userResponses);
+    }
+
+    @GetMapping("/sells-managers")
+    public ResponseEntity<Page<SimpleUserDto>> sellsManagers(
+            @RequestParam(required = false, name = "name") String name,
+            Pageable pageable) {
+        Page<User> users = service.getSellsManagers(name, pageable);
         Page<SimpleUserDto> userResponses = users.map(u -> this.mapper.map(u, SimpleUserDto.class));
         return ResponseEntity.ok(userResponses);
     }

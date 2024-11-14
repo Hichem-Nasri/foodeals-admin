@@ -26,11 +26,15 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -77,6 +81,17 @@ class UserServiceImpl implements UserService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<User> getSellsManagers(String name, Pageable pageable) {
+        final String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Optional<User> user = this.repository.findByEmail(email);
+        if (user.isPresent()) {
+            return this.repository.getSellsManagers(user.get().getOrganizationEntity().getId(), name, "SALES_MANAGER", pageable);
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found");
+        }
     }
 
     @Override
