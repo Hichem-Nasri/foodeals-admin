@@ -13,10 +13,7 @@ import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.user.application.dtos.requests.UserAddress;
 import net.foodeals.user.application.dtos.requests.UserRequest;
-import net.foodeals.user.application.dtos.responses.ClientDto;
-import net.foodeals.user.application.dtos.responses.UserProfileDTO;
-import net.foodeals.user.application.dtos.responses.UserResponse;
-import net.foodeals.user.application.dtos.responses.WorkingHoursDTO;
+import net.foodeals.user.application.dtos.responses.*;
 import net.foodeals.user.application.services.RoleService;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.Role;
@@ -41,7 +38,6 @@ import java.util.stream.Collectors;
 @Transactional
 @RequiredArgsConstructor
 class UserServiceImpl implements UserService {
-
     private final UserRepository repository;
     private final RoleService roleService;
     private final PasswordEncoder passwordEncoder;
@@ -89,9 +85,9 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> searchNonClientUsers(String query, Pageable pageable) {
-        return repository.findByName_FirstNameContainingOrName_LastNameContainingAndRoleNameNot(
-                query, query, "CLIENT", pageable);
+    @Transactional
+    public Page<User> filterUsers(UserFilter filter, Pageable pageable) {
+        return repository.findWithFilters(filter, pageable);
     }
 
 

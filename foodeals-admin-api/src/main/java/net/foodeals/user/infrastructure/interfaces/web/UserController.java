@@ -2,6 +2,7 @@ package net.foodeals.user.infrastructure.interfaces.web;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.*;
 import net.foodeals.user.application.services.UserService;
@@ -25,10 +26,14 @@ public class UserController {
     private final ModelMapper mapper;
 
     @GetMapping("/search")
-    public ResponseEntity<Page<SimpleUserDto>> searchNonClientUsers(
-            @RequestParam String query,
+    public ResponseEntity<Page<SimpleUserDto>> searchUsers(
+            @RequestParam(required = false, name = "name") String name,
+            @RequestParam(required = false, name = "types") List<EntityType> types,
+            @RequestParam(required = false, name = "roleName") String roleName,
+            @RequestParam(required = false, name = "organizationUuid") UUID organizationUuid,
             Pageable pageable) {
-        Page<User> users = service.searchNonClientUsers(query, pageable);
+        UserFilter filter = new UserFilter(name, types, roleName, organizationUuid);
+        Page<User> users = service.filterUsers(filter, pageable);
         Page<SimpleUserDto> userResponses = users.map(u -> this.mapper.map(u, SimpleUserDto.class));
         return ResponseEntity.ok(userResponses);
     }
