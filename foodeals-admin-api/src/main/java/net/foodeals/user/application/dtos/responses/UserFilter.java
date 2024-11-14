@@ -14,8 +14,6 @@ import java.util.UUID;
 public class UserFilter {
     private String query;
     private List<EntityType> types;
-    private String roleName;
-    private UUID organizationUuid;
 
     // getters and setters
 }

@@ -36,4 +36,5 @@ public interface UserService extends CrudService<User, Integer, UserRequest> {
 
     List<WorkingHoursDTO> mapWorkingHoursToDTO(List<WorkingHours> workingHours);
 
+    Page<User> getSellsManagers(String name, Pageable pageable);
 }
