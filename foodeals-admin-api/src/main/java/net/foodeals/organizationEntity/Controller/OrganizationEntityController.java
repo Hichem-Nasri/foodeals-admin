@@ -215,10 +215,11 @@ public class OrganizationEntityController {
     @GetMapping("/partners/search")
     public ResponseEntity<Page<PartnerInfoDto>> searchPartners(
             @RequestParam(name = "name", required = false) String name,
-            @RequestParam(name = "types", required = true) List<EntityType> types,
+            @RequestParam(name = "id", required = false) UUID id,
+            @RequestParam(name = "types", required = false) List<EntityType> types,
             @RequestParam(name = "deleted", required = false, defaultValue = "false") boolean includeDeleted,
             Pageable pageable) {
-        return ResponseEntity.ok(organizationEntityService.searchPartnersByName(name, types, pageable, includeDeleted).map(this.modelMapper::convertToPartnerInfoDto));
+        return ResponseEntity.ok(organizationEntityService.searchPartnersByName(id, name, types, pageable, includeDeleted).map(this.modelMapper::convertToPartnerInfoDto));
     }
 
 
@@ -239,9 +240,10 @@ public class OrganizationEntityController {
     @GetMapping("/cities/search")
     public ResponseEntity<Page<CityResponse>> searchCities(
             @RequestParam(name = "city") String cityName,
+@RequestParam(name = "types", required = false) List<EntityType> types,
             @RequestParam(name = "country") String countryName,
             Pageable pageable) {
-        return ResponseEntity.ok(organizationEntityService.searchCitiesByOrganizationAddress(cityName, countryName, pageable).map(this.modelMapper::convertToCityResponse));
+        return ResponseEntity.ok(organizationEntityService.searchCitiesByOrganizationAddress(types, cityName, countryName, pageable).map(this.modelMapper::convertToCityResponse));
     }
 
 

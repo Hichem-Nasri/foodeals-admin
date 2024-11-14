@@ -45,6 +45,7 @@ import net.foodeals.user.domain.entities.enums.DeletionReason;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -571,7 +572,16 @@ public class OrganizationEntityService {
         return this.organizationEntityRepository.findByType(List.of(EntityType.ASSOCIATION, EntityType.FOOD_BANK, EntityType.FOOD_BANK_ASSO), pageable);
     }
 
-public Page<OrganizationEntity> searchPartnersByName(String name, List<EntityType> types, Pageable pageable, boolean includeDeleted) {
+public Page<OrganizationEntity> searchPartnersByName(UUID id, String name, List<EntityType> types, Pageable pageable, boolean includeDeleted) {
+    if (id != null) {
+        OrganizationEntity entity = organizationEntityRepository.getEntity(id);
+        if (entity == null) {
+            throw new ResourceNotFoundException("Entity not found with ID: " + id);
+        }
+
+        return new PageImpl<>(List.of(entity), pageable, 1);
+    }
+
     Page<OrganizationEntity> entities;
 
     if (name != null && !name.isEmpty()) {
@@ -583,8 +593,8 @@ public Page<OrganizationEntity> searchPartnersByName(String name, List<EntityTyp
     return entities;
 }
 
-    public Page<City> searchCitiesByOrganizationAddress(String cityName, String countryName, Pageable pageable) {
-        return organizationEntityRepository.findCitiesByOrganizationAddress(cityName, countryName, pageable);
+    public Page<City> searchCitiesByOrganizationAddress(List<EntityType> types, String cityName, String countryName, Pageable pageable) {
+        return organizationEntityRepository.findCitiesByOrganizationAddress(types, cityName, countryName, pageable);
     }
 }
 

@@ -34,6 +34,10 @@ public interface BaseRepository<T, ID> extends JpaRepository<T, ID> {
     Optional<T> findById(@Param("id") ID id);
 
     @Query("SELECT e FROM #{#entityName} e WHERE e.id = :id")
+    T getEntity(@Param("id") ID id);
+
+
+    @Query("SELECT e FROM #{#entityName} e WHERE e.id = :id")
     Optional<T> findByIdIncludingDeleted(@Param("id") ID id);
 
     @Modifying
