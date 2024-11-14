@@ -44,10 +44,23 @@ public interface OrganizationEntityRepository extends BaseRepository<Organizatio
     );
 
     Page<OrganizationEntity> findByDeletedAtIsNotNull(Pageable pageable);
+
     Optional<OrganizationEntity> findByIdAndDeletedAtIsNotNull(UUID uuid);
     Page<OrganizationEntity> findByDeletedAtIsNotNullAndTypeIn(Pageable pageable, List<EntityType> type);
 
+    @Query("SELECT o FROM OrganizationEntity o WHERE o.name LIKE %:name% AND o.type IN :types AND ((o.deletedAt IS NOT NULL AND :deleted = true) OR (o.deletedAt IS NULL AND :deleted = false))")
+    Page<OrganizationEntity> findByNameContainingAndTypeInAndDeletedAtIs(
+            @Param("name") String name,
+            @Param("types") List<EntityType> types,
+            @Param("deleted") boolean deleted,
+            Pageable pageable
+    );
+
+@Query("SELECT o FROM OrganizationEntity o WHERE o.type IN :types AND ((o.deletedAt IS NOT NULL AND :deleted = true) OR (o.deletedAt IS NULL AND :deleted = false)) ")
+Page<OrganizationEntity> findByTypeInAndDeletedAtIs(@Param("types") List<EntityType> types, @Param("deleted") boolean deleted, Pageable pageable);
+
     Page<OrganizationEntity> findByTypeIn(List<EntityType> entityTypes, Pageable pageable);
+
     Page<OrganizationEntity> findByTypeInAndSolutionsContainingAndContractContractStatus(
             List<EntityType> types,
             Solution solution,

@@ -389,6 +389,11 @@ public class OrganizationEntityModelMapper {
     }
 
     @Transactional
+    public PartnerInfoDto convertToPartnerInfoDto(OrganizationEntity organizationEntity) {
+        return new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
+    }
+
+    @Transactional
     public OrganizationEntityDto mapOrganizationEntity(OrganizationEntity source) {
         return this.mapper.map(source, OrganizationEntityDto.class);
     }

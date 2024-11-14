@@ -211,15 +211,14 @@ public class OrganizationEntityController {
         };
     }
 
-/*     @GetMapping("/partners/search")
+    @GetMapping("/partners/search")
     public ResponseEntity<Page<PartnerInfoDto>> searchPartners(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "types", required = true) List<EntityType> types,
+            @RequestParam(name = "deleted", required = false, defaultValue = "false") boolean includeDeleted,
             Pageable pageable) {
-        return ResponseEntity.ok(organizationEntityService.searchPartnersByName(name, types, pageable));
-    } */
-//        Page<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.map(modelMapper::mapOrganizationEntity);
-
+        return ResponseEntity.ok(organizationEntityService.searchPartnersByName(name, types, pageable, includeDeleted).map(this.modelMapper::convertToPartnerInfoDto));
+    }
 
 
     @PostMapping(value = "/partners/validate/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
