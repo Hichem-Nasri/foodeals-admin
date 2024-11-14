@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.application.dtos.responses;
 
 import lombok.Builder;
 import lombok.Data;
+import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 
 import java.time.Instant;
@@ -20,4 +21,6 @@ public class OrganizationEntityFilter {
     private String phone;
     private UUID cityId;
     private Long collabId;
+    private Boolean deletedAt;
+    private ContractStatus contractStatus;
 }

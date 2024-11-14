@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.Controller;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.requests.DeleteOrganizationRequest;
 import net.foodeals.organizationEntity.application.dtos.responses.*;
@@ -10,7 +11,10 @@ import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizat
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
+import net.foodeals.organizationEntity.domain.entities.enums.OrganizationsType;
 import net.foodeals.organizationEntity.infrastructure.seeders.ModelMapper.OrganizationEntityModelMapper;
+import net.foodeals.payment.application.dto.response.PartnerInfoDto;
+import net.foodeals.payment.domain.entities.Enum.PartnerType;
 import org.modelmapper.internal.bytebuddy.implementation.bytecode.StackSize;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -123,9 +127,27 @@ public class OrganizationEntityController {
         return ResponseEntity.ok(deletionDetails);
     }
 
+    /**
+     * Retrieve a list of organization entities with the given filters.
+     *
+     * @param startDate the start date for the filter, if provided
+     * @param endDate the end date for the filter, if provided
+     * @param types the types of the organization entity
+     * @param names the names of the organization entity
+     * @param solutions the solutions of the organization entity
+     * @param cityId the city id of the organization entity
+     * @param collabId the collaborator id of the organization entity
+     * @param email the email of the organization entity
+     * @param phone the phone of the organization entity
+     * @param deletedAt whether the organization entity is deleted or not
+     * @param organizationsType which type of organization entities to return
+     * @param status the contract status of the organization entity
+     * @param pageable the pageable object
+     * @return a list of organization entities with the given filters
+     */
     @GetMapping("/partners")
     @Transactional
-    public ResponseEntity<Page<OrganizationEntityDto>> getOrganizationEntities(
+    public ResponseEntity<?> getOrganizationEntities(
             @RequestParam(value = "startDate", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate startDate,
@@ -134,7 +156,7 @@ public class OrganizationEntityController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate endDate,
 
-            @RequestParam(value = "types", required = false)
+            @RequestParam(value = "types", required = true)
             List<EntityType> types,
 
             @RequestParam(value = "names", required = false)
@@ -155,9 +177,17 @@ public class OrganizationEntityController {
             @RequestParam(value = "phone", required = false)
             String phone,
 
+            @RequestParam(value = "deletedAt", required = true)
+            Boolean deletedAt,
+
+            @RequestParam(value = "organizationsType", required = true)
+            OrganizationsType organizationsType,
+
+            @RequestParam(value = "status", required = false)
+            ContractStatus status, // New parameter for contract status
+
             Pageable pageable
     ) {
-        types = types != null ? types : List.of(EntityType.NORMAL_PARTNER, EntityType.PARTNER_WITH_SB);
         OrganizationEntityFilter filter = OrganizationEntityFilter.builder()
                 .startDate(startDate != null ? startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null)
                 .endDate(endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null)
@@ -168,21 +198,28 @@ public class OrganizationEntityController {
                 .solutions(solutions)
                 .cityId(cityId)
                 .collabId(collabId)
+                .deletedAt(deletedAt)
+                .contractStatus(status) // Set the contract status in the filter
                 .build();
 
         Page<OrganizationEntity> organizationEntities = organizationEntityService.getOrganizationEntitiesFilters(filter, pageable);
-        Page<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.map(modelMapper::mapOrganizationEntity);
-        return ResponseEntity.ok(organizationEntitiesDto);
+        return switch (organizationsType) {
+            case PARTNERS -> ResponseEntity.ok(organizationEntities.map(modelMapper::mapOrganizationEntity));
+            case DELIVERIES -> ResponseEntity.ok(organizationEntities.map(this.modelMapper::mapDeliveryPartners));
+            case ASSOCIATIONS -> ResponseEntity.ok(organizationEntities.map(this.modelMapper::mapToAssociation));
+            default -> ResponseEntity.badRequest().body("Invalid organization type");
+        };
     }
 
-    // elevery partner update, update contract, getcontract
+/*     @GetMapping("/partners/search")
+    public ResponseEntity<Page<PartnerInfoDto>> searchPartners(
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "types", required = true) List<EntityType> types,
+            Pageable pageable) {
+        return ResponseEntity.ok(organizationEntityService.searchPartnersByName(name, types, pageable));
+    } */
+//        Page<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.map(modelMapper::mapOrganizationEntity);
 
-    @GetMapping("/delivery-partners")
-    public ResponseEntity<Page<DeliveryPartnerDto>> getDeliveryPartner(Pageable pageable) {
-        Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getDeliveryPartners(pageable);
-        Page<DeliveryPartnerDto> deliveryPartnerDtos = organizationEntities.map(this.modelMapper::mapDeliveryPartners);
-        return new ResponseEntity<Page<DeliveryPartnerDto>>(deliveryPartnerDtos, HttpStatus.OK);
-    }
 
 
     @PostMapping(value = "/partners/validate/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -199,13 +236,6 @@ public class OrganizationEntityController {
         return new ResponseEntity<byte []>(this.organizationEntityService.getContractDocument(id), headers, HttpStatus.OK);
     }
 
-    @GetMapping("/associations")
-    @Transactional
-    public ResponseEntity<Page<AssociationsDto>> getAssociations(Pageable pageable) {
-        Page<OrganizationEntity> organizationEntities = this.organizationEntityService.getAssociations(pageable);
-        Page<AssociationsDto> associationsDtos = organizationEntities.map(this.modelMapper::mapToAssociation);
-        return new ResponseEntity<Page<AssociationsDto>>(associationsDtos, HttpStatus.OK);
-    }
 }
 
 // 1 week
