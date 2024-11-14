@@ -192,3 +192,6 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
                 .collect(Collectors.toList());
     }
 }
+
+// requirement : perform search by name for cities exist only on organiztion table. the city name should be like query param and also there the city should be belonging to country name query.
+// give me controller, service  and repository methods.

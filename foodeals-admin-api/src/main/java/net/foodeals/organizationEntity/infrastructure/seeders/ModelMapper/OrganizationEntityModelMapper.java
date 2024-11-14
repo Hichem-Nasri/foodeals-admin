@@ -9,8 +9,10 @@ import net.foodeals.contract.application.DTo.upload.SolutionsContractDto;
 import net.foodeals.contract.domain.entities.SolutionContract;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.delivery.application.services.DeliveryService;
+import net.foodeals.location.application.dtos.responses.CityResponse;
 import net.foodeals.location.application.services.CountryService;
 import net.foodeals.location.domain.entities.Address;
+import net.foodeals.location.domain.entities.City;
 import net.foodeals.offer.application.services.DonationService;
 import net.foodeals.offer.application.services.OfferService;
 import net.foodeals.order.application.services.OrderService;
@@ -389,6 +391,11 @@ public class OrganizationEntityModelMapper {
     }
 
     @Transactional
+    public PartnerInfoDto convertToPartnerInfoDto(OrganizationEntity organizationEntity) {
+        return new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
+    }
+
+    @Transactional
     public OrganizationEntityDto mapOrganizationEntity(OrganizationEntity source) {
         return this.mapper.map(source, OrganizationEntityDto.class);
     }
@@ -456,5 +463,9 @@ public class OrganizationEntityModelMapper {
 
     public AssociationFormData mapToAssociationFormData(OrganizationEntity organizationEntity) {
         return this.mapper.map(organizationEntity, AssociationFormData.class);
+    }
+
+    public CityResponse convertToCityResponse(City city) {
+        return this.mapper.map(city, CityResponse.class);
     }
 }

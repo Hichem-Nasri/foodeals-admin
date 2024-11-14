@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.domain.repositories;
 
 import net.foodeals.common.contracts.BaseRepository;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
+import net.foodeals.location.domain.entities.City;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityFilter;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.Solution;
@@ -43,11 +44,34 @@ public interface OrganizationEntityRepository extends BaseRepository<Organizatio
             Pageable pageable
     );
 
+
+    @Query("SELECT DISTINCT c FROM OrganizationEntity o " +
+            "JOIN o.address a " +
+            "JOIN a.region r " +
+            "JOIN r.city c " +
+            "JOIN c.country co " +
+            "WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :cityName, '%')) " +
+            "AND LOWER(co.name) = LOWER(:countryName)")
+    Page<City> findCitiesByOrganizationAddress(String cityName, String countryName, Pageable pageable);
+
     Page<OrganizationEntity> findByDeletedAtIsNotNull(Pageable pageable);
+
     Optional<OrganizationEntity> findByIdAndDeletedAtIsNotNull(UUID uuid);
     Page<OrganizationEntity> findByDeletedAtIsNotNullAndTypeIn(Pageable pageable, List<EntityType> type);
 
+    @Query("SELECT o FROM OrganizationEntity o WHERE o.name LIKE %:name% AND o.type IN :types AND ((o.deletedAt IS NOT NULL AND :deleted = true) OR (o.deletedAt IS NULL AND :deleted = false))")
+    Page<OrganizationEntity> findByNameContainingAndTypeInAndDeletedAtIs(
+            @Param("name") String name,
+            @Param("types") List<EntityType> types,
+            @Param("deleted") boolean deleted,
+            Pageable pageable
+    );
+
+@Query("SELECT o FROM OrganizationEntity o WHERE o.type IN :types AND ((o.deletedAt IS NOT NULL AND :deleted = true) OR (o.deletedAt IS NULL AND :deleted = false)) ")
+Page<OrganizationEntity> findByTypeInAndDeletedAtIs(@Param("types") List<EntityType> types, @Param("deleted") boolean deleted, Pageable pageable);
+
     Page<OrganizationEntity> findByTypeIn(List<EntityType> entityTypes, Pageable pageable);
+
     Page<OrganizationEntity> findByTypeInAndSolutionsContainingAndContractContractStatus(
             List<EntityType> types,
             Solution solution,

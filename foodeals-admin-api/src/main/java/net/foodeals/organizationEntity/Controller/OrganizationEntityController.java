@@ -3,6 +3,7 @@ package net.foodeals.organizationEntity.Controller;
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
+import net.foodeals.location.application.dtos.responses.CityResponse;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
 import net.foodeals.organizationEntity.application.dtos.requests.DeleteOrganizationRequest;
 import net.foodeals.organizationEntity.application.dtos.responses.*;
@@ -211,15 +212,14 @@ public class OrganizationEntityController {
         };
     }
 
-/*     @GetMapping("/partners/search")
+    @GetMapping("/partners/search")
     public ResponseEntity<Page<PartnerInfoDto>> searchPartners(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "types", required = true) List<EntityType> types,
+            @RequestParam(name = "deleted", required = false, defaultValue = "false") boolean includeDeleted,
             Pageable pageable) {
-        return ResponseEntity.ok(organizationEntityService.searchPartnersByName(name, types, pageable));
-    } */
-//        Page<OrganizationEntityDto> organizationEntitiesDto = organizationEntities.map(modelMapper::mapOrganizationEntity);
-
+        return ResponseEntity.ok(organizationEntityService.searchPartnersByName(name, types, pageable, includeDeleted).map(this.modelMapper::convertToPartnerInfoDto));
+    }
 
 
     @PostMapping(value = "/partners/validate/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -233,8 +233,17 @@ public class OrganizationEntityController {
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.add("Content-Disposition", "attachment; filename=contract.pdf");
 
-        return new ResponseEntity<byte []>(this.organizationEntityService.getContractDocument(id), headers, HttpStatus.OK);
+        return new ResponseEntity<byte[]>(this.organizationEntityService.getContractDocument(id), headers, HttpStatus.OK);
     }
+
+    @GetMapping("/cities/search")
+    public ResponseEntity<Page<CityResponse>> searchCities(
+            @RequestParam(name = "city") String cityName,
+            @RequestParam(name = "country") String countryName,
+            Pageable pageable) {
+        return ResponseEntity.ok(organizationEntityService.searchCitiesByOrganizationAddress(cityName, countryName, pageable).map(this.modelMapper::convertToCityResponse));
+    }
+
 
 }
 

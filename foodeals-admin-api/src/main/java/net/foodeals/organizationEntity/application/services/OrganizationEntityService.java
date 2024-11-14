@@ -29,6 +29,7 @@ import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEn
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
+import net.foodeals.payment.application.dto.response.PartnerInfoDto;
 import net.foodeals.payment.domain.entities.Enum.PaymentResponsibility;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.PartnerInfo;
@@ -568,6 +569,22 @@ public class OrganizationEntityService {
 
     public Page<OrganizationEntity> getAssociations(Pageable pageable) {
         return this.organizationEntityRepository.findByType(List.of(EntityType.ASSOCIATION, EntityType.FOOD_BANK, EntityType.FOOD_BANK_ASSO), pageable);
+    }
+
+public Page<OrganizationEntity> searchPartnersByName(String name, List<EntityType> types, Pageable pageable, boolean includeDeleted) {
+    Page<OrganizationEntity> entities;
+
+    if (name != null && !name.isEmpty()) {
+        entities = organizationEntityRepository.findByNameContainingAndTypeInAndDeletedAtIs(name, types, includeDeleted, pageable);
+    } else {
+        entities = organizationEntityRepository.findByTypeInAndDeletedAtIs(types, includeDeleted, pageable);
+    }
+
+    return entities;
+}
+
+    public Page<City> searchCitiesByOrganizationAddress(String cityName, String countryName, Pageable pageable) {
+        return organizationEntityRepository.findCitiesByOrganizationAddress(cityName, countryName, pageable);
     }
 }
 
