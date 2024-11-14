@@ -50,9 +50,10 @@ public interface OrganizationEntityRepository extends BaseRepository<Organizatio
             "JOIN a.region r " +
             "JOIN r.city c " +
             "JOIN c.country co " +
-            "WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :cityName, '%')) " +
+            "WHERE o.type IN (:types) " +
+            "AND LOWER(c.name) LIKE LOWER(CONCAT('%', :cityName, '%')) " +
             "AND LOWER(co.name) = LOWER(:countryName)")
-    Page<City> findCitiesByOrganizationAddress(String cityName, String countryName, Pageable pageable);
+    Page<City> findCitiesByOrganizationAddress(@Param("types") List<EntityType> types, @Param("cityName") String cityName, @Param("countryName") String countryName, Pageable pageable);
 
     Page<OrganizationEntity> findByDeletedAtIsNotNull(Pageable pageable);
 

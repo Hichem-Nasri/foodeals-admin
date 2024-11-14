@@ -583,8 +583,8 @@ public Page<OrganizationEntity> searchPartnersByName(String name, List<EntityTyp
     return entities;
 }
 
-    public Page<City> searchCitiesByOrganizationAddress(String cityName, String countryName, Pageable pageable) {
-        return organizationEntityRepository.findCitiesByOrganizationAddress(cityName, countryName, pageable);
+    public Page<City> searchCitiesByOrganizationAddress(List<EntityType> types, String cityName, String countryName, Pageable pageable) {
+        return organizationEntityRepository.findCitiesByOrganizationAddress(types, cityName, countryName, pageable);
     }
 }
 

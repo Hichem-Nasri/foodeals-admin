@@ -239,9 +239,10 @@ public class OrganizationEntityController {
     @GetMapping("/cities/search")
     public ResponseEntity<Page<CityResponse>> searchCities(
             @RequestParam(name = "city") String cityName,
+@RequestParam(name = "types", required = false) List<EntityType> types,
             @RequestParam(name = "country") String countryName,
             Pageable pageable) {
-        return ResponseEntity.ok(organizationEntityService.searchCitiesByOrganizationAddress(cityName, countryName, pageable).map(this.modelMapper::convertToCityResponse));
+        return ResponseEntity.ok(organizationEntityService.searchCitiesByOrganizationAddress(types, cityName, countryName, pageable).map(this.modelMapper::convertToCityResponse));
     }
 
 
