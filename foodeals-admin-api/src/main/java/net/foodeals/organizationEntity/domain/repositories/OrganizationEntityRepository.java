@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.domain.repositories;
 
 import net.foodeals.common.contracts.BaseRepository;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
+import net.foodeals.location.domain.entities.City;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityFilter;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.Solution;
@@ -42,6 +43,16 @@ public interface OrganizationEntityRepository extends BaseRepository<Organizatio
             @Param("filter") OrganizationEntityFilter filter,
             Pageable pageable
     );
+
+
+    @Query("SELECT DISTINCT c FROM OrganizationEntity o " +
+            "JOIN o.address a " +
+            "JOIN a.region r " +
+            "JOIN r.city c " +
+            "JOIN c.country co " +
+            "WHERE LOWER(c.name) LIKE LOWER(CONCAT('%', :cityName, '%')) " +
+            "AND LOWER(co.name) = LOWER(:countryName)")
+    Page<City> findCitiesByOrganizationAddress(String cityName, String countryName, Pageable pageable);
 
     Page<OrganizationEntity> findByDeletedAtIsNotNull(Pageable pageable);
 
