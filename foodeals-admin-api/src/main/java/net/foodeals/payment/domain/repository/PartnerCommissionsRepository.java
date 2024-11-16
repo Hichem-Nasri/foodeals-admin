@@ -70,6 +70,11 @@ public interface PartnerCommissionsRepository extends JpaRepository<PartnerCommi
                 "WHERE p.partnerInfo.id = :partnerId")
         List<String> findDistinctMonthsByPartner(@Param("partnerId") UUID partnerId);
 
+    @Query("SELECT DISTINCT EXTRACT(YEAR FROM p.date) " +
+            "FROM PartnerCommissions p " +
+            "WHERE p.partnerInfo.id = :partnerId")
+    List<Integer> findDistinctYearsByPartner(@Param("partnerId") UUID partnerId);
+
         // Get distinct months by organizationId only
         @Query("SELECT DISTINCT TO_CHAR(p.date, 'YYYY-MM') " +
                 "FROM PartnerCommissions p " +

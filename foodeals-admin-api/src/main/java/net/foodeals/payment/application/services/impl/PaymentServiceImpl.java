@@ -240,6 +240,12 @@ public class PaymentServiceImpl implements PaymentService {
             public List<String> getAvailableMonthsByPartner(UUID partnerId) {
             return partnerCommissionsRepository.findDistinctMonthsByPartner(partnerId);
         }
+
+    @Override
+    @Transactional
+    public List<Integer> getAvailableYearsByPartner(UUID partnerId) {
+        return partnerCommissionsRepository.findDistinctYearsByPartner(partnerId);
+    }
     @Override
     @Transactional
         public List<String> getAvailableMonthsByOrganization(UUID organizationId) {

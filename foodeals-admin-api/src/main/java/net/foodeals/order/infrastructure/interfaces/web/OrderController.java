@@ -36,6 +36,10 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    // order -> offers
+    // offer -> orders.
+
+    // a - b -c - > a -> b
     @PostMapping
     public ResponseEntity<OrderResponse> create(@RequestBody @Valid OrderRequest request) {
         final OrderResponse response = mapper.map(

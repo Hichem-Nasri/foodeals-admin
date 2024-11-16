@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/api/v1/payments")
@@ -68,6 +69,15 @@ public class PaymentController {
             List<String> months = paymentService.getAvailableMonthsByPartner(partnerId);
             return ResponseEntity.ok(months);
         }
+
+    @GetMapping("/commissions/available-years/partners")
+    public ResponseEntity<List<String>> getAvailableYears(
+            @RequestParam UUID partnerId) {
+        List<String> years = paymentService.getAvailableYearsByPartner(partnerId).stream()
+                .map(String::valueOf)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(years);
+    }
 
         // Endpoint to retrieve available months by organization ID only
         @GetMapping("/commissions/available-months/organizations")
