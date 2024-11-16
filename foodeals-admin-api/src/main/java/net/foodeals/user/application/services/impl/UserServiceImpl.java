@@ -93,7 +93,7 @@ class UserServiceImpl implements UserService {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            return new UserInfoDto(createdAt, user.getId(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+            return new UserInfoDto(createdAt, user.getId(), user.getRole().getName(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
         });
     }
 
@@ -104,7 +104,7 @@ class UserServiceImpl implements UserService {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            return new UserInfoDto(createdAt, user.getId(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+            return new UserInfoDto(createdAt, user.getId(), user.getRole().getName(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
         });
     }
 
