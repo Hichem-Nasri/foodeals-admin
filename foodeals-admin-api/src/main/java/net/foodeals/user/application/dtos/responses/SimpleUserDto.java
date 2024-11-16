@@ -4,5 +4,6 @@ import net.foodeals.user.domain.valueObjects.Name;
 
 public record SimpleUserDto(
         Integer id,
-        Name name
+        Name name,
+        String avatarPath
 ) {}

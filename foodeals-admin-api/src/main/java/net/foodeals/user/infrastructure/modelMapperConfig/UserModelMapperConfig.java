@@ -58,7 +58,8 @@ public class UserModelMapperConfig {
             return new SimpleUserDto(
                     user.getId(),
                     new Name(user.getName().firstName(),
-                    user.getName().lastName())
+                    user.getName().lastName()),
+                    user.getAvatarPath()
             );
 
         }, User.class, SimpleUserDto.class);
