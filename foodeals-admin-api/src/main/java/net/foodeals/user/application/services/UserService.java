@@ -37,4 +37,8 @@ public interface UserService extends CrudService<User, Integer, UserRequest> {
     List<WorkingHoursDTO> mapWorkingHoursToDTO(List<WorkingHours> workingHours);
 
     Page<User> getSellsManagers(String name, Pageable pageable);
+
+    Page<UserInfoDto> getUsersByOrganization(UUID organizationId, Pageable pageable);
+
+    Page<UserInfoDto> getUsersBySubEntity(UUID subEntityId, Pageable pageable);
 }

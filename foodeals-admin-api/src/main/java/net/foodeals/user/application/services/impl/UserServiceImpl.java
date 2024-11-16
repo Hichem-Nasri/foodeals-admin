@@ -33,6 +33,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -81,6 +84,28 @@ class UserServiceImpl implements UserService {
                     return dto;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Page<UserInfoDto> getUsersByOrganization(UUID organizationId, Pageable pageable) {
+        Page<User> userPage = this.repository.findByOrganizationId(organizationId, pageable);
+        return userPage.map(user -> {
+            LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
+            String createdAt = localDateTime.format(formatter);
+            return new UserInfoDto(createdAt, user.getId(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+        });
+    }
+
+    @Override
+    public Page<UserInfoDto> getUsersBySubEntity(UUID subEntityId, Pageable pageable) {
+        Page<User> userPage = this.repository.findBySubEntityId(subEntityId, pageable);
+        return userPage.map(user -> {
+            LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
+            String createdAt = localDateTime.format(formatter);
+            return new UserInfoDto(createdAt, user.getId(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+        });
     }
 
     @Override

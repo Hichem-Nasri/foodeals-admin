@@ -10,6 +10,7 @@ import net.foodeals.user.domain.entities.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +37,22 @@ public class UserController {
         return ResponseEntity.ok(userResponses);
     }
 
+
+    @GetMapping("/organizations/{organizationId}")
+    public ResponseEntity<Page<UserInfoDto>> getUsersByOrganization(
+            @PathVariable UUID organizationId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<UserInfoDto> userInfoPage = service.getUsersByOrganization(organizationId, pageable);
+        return ResponseEntity.ok(userInfoPage);
+    }
+
+    @GetMapping("/subentities/{subEntityId}")
+    public ResponseEntity<Page<UserInfoDto>> getUsersBySubEntity(
+            @PathVariable UUID subEntityId,
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<UserInfoDto> userInfoPage = service.getUsersBySubEntity(subEntityId, pageable);
+        return ResponseEntity.ok(userInfoPage);
+    }
     @GetMapping("/sells-managers")
     public ResponseEntity<Page<SimpleUserDto>> sellsManagers(
             @RequestParam(required = false, name = "name") String name,

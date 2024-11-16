@@ -57,4 +57,12 @@ public interface UserRepository extends BaseRepository<User, Integer> {
             "AND (:name IS NULL OR LOWER(CONCAT(u.name.firstName, ' ', u.name.lastName)) LIKE LOWER(CONCAT('%', :name, '%')))" +
             "AND u.role.name = :roleName")
     Page<User> getSellsManagers(@Param("organizationId") UUID organizationId, @Param("name") String name, @Param("roleName") String roleName, Pageable pageable);
+
+    @Query("SELECT u FROM User u WHERE u.organizationEntity.id = :organizationId")
+    Page<User> findByOrganizationId(
+            @Param("organizationId") UUID organizationId,
+            Pageable pageable);
+
+    @Query("SELECT u FROM User u WHERE u.subEntity.id = :subEntityId")
+    Page<User> findBySubEntityId(@Param("subEntityId") UUID subEntityId, Pageable pageable);
 }

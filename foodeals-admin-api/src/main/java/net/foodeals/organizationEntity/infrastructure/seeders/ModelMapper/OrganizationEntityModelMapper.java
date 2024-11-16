@@ -39,7 +39,10 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.plaf.synth.SynthTextAreaUI;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -84,7 +87,10 @@ public class OrganizationEntityModelMapper {
 
             formData.setCommercialNumber(organizationEntity.getCommercialNumber());
             User manager = organizationEntity.getContract().getUserContracts().getUser();
-            UserInfoDto userInfoDto = new UserInfoDto(manager.getId(), manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
+            LocalDateTime localDateTime = LocalDateTime.ofInstant(manager.getCreatedAt(), ZoneId.systemDefault());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
+            String createdAt = localDateTime.format(formatter);
+            UserInfoDto userInfoDto = new UserInfoDto(createdAt, manager.getId(), manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
             formData.setManager(userInfoDto);
             formData.setActivities(organizationEntity.getActivities().stream().map(Activity::getName).collect(Collectors.toList()));
             formData.setMaxNumberOfSubEntities(organizationEntity.getContract().getMaxNumberOfSubEntities());
@@ -320,6 +326,7 @@ public class OrganizationEntityModelMapper {
             formData.setEntityName(organizationEntity.getName());
             formData.setStatus(organizationEntity.getContract().getContractStatus());
 
+
             formData.setSolutions(organizationEntity.getSolutions().stream().map(Solution::getName).collect(Collectors.toList()));
 
             formData.setCommercialNumber(organizationEntity.getCommercialNumber());
@@ -371,7 +378,10 @@ public class OrganizationEntityModelMapper {
 
             formData.setPv(organizationEntity.getCommercialNumber());
             User manager = organizationEntity.getContract().getUserContracts().getUser();
-            UserInfoDto userInfoDto = new UserInfoDto(manager.getId(), manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
+            LocalDateTime localDateTime = LocalDateTime.ofInstant(manager.getCreatedAt(), ZoneId.systemDefault());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
+            String createdAt = localDateTime.format(formatter);
+            UserInfoDto userInfoDto = new UserInfoDto(createdAt, manager.getId(), manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
             formData.setManager(userInfoDto);
             formData.setNumberOfPoints(organizationEntity.getContract().getMaxNumberOfSubEntities());
             // Map EntityAddressDto

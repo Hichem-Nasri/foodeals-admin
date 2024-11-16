@@ -81,23 +81,23 @@ public class UserModelMapperConfig {
             List<String> solutions = user.getOrganizationEntity().getSolutions().stream().map(solution -> solution.getName()).toList();
             String city = user.getAddress().getRegion().getCity().getName();
             String region = user.getAddress().getRegion().getName();
-            UserInfoDto userInfoDto = new UserInfoDto(user.getId(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            return new DeliveryPartnerUserDto(createdAt, user.getRole().getName(), user.getStatus(), city, region, solutions, userInfoDto);
+            UserInfoDto userInfoDto = new UserInfoDto(createdAt, user.getId(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+            return new DeliveryPartnerUserDto(user.getRole().getName(), user.getStatus(), city, region, solutions, userInfoDto);
         }, User.class, DeliveryPartnerUserDto.class);
 
         modelMapper.addConverter(context -> {
             final User user = context.getSource();
             String city = user.getAddress().getRegion().getCity().getName();
             String region = user.getAddress().getRegion().getName();
-            UserInfoDto userInfoDto = new UserInfoDto(user.getId(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
-            String roleName = user.getRole().getName();
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            return new AssociationsUsersDto( user.getId(),createdAt, roleName, city, region, userInfoDto);
+            UserInfoDto userInfoDto = new UserInfoDto(createdAt, user.getId(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+            String roleName = user.getRole().getName();
+            return new AssociationsUsersDto(user.getId(), roleName, city, region, userInfoDto);
         }, User.class, AssociationsUsersDto.class);
 
         modelMapper.addMappings(new PropertyMap<Address, ClientAddressDto>() {
