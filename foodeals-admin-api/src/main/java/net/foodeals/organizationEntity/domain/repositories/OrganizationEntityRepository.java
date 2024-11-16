@@ -97,4 +97,6 @@ Page<OrganizationEntity> findByTypeInAndDeletedAtIs(@Param("types") List<EntityT
             ContractStatus status
 
     );
+
+    OrganizationEntity findByName(String managerTest);
 }

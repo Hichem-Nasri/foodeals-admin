@@ -7,6 +7,8 @@ import net.foodeals.authentication.application.dtos.requests.RegisterRequest;
 import net.foodeals.authentication.application.dtos.responses.AuthenticationResponse;
 import net.foodeals.authentication.application.services.AuthenticationService;
 import net.foodeals.authentication.application.services.JwtService;
+import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
@@ -30,9 +32,11 @@ class AuthenticationServiceImpl implements AuthenticationService {
     private final UserService userService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final OrganizationEntityRepository organizationEntityRepository;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        final User user = userService.create(new UserRequest(request.name(), request.email(), request.phone(), request.password(), request.isEmailVerified(), request.roleName(), null, null));
+        OrganizationEntity organizationEntity = this.organizationEntityRepository.findByName("manager test");
+        final User user = userService.create(new UserRequest(request.name(), request.email(), request.phone(), request.password(), request.isEmailVerified(), request.roleName(), organizationEntity.getId(), null));
         return handleRegistration(user);
     }
 
