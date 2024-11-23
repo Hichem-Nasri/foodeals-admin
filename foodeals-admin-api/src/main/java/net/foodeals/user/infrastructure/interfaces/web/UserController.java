@@ -2,6 +2,8 @@ package net.foodeals.user.infrastructure.interfaces.web;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import net.foodeals.common.dto.request.UpdateReason;
+import net.foodeals.common.dto.response.UpdateDetails;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.*;
@@ -36,6 +38,21 @@ public class UserController {
         Page<SimpleUserDto> userResponses = users.map(u -> this.mapper.map(u, SimpleUserDto.class));
         return ResponseEntity.ok(userResponses);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable Integer id,
+            @RequestBody UpdateReason request) {
+        service.deleteUser(id, request);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{uuid}/deletion-details")
+    public ResponseEntity<Page<UpdateDetails>> getDeletionDetails(@PathVariable Integer uuid, Pageable pageable) {
+        Page<UpdateDetails> deletionDetails = service.getDeletionDetails(uuid, pageable);
+        return ResponseEntity.ok(deletionDetails);
+    }
+
 
 
     @GetMapping("/organizations/{organizationId}")
@@ -101,12 +118,6 @@ public class UserController {
     public ResponseEntity<UserResponse> update(@PathVariable Integer id, @RequestBody @Valid UserRequest request) {
         final UserResponse response = mapper.map(service.update(id, request), UserResponse.class);
         return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        service.delete(id);
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/clients")

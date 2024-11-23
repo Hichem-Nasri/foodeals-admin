@@ -1,7 +1,9 @@
 package net.foodeals.user.domain.entities;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
+import net.foodeals.common.entities.DeletionReason;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.crm.domain.entities.Event;
@@ -79,7 +81,8 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     private List<UserActivities> userActivities;
 
     @OneToMany(mappedBy = "deliveryBoy", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Delivery> deliveries;
+    @Builder.Default
+    private List<Delivery> deliveries = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserContract> userContracts;
@@ -106,6 +109,10 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<DeletionReason> deletionReasons = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Gender gender;

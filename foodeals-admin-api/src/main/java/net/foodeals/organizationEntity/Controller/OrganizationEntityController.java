@@ -2,21 +2,19 @@ package net.foodeals.organizationEntity.Controller;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import net.foodeals.common.dto.request.UpdateReason;
+import net.foodeals.common.dto.response.UpdateDetails;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.location.application.dtos.responses.CityResponse;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
-import net.foodeals.organizationEntity.application.dtos.requests.DeleteOrganizationRequest;
 import net.foodeals.organizationEntity.application.dtos.responses.*;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
-import net.foodeals.organizationEntity.application.dtos.requests.UpdateOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.entities.enums.OrganizationsType;
 import net.foodeals.organizationEntity.infrastructure.seeders.ModelMapper.OrganizationEntityModelMapper;
 import net.foodeals.payment.application.dto.response.PartnerInfoDto;
-import net.foodeals.payment.domain.entities.Enum.PartnerType;
-import org.modelmapper.internal.bytebuddy.implementation.bytecode.StackSize;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -84,8 +82,8 @@ public class OrganizationEntityController {
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> deleteOrganization(
             @PathVariable UUID uuid,
-            @RequestBody DeleteOrganizationRequest request) {
-        organizationEntityService.deleteOrganization(uuid, request.getReason(), request.getDetails());
+            @RequestBody UpdateReason request) {
+        organizationEntityService.deleteOrganization(uuid, request);
         return ResponseEntity.noContent().build();
     }
 
@@ -123,8 +121,8 @@ public class OrganizationEntityController {
     }
 
     @GetMapping("/{uuid}/deletion-details")
-    public ResponseEntity<DeletionDetailsDTO> getDeletionDetails(@PathVariable UUID uuid) {
-        DeletionDetailsDTO deletionDetails = organizationEntityService.getDeletionDetails(uuid);
+    public ResponseEntity<Page<UpdateDetails>> getDeletionDetails(@PathVariable UUID uuid, Pageable pageable) {
+        Page<UpdateDetails> deletionDetails = organizationEntityService.getDeletionDetails(uuid, pageable);
         return ResponseEntity.ok(deletionDetails);
     }
 

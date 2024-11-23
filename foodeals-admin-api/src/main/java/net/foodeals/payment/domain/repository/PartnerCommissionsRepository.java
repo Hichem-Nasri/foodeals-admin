@@ -61,7 +61,7 @@ public interface PartnerCommissionsRepository extends JpaRepository<PartnerCommi
     );
 
         // Get distinct months without any filters
-        @Query("SELECT DISTINCT TO_CHAR(p.date, 'YYYY-MM') FROM PartnerCommissions p")
+        @Query("SELECT DISTINCT TO_CHAR(p.date, 'YYYY-MM') FROM PartnerCommissions p WHERE p.partnerInfo.type != DELIVERY_PARTNER")
         List<String> findDistinctMonths();
 
         // Get distinct months by partnerId only

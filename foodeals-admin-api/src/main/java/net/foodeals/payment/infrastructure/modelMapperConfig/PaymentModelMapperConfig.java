@@ -53,6 +53,13 @@ public class PaymentModelMapperConfig {
     public void paymentModelMapperConfig() {
         modelMapper.addConverter(mappingContext -> {
             PartnerCommissions partnerCommissions = mappingContext.getSource();
+            if (partnerCommissions.getPartnerInfo().type().equals(PartnerType.SUB_ENTITY)) {
+                SubEntity subEntity = subEntityService.getEntityById(partnerCommissions.getPartnerInfo().id());
+                partnerCommissions.setPartner(subEntity);
+            } else {
+                OrganizationEntity partner = organizationEntityService.findById(partnerCommissions.getPartnerInfo().id());
+                partnerCommissions.setPartner(partner);
+            }
             PartnerInfoDto partnerInfoDto = new PartnerInfoDto(partnerCommissions.getPartner().getId(), partnerCommissions.getPartner().getName(), partnerCommissions.getPartner().getAvatarPath());
             UUID organizationId = !partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) ? partnerCommissions.getPartner().getId() : ((SubEntity) partnerCommissions.getPartner()).getOrganizationEntity().getId();
             Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);

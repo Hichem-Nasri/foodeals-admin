@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -89,6 +90,12 @@ class DeliveryServiceImpl implements DeliveryService {
     @Override
     public Long countDeliveriesByDeliveryPartner(UUID organizationEntityId) {
         return this.repository.countDeliveriesByDeliveryPartner(organizationEntityId);
+    }
+
+    @Override
+    @Transactional
+    public Long countDeliveriesByDeliveryPartnerAndDate(UUID organizationEntityId, Date date) {
+        return this.repository.countDeliveriesByDeliveryPartnerAndDate(organizationEntityId, date);
     }
 
 }

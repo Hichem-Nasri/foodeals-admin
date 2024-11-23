@@ -6,11 +6,13 @@ import net.foodeals.order.application.dtos.requests.OrderRequest;
 import net.foodeals.order.domain.entities.Order;
 import net.foodeals.order.domain.enums.OrderStatus;
 import net.foodeals.order.domain.enums.TransactionStatus;
+import net.foodeals.payment.application.dto.response.OperationsDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface OrderService extends CrudService<Order, UUID, OrderRequest> {
@@ -35,11 +37,5 @@ public interface OrderService extends CrudService<Order, UUID, OrderRequest> {
             TransactionStatus transactionStatus
     );
 
-        Long countByOrganizationIdAndDeliveryStatusAndOrderDateAndOrderStatusAndTransactionStatus(
-                UUID organizationId,
-                DeliveryStatus deliveryStatus,
-                Date orderDate,
-                OrderStatus orderStatus,
-                TransactionStatus transactionStatus
-        );
+    Page<OperationsDto> getOperationsByOrderId(UUID orderId, Pageable pageable);
 }

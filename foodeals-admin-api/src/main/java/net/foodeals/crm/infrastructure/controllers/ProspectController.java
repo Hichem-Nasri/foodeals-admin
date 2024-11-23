@@ -2,6 +2,8 @@ package net.foodeals.crm.infrastructure.controllers;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import net.foodeals.common.dto.request.UpdateReason;
+import net.foodeals.common.dto.response.UpdateDetails;
 import net.foodeals.crm.application.dto.requests.*;
 import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectFilter;
@@ -131,6 +133,12 @@ public final class ProspectController {
     public ResponseEntity<Void> deleteEvent(@PathVariable("prospectId") UUID prospectId,@PathVariable("eventId") UUID eventId) {
         this.prospectService.deleteEvent(prospectId, eventId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/prospects/{uuid}/deletion-details")
+    public ResponseEntity<Page<UpdateDetails>> getDeletionDetails(@PathVariable UUID uuid, Pageable pageable) {
+        Page<UpdateDetails> deletionDetails = prospectService.getDeletionDetails(uuid, pageable);
+        return ResponseEntity.ok(deletionDetails);
     }
 
     @GetMapping("/prospects/statistics")

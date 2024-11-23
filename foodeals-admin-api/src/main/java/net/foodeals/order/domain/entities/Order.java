@@ -48,7 +48,7 @@ public class Order extends AbstractEntity<UUID> {
     @ManyToOne(cascade = CascadeType.ALL)
     private Address shippingAddress;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL)
     private Delivery delivery;
 
     @ManyToOne(cascade = CascadeType.ALL)
@@ -59,6 +59,14 @@ public class Order extends AbstractEntity<UUID> {
 
     public Order() {
 
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
     public Order(Price price, OrderType type, OrderStatus status, User client, Offer offer) {
