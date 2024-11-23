@@ -29,6 +29,13 @@ public interface UserRepository extends BaseRepository<User, Integer> {
     @Query("SELECT u FROM User u WHERE u.role.name = :roleName")
     Page<User> findByRoleName(@Param("roleName") String roleName, Pageable pageable);
 
+    @Query("SELECT u FROM User u " +
+            "WHERE u.role.name = :roleName " +
+            "AND (:name IS NULL OR LOWER(CONCAT(u.name.firstName, ' ', u.name.lastName)) LIKE LOWER(CONCAT('%', :name, '%')))")
+    Page<User> findByRoleNameAndNameContaining(@Param("roleName") String roleName, @Param("name") String name, Pageable pageable);
+
+
+
     @Query("SELECT COUNT(u) FROM User u WHERE u.organizationEntity.id = :organizationId AND u.role.name = 'DELIVERY_MAN'")
     Long countDeliveryUsersByOrganizationId(@Param("organizationId") UUID organizationId);
     @Query("SELECT u FROM User u JOIN FETCH u.role r JOIN FETCH r.authorities WHERE u.email = :email")

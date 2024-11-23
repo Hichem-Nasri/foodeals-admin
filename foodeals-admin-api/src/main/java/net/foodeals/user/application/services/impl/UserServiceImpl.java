@@ -108,13 +108,14 @@ class UserServiceImpl implements UserService {
 
     @Override
     public Page<User> getSellsManagers(String name, Pageable pageable) {
-        final String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<User> user = this.repository.findByEmail(email);
-        if (user.isPresent()) {
-            return this.repository.getSellsManagers(user.get().getOrganizationEntity().getId(), name, "SALES_MANAGER", pageable);
-        } else {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found");
-        }
+        // final String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        // Optional<User> user = this.repository.findByEmail(email);
+        // if (user.isPresent()) {
+        //     return this.repository.getSellsManagers(user.get().getOrganizationEntity().getId(), name, "SALES_MANAGER", pageable);
+        // } else {
+        //     throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found");
+        // }
+        return this.repository.findByRoleNameAndNameContaining("SALES_MANAGER", name, pageable);
     }
 
     @Override
