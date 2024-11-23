@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.foodeals.common.entities.DeletionReason;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.crm.domain.entities.enums.ProspectType;
 import net.foodeals.location.domain.entities.Address;
@@ -62,4 +63,8 @@ public class Prospect extends AbstractEntity<UUID> {
     @ManyToMany(fetch = FetchType.EAGER)
     @Builder.Default
     private Set<Solution> solutions = new HashSet<>();
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<DeletionReason> deletionReasons = new ArrayList<>();
 }

@@ -5,13 +5,19 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.foodeals.common.dto.request.UpdateReason;
+import net.foodeals.common.dto.response.UpdateDetails;
+import net.foodeals.common.entities.DeletionReason;
 import net.foodeals.common.services.EmailService;
+import net.foodeals.common.valueOjects.Price;
 import net.foodeals.contract.application.service.ContractService;
 import net.foodeals.contract.domain.entities.Contract;
-import net.foodeals.contract.domain.entities.UserContract;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.delivery.application.services.impl.CoveredZonesService;
 import net.foodeals.delivery.domain.entities.CoveredZones;
+import net.foodeals.delivery.domain.entities.Delivery;
+import net.foodeals.delivery.domain.enums.DeliveryStatus;
+import net.foodeals.delivery.domain.repositories.DeliveryRepository;
 import net.foodeals.location.application.dtos.requests.AddressRequest;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
@@ -21,28 +27,39 @@ import net.foodeals.location.domain.entities.Address;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Country;
 import net.foodeals.location.domain.entities.Region;
+import net.foodeals.offer.domain.entities.Offer;
+import net.foodeals.offer.domain.entities.PublisherInfo;
+import net.foodeals.offer.domain.repositories.OfferRepository;
+import net.foodeals.order.domain.entities.Order;
+import net.foodeals.order.domain.entities.Transaction;
+import net.foodeals.order.domain.enums.OrderStatus;
+import net.foodeals.order.domain.enums.TransactionStatus;
+import net.foodeals.order.domain.enums.TransactionType;
+import net.foodeals.order.domain.repositories.OrderRepository;
 import net.foodeals.organizationEntity.application.dtos.requests.CoveredZonesDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAnOrganizationEntityDto;
 import net.foodeals.organizationEntity.application.dtos.requests.CreateAssociationDto;
-import net.foodeals.organizationEntity.application.dtos.responses.DeletionDetailsDTO;
 import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityFilter;
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
+import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
-import net.foodeals.payment.application.dto.response.PartnerInfoDto;
+import net.foodeals.organizationEntity.domain.repositories.SubEntityRepository;
 import net.foodeals.payment.domain.entities.Enum.PaymentResponsibility;
 import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.PartnerInfo;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 import net.foodeals.processors.classes.DtoProcessor;
+import net.foodeals.schedule.utils.PartnerCommissionsUtil;
 import net.foodeals.user.application.dtos.requests.UserAddress;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.services.RoleService;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
-import net.foodeals.user.domain.entities.enums.DeletionReason;
+import net.foodeals.user.domain.valueObjects.Name;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.coyote.BadRequestException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -50,11 +67,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -79,6 +96,11 @@ public class OrganizationEntityService {
     private final CountryService countryService;
     private final FeatureService featureService;
     private final DtoProcessor dtoProcessor;
+    private final PartnerCommissionsUtil util;
+    private final OfferRepository offerRepository;
+    private final OrderRepository orderRepository;
+    private final SubEntityRepository subEntityRepository;
+    private final DeliveryRepository deliveryRepository;
 
     public OrganizationEntity save(OrganizationEntity organizationEntity) {
         return this.organizationEntityRepository.save(organizationEntity);
@@ -266,9 +288,15 @@ public class OrganizationEntityService {
         return this.organizationEntityRepository.save(organizationEntity);
     }
 
-    public void deleteOrganization(UUID uuid, DeletionReason reason, String details) {
-        OrganizationEntity organization = organizationEntityRepository.findById(uuid).orElseThrow(() -> new EntityNotFoundException("Organization not found with uuid: " + uuid));
-        organization.markDeleted(reason, details);
+    public void deleteOrganization(UUID uuid, UpdateReason reason) {
+        OrganizationEntity organization = organizationEntityRepository.getEntity(uuid).orElseThrow(() -> new EntityNotFoundException("Organization not found with uuid: " + uuid));
+        DeletionReason deletionReason = DeletionReason.builder()
+                .details(reason.details())
+                .reason(reason.reason())
+                .type(reason.action())
+                .build();
+        organization.getDeletionReasons().add(deletionReason);
+        organization.markDeleted(reason.action());
         organizationEntityRepository.save(organization);
     }
 
@@ -279,15 +307,16 @@ public class OrganizationEntityService {
     }
 
     @Transactional
-    public DeletionDetailsDTO getDeletionDetails(UUID uuid) {
-        OrganizationEntity organization = organizationEntityRepository.findByIdAndDeletedAtIsNotNull(uuid)
-                .orElseThrow(() -> new EntityNotFoundException("Deleted organization not found with uuid: " + uuid));
+    public Page<UpdateDetails> getDeletionDetails(UUID uuid, Pageable page) {
+        OrganizationEntity organization = this.organizationEntityRepository.getEntity(uuid).orElseThrow(() -> new EntityNotFoundException("Organization not found with uuid: " + uuid));
 
-        return new DeletionDetailsDTO(
-                organization.getDeletionReason(),
-                organization.getDeletionDetails(),
-                organization.getDeletedAt()
-        );
+        List<DeletionReason> deletionReasons = organization.getDeletionReasons();
+
+        int start = (int)page.getOffset();
+        int end = Math.min(start + page.getPageSize(), deletionReasons.size());
+        List<DeletionReason> content = deletionReasons.subList(start, end);
+
+        return new PageImpl<>(content, page, deletionReasons.size()).map(d -> new UpdateDetails(d.getType(), d.getDetails(), d.getReason(), Date.from(d.getCreatedAt())));
     }
     @Transactional
     private OrganizationEntity updatePartner(CreateAnOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
@@ -345,7 +374,7 @@ public class OrganizationEntityService {
     }
 
     public OrganizationEntity getOrganizationEntityById(UUID id) {
-        OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
+        OrganizationEntity organizationEntity = this.organizationEntityRepository.getEntity(id).orElse(null);
 
         if (organizationEntity == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "organization Entity not found");
@@ -381,6 +410,9 @@ public class OrganizationEntityService {
         if (!organizationEntity.getType().equals(EntityType.FOOD_BANK) && !organizationEntity.getType().equals(EntityType.ASSOCIATION)) {
             Solution pro_market = this.solutionService.findByName("pro_market");
             if (organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) || organizationEntity.getSolutions().contains(pro_market)) {
+                Calendar cal = Calendar.getInstance();
+                cal.add(Calendar.MONTH, -1);
+                Date previousMonthDate = cal.getTime();
                 Date date = new Date();
                 PartnerCommissions partnerCommissions = PartnerCommissions.builder()
                         .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType(), organizationEntity.getName()))
@@ -393,6 +425,15 @@ public class OrganizationEntityService {
             if (!organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER)) {
                 this.contractService.validateContract(organizationEntity.getContract());
             }
+            if (organizationEntity.getType().equals(EntityType.PARTNER_WITH_SB)) {
+                // TODO : should be removed after tests.
+                try {
+                    this.createSubentity(organizationEntity);
+                } catch (BadRequestException e) {
+                    System.out.println("Error creating subEntity : ");
+                    e.printStackTrace();
+                }
+            }
         }
         organizationEntity.getContract().setContractStatus(ContractStatus.VALIDATED);
         this.organizationEntityRepository.save(organizationEntity);
@@ -402,6 +443,185 @@ public class OrganizationEntityService {
 //        String message = "You're account has been validated\n Your email : " + manager.getEmail() + " \n" + " Your password : " + pass;
 //        this.emailService.sendEmail(receiver, subject, message);
         return "Contract validated successfully";
+    }
+
+    @Transactional
+    private void createSubentity(OrganizationEntity organizationEntity) throws BadRequestException {
+        List<SubEntity> subEntities = new ArrayList<>();
+
+        for (int i = 0; i < 2; i++) {
+            Set<Solution> partnerSolutions = new HashSet<>(organizationEntity.getSolutions());
+            AddressRequest addressRequest = new AddressRequest("morocco", "", "casablanca", "maarif", "tes" + i);
+            Contact contact = new Contact();
+            contact.setName(new Name("John " + i, "Doe " + i));
+            contact.setPhone("+212" + (int) (Math.random() * 1000000000));
+            contact.setEmail("john.doe" + i + (int) (Math.random() * 1000000000) + "@example.com");
+            Address address = this.addressService.create(addressRequest);
+
+            SubEntity subEntity = new SubEntity();
+            subEntity.setName("Marjan sbata " + i);
+            subEntity.setType(SubEntityType.PARTNER_SB);
+            subEntity.setOrganizationEntity(organizationEntity);
+            subEntity.setAddress(address);
+            subEntity.setAvatarPath("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlbgNRgwtiqyboN2mV8GPlGyE3beg3FqraOQ&s");
+
+            subEntity.setContacts(new ArrayList<>(List.of(contact)));
+
+            subEntity = this.subEntityRepository.save(subEntity);
+            subEntity.setSolutions(partnerSolutions);
+
+            SubEntity finalSubEntity = subEntity;
+            partnerSolutions.forEach(solution -> {
+                solution.getSubEntities().add(finalSubEntity);
+                this.solutionService.save(solution);
+            });
+
+            organizationEntity.getSubEntities().add(subEntity);
+            this.organizationEntityRepository.save(organizationEntity);
+            this.subEntityRepository.saveAndFlush(subEntity);
+            subEntities.add(subEntity);
+        }
+
+        this.util.createCommissionsForPartner(organizationEntity);
+        this.createOffers(subEntities);
+    }
+
+    @Transactional
+    private void createOffers(List<SubEntity> subEntities) throws BadRequestException {
+        int i = 0;
+        for (SubEntity subEntity : subEntities) {
+            Offer offer = new Offer();
+            offer.setPrice(new Price(BigDecimal.valueOf(100), Currency.getInstance("MAD")));
+            offer.setSalePrice(new Price(BigDecimal.valueOf(80), Currency.getInstance("MAD")));
+            offer.setReduction(20);
+            offer.setPublisherInfo(new PublisherInfo(subEntity.getId(), subEntity.getPublisherType()));
+            offer.setImagePath("https://dynamic-media-cdn.tripadvisor.com/media/photo-o/23/71/2f/68/pizzas-and-panozzos.jpg");
+            offer.setTitle("Pizza ");
+            offer = this.offerRepository.save(offer);
+
+            // Create Order 1
+            Order order1 = new Order();
+            order1.setPrice(new Price(BigDecimal.valueOf(50), Currency.getInstance("MAD")));
+            order1.setQuantity(1);
+            order1.setStatus(OrderStatus.COMPLETED);
+            order1.setOffer(offer);  // Attach the order to the offer
+
+            // Create Order 2
+            Order order2 = new Order();
+            order2.setPrice(new Price(BigDecimal.valueOf(30), Currency.getInstance("MAD")));
+            order2.setQuantity(1);
+            order2.setStatus(OrderStatus.COMPLETED);
+            order2.setOffer(offer);  // Attach the order to the offer
+
+            Order order3 = new Order();
+            order3.setPrice(new Price(BigDecimal.valueOf(30), Currency.getInstance("MAD")));
+            order3.setQuantity(1);
+            order3.setStatus(OrderStatus.COMPLETED);
+            order3.setOffer(offer);
+            // Create Transaction for Order 1
+            Transaction transaction1 = new Transaction();
+            transaction1.setPaymentId("PAY123");
+            transaction1.setReference("REF123");
+            transaction1.setContext("Context1");
+            transaction1.setPrice(new Price(BigDecimal.valueOf(80), Currency.getInstance("MAD")));
+            transaction1.setStatus(TransactionStatus.COMPLETED);
+            transaction1.setType( i == 0 ? TransactionType.CASH : TransactionType.CARD);
+            transaction1.setOrder(order1);
+
+            Transaction transaction5 = new Transaction();
+            transaction5.setPaymentId("PAY123");
+            transaction5.setReference("REF123");
+            transaction5.setContext("Context1");
+            transaction5.setPrice(new Price(BigDecimal.valueOf(80), Currency.getInstance("MAD")));
+            transaction5.setStatus(TransactionStatus.COMPLETED);
+            transaction5.setType( i == 0 ? TransactionType.CASH : TransactionType.CARD);
+            transaction5.setOrder(order3); // Attach transaction to order
+
+
+            order1.setTransaction(transaction1);
+
+            order3.setTransaction(transaction5);
+
+            // Create Transaction for Order 2
+            Transaction transaction4 = new Transaction();
+            transaction4.setPaymentId("PAY126");
+            transaction4.setReference("REF126");
+            transaction4.setContext("Context4");
+            transaction4.setPrice(new Price(BigDecimal.valueOf(80), Currency.getInstance("MAD")));
+            transaction4.setStatus(TransactionStatus.COMPLETED);
+            transaction4.setType(i == 0 ? TransactionType.CASH : TransactionType.CARD);
+            transaction4.setOrder(order2);
+
+            order2.setTransaction(transaction4);
+
+            // Save the orders
+            order1 = this.orderRepository.saveAndFlush(order1);
+            order2 = this.orderRepository.saveAndFlush(order2);
+            order3 = this.orderRepository.saveAndFlush(order3);
+
+            offer.getOrders().add(order1);
+            offer.getOrders().add(order2);
+            offer.getOrders().add(order3);
+
+            this.offerRepository.save(offer);
+            if (i == 0) {
+                // Create a new Delivery instance
+                User d = new User();
+                OrganizationEntity o = this.organizationEntityRepository.findById(UUID.fromString("e6780181-a601-41bc-8544-1d74051b44d5")).orElse(null);
+                d.setOrganizationEntity(o);
+                d = this.userService.save(d);
+                o.getUsers().add(d);
+                this.organizationEntityRepository.saveAndFlush(o);
+                Delivery delivery = new Delivery();
+                Delivery delivery1 = new Delivery();
+                delivery1.setStatus(DeliveryStatus.DELIVERED);
+                delivery.setStatus(DeliveryStatus.DELIVERED);
+
+
+                delivery.setDeliveryBoy(d);
+                delivery1.setDeliveryBoy(d);
+
+//
+
+
+
+                // Set any necessary properties for the delivery here
+                // e.g., delivery.setSomeProperty(value);
+
+                // Save the delivery only once after setting its properties
+                delivery = this.deliveryRepository.saveAndFlush(delivery);
+                delivery1 = this.deliveryRepository.saveAndFlush(delivery1);
+                d.getDeliveries().add(delivery);
+                d.getDeliveries().add(delivery1);
+                this.userService.save(d);
+
+                // Set properties for order1 and order2 as needed
+                // e.g., order1.setPrice(price1);
+                // e.g., order2.setPrice(price2);
+
+                // Set the delivery reference in each order
+                order2.setDelivery(delivery);
+                order1.setDelivery(delivery);
+                order3.setDelivery(delivery1);
+
+                // Save the orders, this will also update the delivery reference
+                order2 = this.orderRepository.save(order2);
+                order1 = this.orderRepository.save(order1);
+                order3 = this.orderRepository.save(order3);
+
+                // Add orders to the delivery
+                delivery.getOrders().addAll(new ArrayList<>(List.of(order2, order1)));
+                delivery1.getOrders().addAll(new ArrayList<>(List.of(order3)));
+
+
+                // Optional: If you need to update the delivery after adding orders
+                 delivery = this.deliveryRepository.save(delivery); // Usually not needed
+
+                delivery1 = this.deliveryRepository.save(delivery1); // Usually not needed
+            }
+
+            i++;
+        }
     }
 
     public byte[] getContractDocument(UUID id) {
@@ -567,14 +787,14 @@ public class OrganizationEntityService {
         return this.organizationEntityRepository.save(organizationEntity).getId();
     }
 
-
     public Page<OrganizationEntity> getAssociations(Pageable pageable) {
         return this.organizationEntityRepository.findByType(List.of(EntityType.ASSOCIATION, EntityType.FOOD_BANK, EntityType.FOOD_BANK_ASSO), pageable);
     }
 
 public Page<OrganizationEntity> searchPartnersByName(UUID id, String name, List<EntityType> types, Pageable pageable, boolean includeDeleted) {
     if (id != null) {
-        OrganizationEntity entity = organizationEntityRepository.getEntity(id);
+
+        OrganizationEntity entity = organizationEntityRepository.getEntity(id).orElse(null);
         if (entity == null) {
             throw new ResourceNotFoundException("Entity not found with ID: " + id);
         }

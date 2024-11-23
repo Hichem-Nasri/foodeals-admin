@@ -1,8 +1,9 @@
 package net.foodeals.organizationEntity.Controller;
 
 import lombok.AllArgsConstructor;
+import net.foodeals.common.dto.request.UpdateReason;
+import net.foodeals.common.dto.response.UpdateDetails;
 import net.foodeals.organizationEntity.application.dtos.responses.AssociationsSubEntitiesDto;
-import net.foodeals.organizationEntity.application.dtos.responses.AssociationsDto;
 import net.foodeals.organizationEntity.application.dtos.responses.PartnerSubEntityDto;
 import net.foodeals.organizationEntity.application.services.SubEntityService;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
@@ -36,4 +37,21 @@ public class SubEntityController {
         Page<PartnerSubEntityDto> partnerSubEntityDtos = subEntities.map(subEntity -> this.mapper.map(subEntity, PartnerSubEntityDto.class));
         return new ResponseEntity<Page<PartnerSubEntityDto>>(partnerSubEntityDtos, HttpStatus.OK);
     }
+
+
+    @GetMapping("/{uuid}/deletion-details")
+    public ResponseEntity<Page<UpdateDetails>> getDeletionDetails(@PathVariable UUID uuid, Pageable pageable) {
+        Page<UpdateDetails> deletionDetails = subEntityService.getDeletionDetails(uuid, pageable);
+        return ResponseEntity.ok(deletionDetails);
+    }
+
+    @DeleteMapping("/{uuid}")
+    public ResponseEntity<Void> deleteSubentity(
+            @PathVariable UUID uuid,
+            @RequestBody UpdateReason request) {
+        subEntityService.deleteSubentity(uuid, request);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

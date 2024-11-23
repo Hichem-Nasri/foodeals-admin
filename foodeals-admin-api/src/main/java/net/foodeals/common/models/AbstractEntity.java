@@ -3,7 +3,7 @@ package net.foodeals.common.models;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import net.foodeals.user.domain.entities.enums.DeletionReason;
+import net.foodeals.common.entities.enums.ActionType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -31,24 +31,15 @@ public abstract class AbstractEntity<T> implements Serializable {
     @Setter
     private Instant deletedAt;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "deletion_reason")
-    @Getter
-    @Setter
-    private DeletionReason deletionReason;
-
-    @Column(name = "deletion_details", length = 2000)
-    @Getter
-    @Setter
-    private String deletionDetails;
-
     public abstract T getId();
 
 
-    public void markDeleted(DeletionReason reason, String details) {
-        this.deletedAt = Instant.now();
-        this.deletionReason = reason;
-        this.deletionDetails = details;
+    public void markDeleted(ActionType action) {
+        if (action.equals(ActionType.ARCHIVE)) {
+            this.setDeletedAt(Instant.now());
+        } else if (action.equals(ActionType.DE_ARCHIVE)) {
+            this.setDeletedAt(null);
+        }
     }
 
     public Instant getDeletedAt() {

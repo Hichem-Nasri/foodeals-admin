@@ -16,7 +16,7 @@ public class DeliveryPaymentDto {
     private Price commissionCost;
     private Long orderCount;
     private Price foodealsCommission;
-    private Price amountToPay;
-    private Price amountToReceive;
+    private Price toPay;
+    private Price toReceive;
     private PaymentStatus status;
 }

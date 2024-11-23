@@ -1,6 +1,8 @@
 package net.foodeals.crm.application.services;
 
 import net.foodeals.common.contracts.CrudService;
+import net.foodeals.common.dto.request.UpdateReason;
+import net.foodeals.common.dto.response.UpdateDetails;
 import net.foodeals.crm.application.dto.requests.*;
 import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectFilter;
@@ -36,4 +38,5 @@ public interface ProspectService extends CrudService<ProspectResponse, UUID, Pro
     String changeStatus(UUID id, ProspectStatusRequest status);
     Page<ProspectResponse> findAllWithFilters(ProspectFilter filter, Pageable pageable);
 
+    Page<UpdateDetails> getDeletionDetails(UUID uuid, Pageable pageable);
 }

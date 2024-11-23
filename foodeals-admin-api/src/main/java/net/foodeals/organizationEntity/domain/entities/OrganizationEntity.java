@@ -3,6 +3,7 @@ package net.foodeals.organizationEntity.domain.entities;
 import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import lombok.*;
+import net.foodeals.common.entities.DeletionReason;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.contract.domain.entities.Contract;
 import net.foodeals.contract.domain.entities.Subscription;
@@ -74,6 +75,10 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     private Address address;
 
     private String commercialNumber;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<DeletionReason> deletionReasons = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "organizationEntity", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

@@ -5,8 +5,10 @@ import lombok.RequiredArgsConstructor;
 import net.foodeals.order.application.dtos.requests.OrderRequest;
 import net.foodeals.order.application.dtos.responses.OrderResponse;
 import net.foodeals.order.application.services.OrderService;
+import net.foodeals.payment.application.dto.response.OperationsDto;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,14 @@ public class OrderController {
 
     private final OrderService service;
     private final ModelMapper mapper;
+
+
+
+    @GetMapping("/{orderId}/operations")
+    public ResponseEntity<Page<OperationsDto>> getOperationsByOrderId(@PathVariable UUID orderId, Pageable pageable) {
+        final Page<OperationsDto> response = service.getOperationsByOrderId(orderId, pageable);
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping
     public ResponseEntity<Page<OrderResponse>> getAll(@RequestParam(defaultValue = "0") Integer pageNum, @RequestParam(defaultValue = "10") Integer pageSize) {

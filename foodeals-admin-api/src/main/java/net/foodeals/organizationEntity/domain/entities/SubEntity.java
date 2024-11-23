@@ -3,6 +3,7 @@ package net.foodeals.organizationEntity.domain.entities;
 import jakarta.persistence.*;
 import jakarta.transaction.Transactional;
 import lombok.*;
+import net.foodeals.common.entities.DeletionReason;
 import net.foodeals.common.models.AbstractEntity;
 import net.foodeals.common.valueOjects.Coordinates;
 import net.foodeals.contract.domain.entities.Contract;
@@ -72,6 +73,10 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     @OneToOne
     @JoinColumn(name = "address_id", unique = false)
     private Address address;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<DeletionReason> deletionReasons = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "subEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;

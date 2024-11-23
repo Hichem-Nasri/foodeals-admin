@@ -1,6 +1,10 @@
 package net.foodeals.crm.application.services.implementation;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import net.foodeals.common.dto.response.UpdateDetails;
+import net.foodeals.common.entities.DeletionReason;
 import net.foodeals.crm.application.dto.requests.*;
 import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectFilter;
@@ -23,6 +27,7 @@ import net.foodeals.organizationEntity.application.services.ContactsService;
 import net.foodeals.organizationEntity.application.services.SolutionService;
 import net.foodeals.organizationEntity.domain.entities.Activity;
 import net.foodeals.organizationEntity.domain.entities.Contact;
+import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.user.application.services.RoleService;
 import net.foodeals.user.application.services.UserService;
@@ -42,7 +47,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public final class ProspectServiceImp implements ProspectService {
+public class ProspectServiceImp implements ProspectService {
 
     private final ActivityService activityService;
     private final ProspectRepository prospectRepository;
@@ -222,10 +227,33 @@ public final class ProspectServiceImp implements ProspectService {
 
         return new ProspectStatisticDto(inProgressCount, totalCount, canceledCount, validCount);
     }
+
+    @Transactional
+    @Override
+    public Page<UpdateDetails> getDeletionDetails(UUID uuid, Pageable page) {
+        Prospect prospect = this.prospectRepository.getEntity(uuid).orElseThrow(() -> new EntityNotFoundException("prospect not found with uuid: " + uuid));
+
+        List<DeletionReason> deletionReasons = prospect.getDeletionReasons();
+
+        int start = (int)page.getOffset();
+        int end = Math.min(start + page.getPageSize(), deletionReasons.size());
+        List<DeletionReason> content = deletionReasons.subList(start, end);
+
+        return new PageImpl<>(content, page, deletionReasons.size()).map(d -> new UpdateDetails(d.getType(), d.getDetails(), d.getReason(), Date.from(d.getCreatedAt())));
+    }
+
     @Override
     public String changeStatus(UUID id, ProspectStatusRequest dto) {
         Prospect prospect = this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("prospect not found with id " + id.toString()));
         prospect.setStatus(dto.status());
+        if (dto.reason() != null) {
+            DeletionReason deletionReason = DeletionReason.builder()
+                    .details(dto.reason().details())
+                    .reason(dto.reason().reason())
+                    .type(dto.reason().action())
+                    .build();
+            prospect.getDeletionReasons().add(deletionReason);
+        }
         this.prospectRepository.save(prospect);
         return "status changed successfully";
     }

@@ -1,6 +1,7 @@
 package net.foodeals.delivery.domain.entities;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import net.foodeals.common.models.AbstractEntity;
@@ -9,6 +10,7 @@ import net.foodeals.order.domain.entities.Order;
 import net.foodeals.user.domain.entities.User;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,7 +22,6 @@ import java.util.UUID;
 public class Delivery extends AbstractEntity<UUID> {
 
     @Id
-    @GeneratedValue
     @UuidGenerator
     private UUID id;
 
@@ -35,10 +36,11 @@ public class Delivery extends AbstractEntity<UUID> {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private DeliveryPosition deliveryPosition;
 
-    @OneToOne(mappedBy = "delivery", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private Order order;
+    @Builder.Default
+    @OneToMany(mappedBy = "delivery", fetch = FetchType.EAGER)
+    private List<Order> orders = new ArrayList<>();
 
-    Delivery() {
+    public Delivery() {
 
     }
 

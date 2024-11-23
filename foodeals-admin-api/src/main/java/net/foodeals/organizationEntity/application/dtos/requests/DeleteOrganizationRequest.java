@@ -1,19 +1,19 @@
 package net.foodeals.organizationEntity.application.dtos.requests;
 
 import lombok.Data;
-import net.foodeals.user.domain.entities.enums.DeletionReason;
+import net.foodeals.user.domain.entities.enums.ReasonType;
 
 @Data
 public class DeleteOrganizationRequest {
-    private DeletionReason reason;
+    private ReasonType reason;
     private String details;
 
     // Getters and setters
-    public DeletionReason getReason() {
+    public ReasonType getReason() {
         return reason;
     }
 
-    public void setReason(DeletionReason reason) {
+    public void setReason(ReasonType reason) {
         this.reason = reason;
     }
 

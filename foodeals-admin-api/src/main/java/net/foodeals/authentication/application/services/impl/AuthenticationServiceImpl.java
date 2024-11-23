@@ -35,8 +35,8 @@ class AuthenticationServiceImpl implements AuthenticationService {
     private final OrganizationEntityRepository organizationEntityRepository;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        OrganizationEntity organizationEntity = this.organizationEntityRepository.findByName("manager test");
-        final User user = userService.create(new UserRequest(request.name(), request.email(), request.phone(), request.password(), request.isEmailVerified(), request.roleName(), organizationEntity.getId(), null));
+//        OrganizationEntity organizationEntity = this.organizationEntityRepository.findByName("manager test");
+        final User user = userService.create(new UserRequest(request.name(), request.email(), request.phone(), request.password(), request.isEmailVerified(), request.roleName(), null, null));
         return handleRegistration(user);
     }
 

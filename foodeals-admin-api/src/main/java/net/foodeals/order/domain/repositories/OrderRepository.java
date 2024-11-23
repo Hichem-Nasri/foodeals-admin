@@ -73,7 +73,8 @@ public interface OrderRepository extends BaseRepository<Order, UUID> {
             "JOIN d.deliveryBoy u " +
             "WHERE u.organizationEntity.id = :organizationId " +
             "AND d.status = :deliveryStatus "  +
-            "AND DATE(o.createdAt) = :orderDate " +
+            "AND EXTRACT(MONTH FROM o.createdAt) = EXTRACT(MONTH FROM CAST(:orderDate AS timestamp)) " +
+            "AND EXTRACT(YEAR FROM o.createdAt) = EXTRACT(YEAR FROM CAST(:orderDate AS timestamp)) " +
             "AND o.status = :orderStatus " +
             "AND o.transaction.status = :transactionStatus")
     List<Order> findOrdersByOrganizationAndDeliveryStatusAndCriteria(
@@ -84,21 +85,11 @@ public interface OrderRepository extends BaseRepository<Order, UUID> {
             @Param("transactionStatus") TransactionStatus transactionStatus
     );
 
-    @Query("SELECT COUNT(o) FROM Order o " +
-            "JOIN o.delivery d " +
-            "JOIN d.deliveryBoy u " +
-            "WHERE u.organizationEntity.id = :organizationId " +
-            "AND d.status = :deliveryStatus "  +
-            "AND DATE(o.createdAt) = :orderDate " +
-            "AND o.status = :orderStatus " +
-            "AND o.transaction.status = :transactionStatus")
-    Long countOrdersByOrganizationAndDeliveryStatusAndCriteria(
-            @Param("organizationId") UUID organizationId,
-            @Param("deliveryStatus") DeliveryStatus deliveryStatus,
-            @Param("orderDate") Date orderDate,
-            @Param("orderStatus") OrderStatus orderStatus,
-            @Param("transactionStatus") TransactionStatus transactionStatus
-    );
+
+    @EntityGraph(attributePaths = {"delivery"})
+    @Query("SELECT o FROM Order o " +
+            "WHERE o.delivery.id = :deliveryId")
+    List<Order> findOrdersByDeliveryId(@Param("deliveryId") UUID deliveryId);
 }
 
 

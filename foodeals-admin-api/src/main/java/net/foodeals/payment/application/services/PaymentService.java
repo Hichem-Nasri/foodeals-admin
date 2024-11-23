@@ -65,5 +65,5 @@ public interface PaymentService {
 
     DeliveryPaymentResponse getDeliveryPayments(int year, Pageable page, UUID id);
 
-    Page<DeliveryPaymentDto> convertToDeliveryCommission(Page<PartnerCommissions> commissionsPage);
+    DeliveryPaymentDto convertToDeliveryCommission(PartnerCommissions commissionsPage);
 }

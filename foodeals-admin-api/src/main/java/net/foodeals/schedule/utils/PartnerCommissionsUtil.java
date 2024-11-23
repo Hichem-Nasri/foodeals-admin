@@ -18,6 +18,7 @@ import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.PartnerInfo;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -87,8 +88,9 @@ public class PartnerCommissionsUtil {
         entityManager.persist(parentCommission);
         freshPartner.getCommissions().add(parentCommission);
         entityManager.merge(freshPartner);
+        List<SubEntity> subEntities = new ArrayList<>(freshPartner.getSubEntities());
 
-        for (SubEntity subEntity : freshPartner.getSubEntities()) {
+        for (SubEntity subEntity : subEntities) {
             SubEntity freshSubEntity = entityManager.find(SubEntity.class, subEntity.getId(), LockModeType.PESSIMISTIC_WRITE);
             PartnerCommissions subEntityCommission = PartnerCommissions.builder()
                     .partnerInfo(new PartnerInfo(freshPartner.getId(), freshSubEntity.getId(), freshSubEntity.getPartnerType(), freshSubEntity.getName()))

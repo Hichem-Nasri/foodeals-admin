@@ -1,17 +1,15 @@
 package net.foodeals.user.application.services.impl;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
+import net.foodeals.common.dto.request.UpdateReason;
+import net.foodeals.common.dto.response.UpdateDetails;
+import net.foodeals.common.entities.DeletionReason;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.domain.entities.Address;
-import net.foodeals.location.domain.repositories.AddressRepository;
-import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
-import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
-import net.foodeals.user.application.dtos.requests.UserAddress;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.*;
 import net.foodeals.user.application.services.RoleService;
@@ -21,14 +19,13 @@ import net.foodeals.user.domain.entities.User;
 import net.foodeals.user.domain.entities.WorkingHours;
 import net.foodeals.user.domain.exceptions.UserNotFoundException;
 import net.foodeals.user.domain.repositories.UserRepository;
-import org.apache.commons.lang.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -36,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -173,10 +171,14 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(Integer id) {
-        if (!repository.existsById(id))
-            throw new UserNotFoundException(id);
-        repository.softDelete(id);
+    public void delete(Integer integer) {
+    }
+
+    @Override
+    public void delete(Integer id, UpdateReason reason) {
+//        User user = findById(id);
+//        user.markDeleted(reason);
+//        this.repository.save(user);
     }
 
     private User mapRelationsAndEncodePassword(User user, UserRequest request) {
@@ -200,8 +202,36 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
+    public void deleteUser(Integer id, UpdateReason reason) {
+        User user = this.repository.getEntity(id).orElseThrow(() -> new UserNotFoundException(id));
+        DeletionReason deletionReason = DeletionReason.builder()
+                .details(reason.details())
+                .reason(reason.reason())
+                .type(reason.action())
+                .build();
+        user.getDeletionReasons().add(deletionReason);
+        user.markDeleted(reason.action());
+        this.repository.save(user);
+    }
+
+    @Override
     public User save(User user) {
         return this.repository.save(user);
+    }
+
+    @Transactional
+    @Override
+    public Page<UpdateDetails> getDeletionDetails(Integer id, Pageable page) {
+        User user = this.repository.getEntity(id).orElseThrow(() -> new UserNotFoundException(id));
+
+        List<DeletionReason> deletionReasons = user.getDeletionReasons();
+
+        int start = (int)page.getOffset();
+        int end = Math.min(start + page.getPageSize(), deletionReasons.size());
+        List<DeletionReason> content = deletionReasons.subList(start, end);
+
+        return new PageImpl<>(content, page, deletionReasons.size()).map(d -> new UpdateDetails(d.getType(), d.getDetails(), d.getReason(), Date.from(d.getCreatedAt())));
     }
 
     @Override
