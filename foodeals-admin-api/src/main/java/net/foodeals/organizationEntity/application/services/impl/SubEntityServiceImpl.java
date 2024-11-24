@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import net.foodeals.common.dto.request.UpdateReason;
 import net.foodeals.common.dto.response.UpdateDetails;
 import net.foodeals.common.entities.DeletionReason;
+import net.foodeals.organizationEntity.application.dtos.requests.SubEntityFilter;
 import net.foodeals.organizationEntity.application.dtos.requests.SubEntityRequest;
 import net.foodeals.organizationEntity.application.dtos.responses.SubEntityResponse;
 import net.foodeals.organizationEntity.application.services.SubEntityService;
@@ -32,15 +33,7 @@ public class SubEntityServiceImpl implements SubEntityService {
         return this.subEntityRepository.countByOrganizationEntity_IdAndType(organizationId, type);
     }
 
-    @Override
-    public Page<SubEntity> getFoodBankSubEntities(Pageable pageable, UUID id) {
-        return this.subEntityRepository.findByOrganizationEntity_Id(id, pageable);
-    }
 
-    @Override
-    public Page<SubEntity> partnerSubEntities(Pageable pageable, UUID id) {
-        return this.subEntityRepository.findByOrganizationEntity_Id(id, pageable);
-    }
 
     @Override
     public List<SubEntityResponse> findAll() {
@@ -110,5 +103,9 @@ public class SubEntityServiceImpl implements SubEntityService {
 
         return new PageImpl<>(content, page, deletionReasons.size()).map(d -> new UpdateDetails(d.getType(), d.getDetails(), d.getReason(), Date.from(d.getCreatedAt())));
     }
+
+    @Override
+    public Page<SubEntity> subEntitiesFilters(Pageable pageable, UUID id, SubEntityFilter filter) {
+        return this.subEntityRepository.findWithFilters(id, filter, pageable);    }
 
 }
