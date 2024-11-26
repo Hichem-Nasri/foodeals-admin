@@ -6,12 +6,11 @@ import lombok.NoArgsConstructor;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserFilter {
+public class UserSearchFilter {
     private String query;
     private List<EntityType> types;
 

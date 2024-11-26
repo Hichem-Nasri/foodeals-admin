@@ -65,6 +65,7 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     private List<User> users = new ArrayList<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @Builder.Default
     private Set<Solution> solutions = new HashSet<>();
 
     @Builder.Default

@@ -3,6 +3,7 @@ package net.foodeals.user.application.services;
 import net.foodeals.common.contracts.CrudService;
 import net.foodeals.common.dto.request.UpdateReason;
 import net.foodeals.common.dto.response.UpdateDetails;
+import net.foodeals.user.application.dtos.requests.UserFilter;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.*;
 import net.foodeals.user.domain.entities.Role;
@@ -22,7 +23,7 @@ public interface UserService extends CrudService<User, Integer, UserRequest> {
 
     Page<User> getClientsData(Pageable page);
 
-    Page<User> filterUsers(UserFilter filter, Pageable pageable);
+    Page<User> filterUsers(UserSearchFilter filter, Pageable pageable);
 
     ClientDto toClientDto(User user);
 
@@ -42,9 +43,9 @@ public interface UserService extends CrudService<User, Integer, UserRequest> {
 
     Page<User> getSellsManagers(String name, Pageable pageable);
 
-    Page<UserInfoDto> getUsersByOrganization(UUID organizationId, Pageable pageable);
+    Page<UserInfoDto> getUsersByOrganization(UUID organizationId, UserFilter filter, Pageable pageable);
 
-    Page<UserInfoDto> getUsersBySubEntity(UUID subEntityId, Pageable pageable);
+    Page<UserInfoDto> getUsersBySubEntity(UUID subEntityId, UserFilter filter, Pageable pageable);
 
     void deleteUser(Integer id, UpdateReason request);
 

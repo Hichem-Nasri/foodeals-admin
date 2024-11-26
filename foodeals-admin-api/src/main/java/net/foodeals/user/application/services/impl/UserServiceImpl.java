@@ -10,6 +10,7 @@ import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
+import net.foodeals.user.application.dtos.requests.UserFilter;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.*;
 import net.foodeals.user.application.services.RoleService;
@@ -24,18 +25,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -85,24 +82,46 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserInfoDto> getUsersByOrganization(UUID organizationId, Pageable pageable) {
-        Page<User> userPage = this.repository.findByOrganizationId(organizationId, pageable);
+    public Page<UserInfoDto> getUsersByOrganization(UUID organizationId, UserFilter filter, Pageable pageable) {
+        Page<User> userPage = this.repository.findByOrganizationIdWithFilters(organizationId, filter, pageable);
+
         return userPage.map(user -> {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            return new UserInfoDto(createdAt, user.getId(), user.getRole().getName(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+
+            return new UserInfoDto(
+                    createdAt,
+                    user.getId(),
+                    user.getRole().getName(),
+                    user.getName(),
+                    user.getAddress().getRegion().getCity().getName(),
+                    user.getAddress().getRegion().getName(),
+                    user.getAvatarPath(),
+                    user.getEmail(),
+                    user.getPhone());
         });
     }
 
     @Override
-    public Page<UserInfoDto> getUsersBySubEntity(UUID subEntityId, Pageable pageable) {
-        Page<User> userPage = this.repository.findBySubEntityId(subEntityId, pageable);
+    public Page<UserInfoDto> getUsersBySubEntity(UUID subEntityId, UserFilter filter, Pageable pageable) {
+        Page<User> userPage = this.repository.findBySubEntityIdWithFilters(subEntityId, filter, pageable);
+
         return userPage.map(user -> {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            return new UserInfoDto(createdAt, user.getId(), user.getRole().getName(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+
+            return new UserInfoDto(
+                    createdAt,
+                    user.getId(),
+                    user.getRole().getName(),
+                    user.getName(),
+                    user.getAddress().getRegion().getCity().getName(),
+                    user.getAddress().getRegion().getName(),
+                    user.getAvatarPath(),
+                    user.getEmail(),
+                    user.getPhone());
         });
     }
 
@@ -125,7 +144,7 @@ class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Page<User> filterUsers(UserFilter filter, Pageable pageable) {
+    public Page<User> filterUsers(UserSearchFilter filter, Pageable pageable) {
         return repository.findWithFilters(filter, pageable);
     }
 
@@ -186,16 +205,14 @@ class UserServiceImpl implements UserService {
         final Role role = roleService.findByName(request.roleName());
         user.setRole(role)
                 .setPassword(passwordEncoder.encode(user.getPassword()));
-        if (request.userAddress() != null) {
-            Address address = this.addressService.createUserAddress(request.userAddress());
-            user.setAddress(address);
-        }
         user = this.repository.save(user);
         if (request.organizationEntityId() != null) {
             final OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(request.organizationEntityId()).orElse(null);
             if (organizationEntity != null) {
                 user.setOrganizationEntity(organizationEntity);
                 organizationEntity.getUsers().add(user);
+                Address address = organizationEntity.getAddress();
+                user.setAddress(address);
                 this.organizationEntityRepository.save(organizationEntity);
             }
         }

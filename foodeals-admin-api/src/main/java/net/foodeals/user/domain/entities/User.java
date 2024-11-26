@@ -13,6 +13,7 @@ import net.foodeals.location.domain.entities.Address;
 import net.foodeals.notification.domain.entity.Notification;
 import net.foodeals.order.domain.entities.Order;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.user.domain.entities.enums.Gender;
 import net.foodeals.user.domain.valueObjects.Name;
@@ -21,10 +22,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -67,6 +65,18 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @ManyToOne
     private OrganizationEntity organizationEntity;
 
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @Builder.Default
+    private Set<Solution> solutions = new HashSet<>();
+
+    public Set<Solution> getSolutions() {
+        return solutions;
+    }
+
+    public void setSolutions(Set<Solution> solutions) {
+        this.solutions = solutions;
+    }
+
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
 
@@ -93,7 +103,7 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "address_id")
     private Address address;
 

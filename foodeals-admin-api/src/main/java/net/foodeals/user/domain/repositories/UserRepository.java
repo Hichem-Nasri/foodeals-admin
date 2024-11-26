@@ -1,7 +1,8 @@
 package net.foodeals.user.domain.repositories;
 
 import net.foodeals.common.contracts.BaseRepository;
-import net.foodeals.user.application.dtos.responses.UserFilter;
+import net.foodeals.user.application.dtos.requests.UserFilter;
+import net.foodeals.user.application.dtos.responses.UserSearchFilter;
 import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
 import org.springframework.data.jpa.repository.Query;
@@ -20,7 +21,7 @@ public interface UserRepository extends BaseRepository<User, Integer> {
             "WHERE (:#{#filter.query} IS NULL OR CONCAT(u.name.firstName, ' ', u.name.lastName) LIKE CONCAT('%', :#{#filter.query}, '%')) " +
             "AND (:#{#filter.types} IS NULL OR oe.type IN :#{#filter.types}) ")
     Page<User> findWithFilters(
-            @Param("filter") UserFilter filter,
+            @Param("filter") UserSearchFilter filter,
             Pageable pageable
     );
 
@@ -35,9 +36,9 @@ public interface UserRepository extends BaseRepository<User, Integer> {
     Page<User> findByRoleNameAndNameContaining(@Param("roleName") String roleName, @Param("name") String name, Pageable pageable);
 
 
-
     @Query("SELECT COUNT(u) FROM User u WHERE u.organizationEntity.id = :organizationId AND u.role.name = 'DELIVERY_MAN'")
     Long countDeliveryUsersByOrganizationId(@Param("organizationId") UUID organizationId);
+
     @Query("SELECT u FROM User u JOIN FETCH u.role r JOIN FETCH r.authorities WHERE u.email = :email")
     Optional<User> findByEmailWithRoleAndAuthorities(@Param("email") String email);
 
@@ -72,4 +73,42 @@ public interface UserRepository extends BaseRepository<User, Integer> {
 
     @Query("SELECT u FROM User u WHERE u.subEntity.id = :subEntityId")
     Page<User> findBySubEntityId(@Param("subEntityId") UUID subEntityId, Pageable pageable);
+
+    @Query("SELECT DISTINCT u FROM User u " +
+            "WHERE u.organizationEntity.id = :organizationId " +
+            "AND (:#{#filter.names} IS NULL OR LOWER(CONCAT(u.name.firstName, ' ', u.name.lastName)) IN :#{#filter.names}) " +
+            "AND (:#{#filter.phone} IS NULL OR u.phone = :#{#filter.phone}) " +
+            "AND (:#{#filter.city} IS NULL OR u.address.region.city.name = :#{#filter.city}) " +
+            "AND (:#{#filter.region} IS NULL OR u.address.region.name = :#{#filter.region}) " +
+            "AND (:#{#filter.email} IS NULL OR u.email = :#{#filter.email}) " +
+            "AND (:#{#filter.roleName} IS NULL OR u.role.name = :#{#filter.roleName}) " +
+            "AND (:#{#filter.entityTypes} IS NULL OR u.organizationEntity.type IN :#{#filter.entityTypes}) " +
+            "AND (:#{#filter.solutions} IS NULL OR  (SELECT COUNT(DISTINCT s.name)  FROM Solution s JOIN s.users u2  WHERE u2 = u AND s.name IN (:#{#filter.solutions})) = :#{#filter.solutions.size()})" +
+            "AND (COALESCE(:#{#filter.startDate}, NULL) IS NULL OR u.createdAt >= :#{#filter.startDate}) " +
+            "AND (COALESCE(:#{#filter.endDate}, NULL) IS NULL OR u.createdAt <= :#{#filter.endDate}) " +
+            "AND (:#{#filter.deletedAt} IS NULL OR (u.deletedAt IS NOT NULL AND :#{#filter.deletedAt} = true) OR (u.deletedAt IS NULL AND :#{#filter.deletedAt} = false))")
+    Page<User> findByOrganizationIdWithFilters(
+            @Param("organizationId") UUID organizationId,
+            @Param("filter") UserFilter filter,
+            Pageable pageable
+    );
+
+    @Query("SELECT DISTINCT u FROM User u " +
+            "WHERE u.subEntity.id = :subEntityId " +
+            "AND (:#{#filter.names} IS NULL OR LOWER(CONCAT(u.name.firstName, ' ', u.name.lastName)) IN :#{#filter.names}) " +
+            "AND (:#{#filter.phone} IS NULL OR u.phone = :#{#filter.phone}) " +
+            "AND (:#{#filter.city} IS NULL OR u.address.region.city.name = :#{#filter.city}) " +
+            "AND (:#{#filter.region} IS NULL OR u.address.region.name = :#{#filter.region}) " +
+            "AND (:#{#filter.email} IS NULL OR u.email = :#{#filter.email}) " +
+            "AND (:#{#filter.roleName} IS NULL OR u.role.name = :#{#filter.roleName}) " +
+            "AND (:#{#filter.entityTypes} IS NULL OR u.subEntity.type IN :#{#filter.subEntityTypes}) " +
+            "AND (:#{#filter.solutions} IS NULL OR  (SELECT COUNT(DISTINCT s.name)  FROM Solution s JOIN s.users u2  WHERE u2 = u AND s.name IN (:#{#filter.solutions})) = :#{#filter.solutions.size()})" +
+            "AND (COALESCE(:#{#filter.startDate}, NULL) IS NULL OR u.createdAt >= :#{#filter.startDate}) " +
+            "AND (COALESCE(:#{#filter.endDate}, NULL) IS NULL OR u.createdAt <= :#{#filter.endDate}) " +
+            "AND (:#{#filter.deletedAt} IS NULL OR (u.deletedAt IS NOT NULL AND :#{#filter.deletedAt} = true) OR (u.deletedAt IS NULL AND :#{#filter.deletedAt} = false))")
+    Page<User> findBySubEntityIdWithFilters(
+            @Param("subEntityId") UUID subEntityId,
+            @Param("filter") UserFilter filter,
+            Pageable pageable
+    );
 }
