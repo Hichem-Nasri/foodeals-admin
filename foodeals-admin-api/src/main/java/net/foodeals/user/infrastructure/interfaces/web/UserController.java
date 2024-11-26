@@ -27,6 +27,7 @@ import java.awt.desktop.SystemEventListener;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -94,7 +95,7 @@ public class UserController {
                     .email(email)
                     .roleName(roleName)
                     .entityTypes(entityTypes)
-                    .solutions(solutions)
+                    .solutions(solutions != null ? solutions : new ArrayList<String>())
                     .startDate(startDate != null ? startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null)
                     .endDate(endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null)
                     .deletedAt(deletedAt)
@@ -130,7 +131,7 @@ public class UserController {
                 .email(email)
                 .roleName(roleName)
                 .subEntityTypes(entityTypes)
-                .solutions(solutions)
+                .solutions(solutions != null ? solutions : new ArrayList<String>())
                 .startDate(startDate != null ? startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null)
                 .endDate(endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null)
                 .deletedAt(deletedAt)

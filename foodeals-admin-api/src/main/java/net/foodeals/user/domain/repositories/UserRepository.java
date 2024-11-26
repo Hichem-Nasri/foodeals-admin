@@ -83,7 +83,7 @@ public interface UserRepository extends BaseRepository<User, Integer> {
             "AND (:#{#filter.email} IS NULL OR u.email = :#{#filter.email}) " +
             "AND (:#{#filter.roleName} IS NULL OR u.role.name = :#{#filter.roleName}) " +
             "AND (:#{#filter.entityTypes} IS NULL OR u.organizationEntity.type IN :#{#filter.entityTypes}) " +
-            "AND (:#{#filter.solutions} IS NULL OR  (SELECT COUNT(DISTINCT s.name)  FROM Solution s JOIN s.users u2  WHERE u2 = u AND s.name IN (:#{#filter.solutions})) = :#{#filter.solutions.size()})" +
+            "AND ((:#{#filter.solutions} IS NULL) OR (:#{#filter.solutions} IS NOT NULL AND  (SELECT COUNT(DISTINCT s.name)  FROM Solution s JOIN s.users u2  WHERE u2 = u AND s.name IN (:#{#filter.solutions})) = :#{#filter.solutions.size()}))" +
             "AND (COALESCE(:#{#filter.startDate}, NULL) IS NULL OR u.createdAt >= :#{#filter.startDate}) " +
             "AND (COALESCE(:#{#filter.endDate}, NULL) IS NULL OR u.createdAt <= :#{#filter.endDate}) " +
             "AND (:#{#filter.deletedAt} IS NULL OR (u.deletedAt IS NOT NULL AND :#{#filter.deletedAt} = true) OR (u.deletedAt IS NULL AND :#{#filter.deletedAt} = false))")

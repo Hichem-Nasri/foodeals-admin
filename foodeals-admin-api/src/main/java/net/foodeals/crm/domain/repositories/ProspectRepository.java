@@ -23,15 +23,16 @@ public interface ProspectRepository extends BaseRepository<Prospect, UUID> {
     Integer countByStatusAndDeletedAtIsNull(ProspectStatus status);
 
     @Query("SELECT DISTINCT p FROM Prospect p " +
-            "JOIN p.activities a " +
+            "LEFT JOIN p.activities a " +
             "JOIN p.address.region.city c " +
             "JOIN c.country co " +
             "JOIN p.contacts ct " +
             "WHERE (coalesce(:#{#filter.startDate}, null) IS NULL OR p.createdAt >= :#{#filter.startDate}) " +
             "AND (coalesce(:#{#filter.endDate}, null) IS NULL OR p.createdAt <= :#{#filter.endDate}) " +
             "AND (:#{#filter.names} IS NULL OR p.name IN :#{#filter.names}) " +
-            "AND (:#{#filter.categories} IS NULL OR a.name IN :#{#filter.categories}) " +
-            "AND (:#{#filter.types} IS NULL OR p.type IN :#{#filter.types}) " +
+            "AND (:#{#filter.categories} IS NULL OR " +
+            "(SELECT COUNT(DISTINCT a.name) FROM Activity a JOIN a.prospects p2 " +
+            "WHERE p2 = p AND a.name IN :#{#filter.categories}) = :#{#filter.categories.size()}) " +
             "AND (:#{#filter.cityId} IS NULL OR c.id = :#{#filter.cityId}) " +
             "AND (:#{#filter.countryId} IS NULL OR co.id = :#{#filter.countryId}) " +
             "AND (:#{#filter.creatorId} IS NULL OR p.creator.id = :#{#filter.creatorId}) " +

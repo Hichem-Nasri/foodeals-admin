@@ -194,7 +194,7 @@ public class OrganizationEntityController {
                 .names(names)
                 .email(email)
                 .phone(phone)
-                .solutions(solutions)
+                .solutions(solutions != null ? solutions : new ArrayList<String>())
                 .cityId(cityId)
                 .collabId(collabId)
                 .deletedAt(deletedAt)

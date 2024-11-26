@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -80,7 +81,7 @@ public class SubEntityController {
                 .names(names)
                 .email(email)
                 .phone(phone)
-                .solutions(solutions)
+                .solutions(solutions != null ? solutions : new ArrayList<String>())
                 .cityId(cityId)
                 .types(types)
                 .collabId(collabId)
