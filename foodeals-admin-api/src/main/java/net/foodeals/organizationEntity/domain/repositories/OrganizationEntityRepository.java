@@ -32,7 +32,10 @@ public interface OrganizationEntityRepository extends BaseRepository<Organizatio
             "AND (coalesce(:#{#filter.endDate}, null) IS NULL OR o.createdAt <= :#{#filter.endDate}) " +
             "AND (:#{#filter.types} IS NULL OR o.type IN :#{#filter.types}) " +
             "AND (:#{#filter.names} IS NULL OR o.name IN :#{#filter.names}) " +
-            "AND (:#{#filter.solutions} IS NULL OR s.name IN :#{#filter.solutions}) " +
+            // Refactored solutions check logic for organizations
+            "AND (:#{#filter.solutions} IS NULL OR " +
+            "(SELECT COUNT(DISTINCT s.name) FROM Solution s JOIN s.organizationEntities o2 " +
+            "WHERE o2 = o AND s.name IN :#{#filter.solutions}) = :#{#filter.solutions.size()}) " +
             "AND (:#{#filter.cityId} IS NULL OR c.id = :#{#filter.cityId}) " +
             "AND (:#{#filter.email} IS NULL OR ct.email = :#{#filter.email}) " +
             "AND (:#{#filter.phone} IS NULL OR ct.phone = :#{#filter.phone}) " +

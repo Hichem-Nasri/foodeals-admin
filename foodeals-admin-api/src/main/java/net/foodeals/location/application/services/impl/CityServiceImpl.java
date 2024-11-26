@@ -54,6 +54,7 @@ class CityServiceImpl implements CityService {
     public City create(CityRequest request) {
         Country country = countryService.findByName(request.country().toLowerCase());
         City city = City.builder().name(request.name().toLowerCase()).build();
+        city = this.repository.save(city);
         city.setCountry(country);
         country.getCities().add(city);
         this.countryService.save(country);

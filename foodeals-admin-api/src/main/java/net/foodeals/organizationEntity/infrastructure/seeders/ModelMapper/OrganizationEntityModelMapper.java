@@ -90,7 +90,7 @@ public class OrganizationEntityModelMapper {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(manager.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            UserInfoDto userInfoDto = new UserInfoDto(createdAt, manager.getId(), manager.getRole().getName(), manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
+            UserInfoDto userInfoDto = new UserInfoDto(createdAt, manager.getId(), manager.getRole().getName(), manager.getName(), manager.getAddress().getRegion().getCity().getName(), manager.getAddress().getRegion().getName(),manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
             formData.setManager(userInfoDto);
             formData.setActivities(organizationEntity.getActivities().stream().map(Activity::getName).collect(Collectors.toList()));
             formData.setMaxNumberOfSubEntities(organizationEntity.getContract().getMaxNumberOfSubEntities());
@@ -381,7 +381,7 @@ public class OrganizationEntityModelMapper {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(manager.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            UserInfoDto userInfoDto = new UserInfoDto(createdAt, manager.getId(), manager.getRole().getName(), manager.getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
+            UserInfoDto userInfoDto = new UserInfoDto(createdAt, manager.getId(), manager.getRole().getName(), manager.getName(), manager.getAddress().getRegion().getCity().getName(), manager.getAddress().getRegion().getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
             formData.setManager(userInfoDto);
             formData.setNumberOfPoints(organizationEntity.getContract().getMaxNumberOfSubEntities());
             // Map EntityAddressDto

@@ -84,7 +84,7 @@ public class UserModelMapperConfig {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            UserInfoDto userInfoDto = new UserInfoDto(createdAt, user.getId(), user.getRole().getName(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+            UserInfoDto userInfoDto = new UserInfoDto(createdAt, user.getId(), user.getRole().getName(), user.getName(), user.getAddress().getRegion().getCity().getName(), user.getAddress().getRegion().getName(),  user.getAvatarPath(), user.getEmail(), user.getPhone());
             return new DeliveryPartnerUserDto(user.getStatus(), city, region, solutions, userInfoDto);
         }, User.class, DeliveryPartnerUserDto.class);
 
@@ -95,7 +95,7 @@ public class UserModelMapperConfig {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            UserInfoDto userInfoDto = new UserInfoDto(createdAt, user.getId(), user.getRole().getName(), user.getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
+            UserInfoDto userInfoDto = new UserInfoDto(createdAt, user.getId(), user.getRole().getName(), user.getName(), user.getAddress().getRegion().getCity().getName(), user.getAddress().getRegion().getName(), user.getAvatarPath(), user.getEmail(), user.getPhone());
             String roleName = user.getRole().getName();
             return new AssociationsUsersDto(user.getId(), city, region, userInfoDto);
         }, User.class, AssociationsUsersDto.class);

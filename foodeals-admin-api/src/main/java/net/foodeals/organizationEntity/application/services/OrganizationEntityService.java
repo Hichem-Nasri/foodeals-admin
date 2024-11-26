@@ -404,8 +404,7 @@ public class OrganizationEntityService {
 
         Role role  = this.roleService.findByName("MANAGER");
         String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserAddress userAddress = new UserAddress(organizationEntity.getAddress().getRegion().getCity().getCountry().getName(), organizationEntity.getAddress().getRegion().getCity().getName(), organizationEntity.getAddress().getRegion().getName());
-        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), false, "MANAGER", organizationEntity.getId(), userAddress);
+        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), false, "MANAGER", organizationEntity.getId());
         User manager = this.userService.create(userRequest);
         if (!organizationEntity.getType().equals(EntityType.FOOD_BANK) && !organizationEntity.getType().equals(EntityType.ASSOCIATION)) {
             Solution pro_market = this.solutionService.findByName("pro_market");
