@@ -180,7 +180,8 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     public List<CoveredZonesDto> getCoveredZonesDto() {
         return coveredZones.stream()
                 .map(coveredZone -> CoveredZonesDto.builder()
-                        .country(coveredZone.getRegion().getCity().getCountry().getName())
+                        .country(coveredZone.getRegion().getCity().getState().getCountry().getName())
+                        .state(coveredZone.getRegion().getCity().getState().getName())
                         .city(coveredZone.getRegion().getCity().getName())
                         .regions(List.of(coveredZone.getRegion().getName()))
                         .build())
@@ -189,6 +190,7 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
                 .stream()
                 .map(entry -> CoveredZonesDto.builder()
                         .city(entry.getKey())
+                        .state(entry.getValue().get(0).getState())
                         .country(entry.getValue().get(0).getCountry()) // Extract country from any dto in the group
                         .regions(entry.getValue().stream()
                                 .flatMap(dto -> dto.getRegions().stream())

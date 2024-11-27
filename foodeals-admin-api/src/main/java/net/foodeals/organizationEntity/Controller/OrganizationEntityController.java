@@ -56,6 +56,7 @@ public class OrganizationEntityController {
     @PostMapping(value = "/associations/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
     public ResponseEntity<UUID> createAssociation(@RequestPart("dto") CreateAssociationDto createAssociationDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) {
+        System.out.println(createAssociationDto);
         return new ResponseEntity<UUID>(this.organizationEntityService.createAssociation(createAssociationDto, logo, cover), HttpStatus.OK);
     }
 
@@ -65,10 +66,11 @@ public class OrganizationEntityController {
         return new ResponseEntity<UUID>(this.organizationEntityService.updateAssociation(id, createAssociationDto, cover, logo), HttpStatus.OK);
     }
 
-    @PutMapping("/partners/edit/{id}")
+    @PutMapping(value = "/partners/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
-    public ResponseEntity<?> updateOrganizationEntity(@RequestBody CreateAnOrganizationEntityDto updateOrganizationEntityDto, @PathVariable("id") UUID id) throws DocumentException, IOException {
-        OrganizationEntity  organizationEntity = this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto);
+    public ResponseEntity<?> updateOrganizationEntity(@PathVariable("id") UUID id, @RequestPart("dto") CreateAnOrganizationEntityDto updateOrganizationEntityDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) throws DocumentException, IOException {
+        System.out.println(updateOrganizationEntityDto);
+        OrganizationEntity  organizationEntity = this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto, logo, cover);
         return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ? this.modelMapper.mapDeliveryPartners(organizationEntity) : this.modelMapper.mapOrganizationEntity(organizationEntity), HttpStatus.OK);
     }
 

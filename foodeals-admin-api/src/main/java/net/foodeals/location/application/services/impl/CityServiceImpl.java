@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import net.foodeals.location.application.dtos.requests.CityRequest;
 import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.CountryService;
+import net.foodeals.location.application.services.StateService;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Country;
 import net.foodeals.location.domain.entities.Region;
+import net.foodeals.location.domain.entities.State;
 import net.foodeals.location.domain.exceptions.CityNotFoundException;
 import net.foodeals.location.domain.repositories.CityRepository;
 import org.modelmapper.ModelMapper;
@@ -27,6 +29,7 @@ class CityServiceImpl implements CityService {
     private final ModelMapper modelMapper;
     private final CityRepository repository;
     private final CountryService countryService;
+    private final StateService stateService;
 
 
     @Override
@@ -52,26 +55,28 @@ class CityServiceImpl implements CityService {
 
     @Override
     public City create(CityRequest request) {
-        Country country = countryService.findByName(request.country().toLowerCase());
+        Country country = this.countryService.findByName(request.country().toLowerCase());
+        State state = country.getStates().stream().filter(s -> s.getName().equals(request.state().toLowerCase())).findFirst().get();
         City city = City.builder().name(request.name().toLowerCase()).build();
         city = this.repository.save(city);
-        city.setCountry(country);
-        country.getCities().add(city);
-        this.countryService.save(country);
+        city.setState(state);
+        state.getCities().add(city);
+        this.stateService.save(state);
         return repository.save(city);
     }
 
     @Override
     public City update(UUID id, CityRequest request) {
-        Country country = countryService.findByName(request.country().toLowerCase());
+        Country country = this.countryService.findByName(request.country().toLowerCase());
+        State state = country.getStates().stream().filter(s -> s.getName().equals(request.state().toLowerCase())).findFirst().get();
         City existingCity = repository.findById(id)
                 .orElseThrow(() -> new CityNotFoundException(id));
 
-        if (!country.getName().equals(existingCity.getCountry().getName())) {
-            Country country1 = existingCity.getCountry();
-            country1.getCities().remove(existingCity);
-            existingCity.setCountry(country);
-            country.getCities().add(existingCity);
+        if (!state.getName().equals(existingCity.getState().getName())) {
+            State oldState = existingCity.getState();
+            oldState.getCities().remove(existingCity);
+            existingCity.setState(state);
+            state.getCities().add(existingCity);
         }
         existingCity.setName(request.name().toLowerCase());
         return repository.save(existingCity);

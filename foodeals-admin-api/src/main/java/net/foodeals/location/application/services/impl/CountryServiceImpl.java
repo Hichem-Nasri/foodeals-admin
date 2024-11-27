@@ -6,6 +6,7 @@ import net.foodeals.location.application.dtos.requests.CountryRequest;
 import net.foodeals.location.application.services.CountryService;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Country;
+import net.foodeals.location.domain.entities.State;
 import net.foodeals.location.domain.exceptions.CountryNotFoundException;
 import net.foodeals.location.domain.repositories.CountryRepository;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -91,10 +92,10 @@ class CountryServiceImpl implements CountryService {
     }
 
     @Override
-    public List<City> getCities(UUID id) {
+    public List<State> getStates(UUID id) {
         Country existingCountry = repository.findById(id)
                 .orElseThrow(() -> new CountryNotFoundException(id));
-        return existingCountry.getCities();
+        return existingCountry.getStates();
     }
 
     @Override

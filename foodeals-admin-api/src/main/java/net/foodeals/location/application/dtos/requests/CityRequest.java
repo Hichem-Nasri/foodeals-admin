@@ -8,6 +8,7 @@ import java.util.UUID;
 
 public record CityRequest(
         @NotBlank @Processable String country,
+        @NotBlank @Processable String state,
         @NotBlank @Processable String name
 ) {
 }

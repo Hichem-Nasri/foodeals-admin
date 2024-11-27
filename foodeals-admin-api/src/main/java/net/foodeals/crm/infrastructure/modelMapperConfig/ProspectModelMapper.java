@@ -61,11 +61,12 @@ public class ProspectModelMapper {
 
             ContactDto contactInfo = new ContactDto(contact.getName(), contact.getEmail(), contact.getPhone());
 
-            String country = prospect.getAddress().getRegion().getCity().getCountry().getName();
+            String country = prospect.getAddress().getRegion().getCity().getState().getCountry().getName();
+            String state = prospect.getAddress().getRegion().getCity().getState().getName();
             String city = prospect.getAddress().getRegion().getCity().getName();
             String region =  prospect.getAddress().getRegion().getName();
             String address =  prospect.getAddress().getAddress();
-            AddressDto addressDto = new AddressDto(country, city, address, region, null);
+            AddressDto addressDto = new AddressDto(country, city, state, address, region, null);
 
             final User creator = prospect.getCreator();
             final User lead = prospect.getLead();

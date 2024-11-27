@@ -79,74 +79,79 @@ public class ProspectServiceImp implements ProspectService {
 
     @Override
     public ProspectResponse partialUpdate(UUID id, PartialProspectRequest dto) {
-            Prospect prospect = this.prospectRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + id.toString()));
-
-            if (dto.companyName() != null) {
-                prospect.setName(dto.companyName());
-            }
-            if (dto.status() != null) {
-                prospect.setStatus(dto.status());
-            }
-
-            if (dto.responsible() != null) {
-                Contact contact = prospect.getContacts().get(0);
-                if (dto.responsible().getName() != null) {
-                    contact.setName(dto.responsible().getName());
-                }
-                if (dto.responsible().getEmail() != null) {
-                    contact.setEmail(dto.responsible().getEmail());
-                }
-                if (dto.responsible().getPhone() != null) {
-                    contact.setPhone(dto.responsible().getPhone());
-                }
-            }
-
-            if (dto.manager_id() != null) {
-                User oldManager = prospect.getLead();
-                if (oldManager != null) {
-                    oldManager.getManagedProspects().remove(prospect);
-                }
-
-                User manager = this.userService.findById(dto.manager_id());
-                manager.getManagedProspects().add(prospect);
-                prospect.setLead(manager);
-            }
-
-            if (dto.activities() != null) {
-                Set<Activity> activities = this.activityService.getActivitiesByName(dto.activities());
-                prospect.getActivities().forEach((Activity activity) -> {
-                    if (!activities.contains(activity)) {
-                        activity.getProspects().remove(prospect);
-                    }
-                });
-                prospect.setActivities(activities);
-                activities.forEach(activity -> activity.getProspects().add(prospect));
-                this.activityService.saveAll(activities);
-            }
-
-        if (dto.solutions() != null) {
-            Set<Solution> solutions = this.solutionService.getSolutionsByNames(dto.solutions());
-            prospect.getSolutions().forEach((Solution solution) -> {
-                if (!solutions.contains(solution)) {
-                    solution.getProspects().remove(prospect);
-                }
-            });
-            prospect.setSolutions(solutions);
-            solutions.forEach(solution -> solution.getProspects().add(prospect));
-            this.solutionService.saveAll(solutions);
-        }
-
-            if (dto.address() != null) {
-                Address existingAddress = prospect.getAddress();
-                AddressRequest addressRequest = new AddressRequest(dto.address().country(), dto.address().address(),  dto.address().city(),  dto.address().region(),  dto.address().iframe());
-                this.addressService.update(existingAddress.getId(), addressRequest);
-            }
-
-            Prospect updatedProspect = this.prospectRepository.save(prospect);
-
-            return this.modelMapper.map(updatedProspect, ProspectResponse.class);
+        return null;
     }
+
+//    @Override
+//    public ProspectResponse partialUpdate(UUID id, PartialProspectRequest dto) {
+//            Prospect prospect = this.prospectRepository.findById(id)
+//                    .orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + id.toString()));
+//
+//            if (dto.companyName() != null) {
+//                prospect.setName(dto.companyName());
+//            }
+//            if (dto.status() != null) {
+//                prospect.setStatus(dto.status());
+//            }
+//
+//            if (dto.responsible() != null) {
+//                Contact contact = prospect.getContacts().get(0);
+//                if (dto.responsible().getName() != null) {
+//                    contact.setName(dto.responsible().getName());
+//                }
+//                if (dto.responsible().getEmail() != null) {
+//                    contact.setEmail(dto.responsible().getEmail());
+//                }
+//                if (dto.responsible().getPhone() != null) {
+//                    contact.setPhone(dto.responsible().getPhone());
+//                }
+//            }
+//
+//            if (dto.manager_id() != null) {
+//                User oldManager = prospect.getLead();
+//                if (oldManager != null) {
+//                    oldManager.getManagedProspects().remove(prospect);
+//                }
+//
+//                User manager = this.userService.findById(dto.manager_id());
+//                manager.getManagedProspects().add(prospect);
+//                prospect.setLead(manager);
+//            }
+//
+//            if (dto.activities() != null) {
+//                Set<Activity> activities = this.activityService.getActivitiesByName(dto.activities());
+//                prospect.getActivities().forEach((Activity activity) -> {
+//                    if (!activities.contains(activity)) {
+//                        activity.getProspects().remove(prospect);
+//                    }
+//                });
+//                prospect.setActivities(activities);
+//                activities.forEach(activity -> activity.getProspects().add(prospect));
+//                this.activityService.saveAll(activities);
+//            }
+//
+//        if (dto.solutions() != null) {
+//            Set<Solution> solutions = this.solutionService.getSolutionsByNames(dto.solutions());
+//            prospect.getSolutions().forEach((Solution solution) -> {
+//                if (!solutions.contains(solution)) {
+//                    solution.getProspects().remove(prospect);
+//                }
+//            });
+//            prospect.setSolutions(solutions);
+//            solutions.forEach(solution -> solution.getProspects().add(prospect));
+//            this.solutionService.saveAll(solutions);
+//        }
+//
+//            if (dto.address() != null) {
+//                Address existingAddress = prospect.getAddress();
+//                AddressRequest addressRequest = new AddressRequest(dto.address().country(), dto.address().address(),  dto.address().state(),dto.address().city(),  dto.address().region(),  dto.address().iframe());
+//                this.addressService.update(existingAddress.getId(), addressRequest);
+//            }
+//
+//            Prospect updatedProspect = this.prospectRepository.save(prospect);
+//
+//            return this.modelMapper.map(updatedProspect, ProspectResponse.class);
+//    }
 
     @Override
     public EventResponse createEvent(UUID id, EventRequest eventRequest) {
@@ -323,7 +328,7 @@ public class ProspectServiceImp implements ProspectService {
         this.solutionService.saveAll(solutions);
         prospect.setSolutions(solutions);
 
-        AddressRequest addressRequest = new AddressRequest(dto.address().country(), dto.address().address(),  dto.address().city(), dto.address().region(), dto.address().iframe());
+        AddressRequest addressRequest = new AddressRequest(dto.address().country(), dto.address().address(),  dto.address().state(), dto.address().city(), dto.address().region(), dto.address().iframe());
         Address address = this.addressService.create(addressRequest);
 
         prospect.setAddress(address);
@@ -380,7 +385,7 @@ public class ProspectServiceImp implements ProspectService {
         prospect.setSolutions(solutions);
 
         Address existingAddress = prospect.getAddress();
-        AddressRequest addressRequest = new AddressRequest(dto.address().country(), dto.address().address(),  dto.address().city(),  dto.address().region(),  dto.address().iframe());
+        AddressRequest addressRequest = new AddressRequest(dto.address().country(), dto.address().address(),  dto.address().state(), dto.address().city(),  dto.address().region(),  dto.address().iframe());
         this.addressService.update(existingAddress.getId(), addressRequest);
 
         Prospect updatedProspect = this.prospectRepository.save(prospect);

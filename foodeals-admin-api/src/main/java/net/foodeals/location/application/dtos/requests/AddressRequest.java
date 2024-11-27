@@ -10,7 +10,8 @@ import java.util.UUID;
 public record AddressRequest(
         @Processable String country,
         String address,
-         @Processable String cityName,
+        @Processable String stateName,
+        @Processable String cityName,
          @Processable String regionName,
          String iframe
 ) {

@@ -27,5 +27,5 @@ public class Country extends AbstractEntity<UUID> {
 
     @OneToMany(mappedBy = "country", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<City> cities = new ArrayList<>();
+    private List<State> states = new ArrayList<>();
 }

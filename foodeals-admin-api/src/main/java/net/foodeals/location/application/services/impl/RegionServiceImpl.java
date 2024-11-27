@@ -8,6 +8,7 @@ import net.foodeals.location.application.services.RegionService;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Country;
 import net.foodeals.location.domain.entities.Region;
+import net.foodeals.location.domain.entities.State;
 import net.foodeals.location.domain.exceptions.CityNotFoundException;
 import net.foodeals.location.domain.repositories.RegionRepository;
 import org.springframework.data.domain.Page;
@@ -59,7 +60,8 @@ public class RegionServiceImpl implements RegionService {
     @Override
     public Region create(RegionRequest dto) {
         Country country = this.countryService.findByName(dto.country().toLowerCase());
-        City city = country.getCities().stream().filter(c -> c.getName().equals(dto.city().toLowerCase())).findFirst().get();
+        State state = country.getStates().stream().filter(s -> s.getName().equals(dto.state().toLowerCase())).findFirst().get();
+        City city = state.getCities().stream().filter(c -> c.getName().equals(dto.city().toLowerCase())).findFirst().get();
         Region region = Region.builder().name(dto.name().toLowerCase())
                 .city(city)
                 .build();
@@ -72,14 +74,14 @@ public class RegionServiceImpl implements RegionService {
     @Override
     public Region update(UUID uuid, RegionRequest dto) {
         Region region = this.regionRepository.findById(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Region with Id : " + uuid + " not found"));
-
-        if (!dto.country().toLowerCase().equals(region.getCity().getCountry().getName())) {
+        if (!dto.country().toLowerCase().equals(region.getCity().getState().getCountry().getName())) {
             Country country = this.countryService.findByName(dto.country().toLowerCase());
-            City city = country.getCities().stream().filter(c -> c.getName().equals(dto.city().toLowerCase())).findFirst().get();
+            State state = country.getStates().stream().filter(s -> s.getName().equals(dto.state().toLowerCase())).findFirst().get();
+            City city = state.getCities().stream().filter(c -> c.getName().equals(dto.city().toLowerCase())).findFirst().get();
             region.setCity(city);
-        } else if (!dto.city().toLowerCase().equals(region.getCity().getName())) {
-            Country country = region.getCity().getCountry();
-            City city = country.getCities().stream().filter(c -> c.getName().equals(dto.city().toLowerCase())).findFirst().get();
+        } else if (!dto.state().toLowerCase().equals(region.getCity().getState().getName()) || !dto.city().toLowerCase().equals(region.getCity().getName())) {
+            State state = region.getCity().getState().getCountry().getStates().stream().filter(s -> s.getName().equals(dto.state().toLowerCase())).findFirst().get();
+            City city = state.getCities().stream().filter(c -> c.getName().equals(dto.city().toLowerCase())).findFirst().get();
             region.setCity(city);
         }
         region.setName(dto.name().toLowerCase());

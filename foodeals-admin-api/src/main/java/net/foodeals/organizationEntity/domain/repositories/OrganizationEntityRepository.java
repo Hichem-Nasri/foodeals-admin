@@ -52,7 +52,8 @@ public interface OrganizationEntityRepository extends BaseRepository<Organizatio
             "JOIN o.address a " +
             "JOIN a.region r " +
             "JOIN r.city c " +
-            "JOIN c.country co " +
+            "JOIN c.state s " +
+            "JOIN s.country co " +
             "WHERE o.type IN (:types) " +
             "AND LOWER(c.name) LIKE LOWER(CONCAT('%', :cityName, '%')) " +
             "AND LOWER(co.name) = LOWER(:countryName)")

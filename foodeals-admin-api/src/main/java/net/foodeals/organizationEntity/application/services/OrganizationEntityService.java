@@ -23,10 +23,7 @@ import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.CountryService;
 import net.foodeals.location.application.services.impl.RegionServiceImpl;
-import net.foodeals.location.domain.entities.Address;
-import net.foodeals.location.domain.entities.City;
-import net.foodeals.location.domain.entities.Country;
-import net.foodeals.location.domain.entities.Region;
+import net.foodeals.location.domain.entities.*;
 import net.foodeals.offer.domain.entities.Offer;
 import net.foodeals.offer.domain.entities.PublisherInfo;
 import net.foodeals.offer.domain.repositories.OfferRepository;
@@ -118,7 +115,7 @@ public class OrganizationEntityService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "internal server error ");
         }
 
-        AddressRequest addressRequest = new AddressRequest(createAnOrganizationEntityDto.getEntityAddressDto().getCountry(), createAnOrganizationEntityDto.getEntityAddressDto().getAddress(), createAnOrganizationEntityDto.getEntityAddressDto().getCity(), createAnOrganizationEntityDto.getEntityAddressDto().getRegion(), createAnOrganizationEntityDto.getEntityAddressDto().getIframe());
+        AddressRequest addressRequest = new AddressRequest(createAnOrganizationEntityDto.getEntityAddressDto().getCountry(), createAnOrganizationEntityDto.getEntityAddressDto().getAddress(), createAnOrganizationEntityDto.getEntityAddressDto().getState(), createAnOrganizationEntityDto.getEntityAddressDto().getCity(), createAnOrganizationEntityDto.getEntityAddressDto().getRegion(), createAnOrganizationEntityDto.getEntityAddressDto().getIframe());
         Address address = this.addressService.create(addressRequest);
         Contact contact = Contact.builder().name(createAnOrganizationEntityDto.getContactDto().getName())
                 .email(createAnOrganizationEntityDto.getContactDto().getEmail())
@@ -164,7 +161,8 @@ public class OrganizationEntityService {
                     CoveredZones coveredZone = CoveredZones.builder().organizationEntity(organizationEntity)
                             .build();
                     Country country = this.countryService.findByName(coveredZonesDto.getCountry());
-                    City city = country.getCities().stream().filter(c -> c.getName().equals(coveredZonesDto.getCity().toLowerCase())).findFirst().get();
+                    State state = country.getStates().stream().filter(s -> s.getName().equals(coveredZonesDto.getState().toLowerCase())).findFirst().get();
+                    City city = state.getCities().stream().filter(c -> c.getName().equals(coveredZonesDto.getCity().toLowerCase())).findFirst().get();
                     Region region = city.getRegions().stream().filter(r -> r.getName().equals(regionName.toLowerCase())).findFirst().get();
                     coveredZone.setRegion(region);
                     this.coveredZonesService.save(coveredZone);
@@ -208,7 +206,7 @@ public class OrganizationEntityService {
     }
 
     @Transactional
-    public OrganizationEntity updateOrganizationEntity(UUID id, CreateAnOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
+    public OrganizationEntity updateOrganizationEntity(UUID id, CreateAnOrganizationEntityDto updateOrganizationEntityDto, MultipartFile logo, MultipartFile cover) throws DocumentException, IOException {
         try {
             dtoProcessor.processDto(updateOrganizationEntityDto);
         } catch(Exception e) {
@@ -266,7 +264,8 @@ public class OrganizationEntityService {
                 for (String regionName : coveredZonesDto.getRegions()) {
                     CoveredZones coveredZone = CoveredZones.builder().organizationEntity(organizationEntity).build();
                     Country country = this.countryService.findByName(coveredZonesDto.getCountry());
-                    City city = country.getCities().stream().filter(c -> c.getName().equalsIgnoreCase(coveredZonesDto.getCity())).findFirst().orElseThrow(() -> new RuntimeException("City not found"));
+                    State state = country.getStates().stream().filter(s -> s.getName().equalsIgnoreCase(coveredZonesDto.getState())).findFirst().orElseThrow(() -> new RuntimeException("State not found"));
+                    City city = state.getCities().stream().filter(c -> c.getName().equalsIgnoreCase(coveredZonesDto.getCity())).findFirst().orElseThrow(() -> new RuntimeException("City not found"));
                     Region region = city.getRegions().stream().filter(r -> r.getName().equalsIgnoreCase(regionName)).findFirst().orElseThrow(() -> new RuntimeException("Region not found"));
                     coveredZone.setRegion(region);
                     this.coveredZonesService.save(coveredZone);
@@ -424,15 +423,15 @@ public class OrganizationEntityService {
             if (!organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER)) {
                 this.contractService.validateContract(organizationEntity.getContract());
             }
-            if (organizationEntity.getType().equals(EntityType.PARTNER_WITH_SB)) {
-                // TODO : should be removed after tests.
-                try {
-                    this.createSubentity(organizationEntity);
-                } catch (BadRequestException e) {
-                    System.out.println("Error creating subEntity : ");
-                    e.printStackTrace();
-                }
-            }
+//            if (organizationEntity.getType().equals(EntityType.PARTNER_WITH_SB)) {
+//                // TODO : should be removed after tests.
+//                try {
+//                    this.createSubentity(organizationEntity);
+//                } catch (BadRequestException e) {
+//                    System.out.println("Error creating subEntity : ");
+//                    e.printStackTrace();
+//                }
+//            }
         }
         organizationEntity.getContract().setContractStatus(ContractStatus.VALIDATED);
         this.organizationEntityRepository.save(organizationEntity);
@@ -450,7 +449,7 @@ public class OrganizationEntityService {
 
         for (int i = 0; i < 2; i++) {
             Set<Solution> partnerSolutions = new HashSet<>(organizationEntity.getSolutions());
-            AddressRequest addressRequest = new AddressRequest("morocco", "", "casablanca", "maarif", "tes" + i);
+            AddressRequest addressRequest = new AddressRequest("morocco", "", "casablanca-settat", "casablanca", "maarif", "tes" + i);
             Contact contact = new Contact();
             contact.setName(new Name("John " + i, "Doe " + i));
             contact.setPhone("+212" + (int) (Math.random() * 1000000000));
@@ -643,7 +642,14 @@ public class OrganizationEntityService {
 
     @Transactional
     public UUID createAssociation(CreateAssociationDto createAssociationDto, MultipartFile logo, MultipartFile cover) {
-        AddressRequest addressRequest = new AddressRequest(createAssociationDto.associationAddress().getCountry(), createAssociationDto.associationAddress().getAddress(), createAssociationDto.associationAddress().getCity(), createAssociationDto.associationAddress().getRegion(), createAssociationDto.associationAddress().getIframe());
+            AddressRequest addressRequest = new AddressRequest(
+                createAssociationDto.associationAddress().getCountry(),
+                createAssociationDto.associationAddress().getAddress(),
+                createAssociationDto.associationAddress().getState(), // Added state here
+                createAssociationDto.associationAddress().getCity(),
+                createAssociationDto.associationAddress().getRegion(),
+                createAssociationDto.associationAddress().getIframe()
+            );
         Address address = this.addressService.create(addressRequest);
         Set<Activity> activities = this.activityService.getActivitiesByName(createAssociationDto.activities());
         Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAssociationDto.solutions());
@@ -680,7 +686,7 @@ public class OrganizationEntityService {
         OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(organizationId).orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
 
         // Update Address
-        AddressRequest addressRequest = new AddressRequest(updateAssociationDto.associationAddress().getCountry(), updateAssociationDto.associationAddress().getAddress(), updateAssociationDto.associationAddress().getCity(), updateAssociationDto.associationAddress().getRegion(), updateAssociationDto.associationAddress().getIframe());
+        AddressRequest addressRequest = new AddressRequest(updateAssociationDto.associationAddress().getCountry(), updateAssociationDto.associationAddress().getAddress(), updateAssociationDto.associationAddress().getState(), updateAssociationDto.associationAddress().getCity(), updateAssociationDto.associationAddress().getRegion(), updateAssociationDto.associationAddress().getIframe());
         Address address = this.addressService.update(organizationEntity.getAddress().getId(), addressRequest);
         // Update Activities
         List<String> activitiesNames = updateAssociationDto.activities();
@@ -751,38 +757,6 @@ public class OrganizationEntityService {
         Contract contract = this.contractService.updateAssociationContract(updateAssociationDto, organizationEntity);
         organizationEntity =  this.organizationEntityRepository.save(organizationEntity);
 
-
-        System.out.println("Updated Organization Details:");
-        System.out.println("ID: " + organizationEntity.getId());
-        System.out.println("Company Name: " + organizationEntity.getName());
-        System.out.println("Entity Type: " + organizationEntity.getType());
-        System.out.println("Commercial Number (PV): " + organizationEntity.getCommercialNumber());
-
-        System.out.println("\nUpdated Address:");
-        System.out.println("Country: " + organizationEntity.getAddress().getRegion().getCity().getCountry());
-        System.out.println("Address: " + organizationEntity.getAddress().getAddress());
-        System.out.println("City: " + organizationEntity.getAddress().getRegion().getCity());
-        System.out.println("Region: " + organizationEntity.getAddress().getRegion());
-        System.out.println("Iframe: " + organizationEntity.getAddress().getIframe());
-
-        System.out.println("\nUpdated Activities:");
-        organizationEntity.getActivities().forEach(activity -> System.out.println("- " + activity.getName()));
-
-        System.out.println("\nUpdated Solutions:");
-        organizationEntity.getSolutions().forEach(solution -> System.out.println("- " + solution.getName()));
-
-        System.out.println("\nUpdated Contact:");
-        Contact updatedContact = organizationEntity.getContacts().getFirst();
-        System.out.println("Name: " + updatedContact.getName().firstName() + " " + updatedContact.getName().lastName());
-        System.out.println("Email: " + updatedContact.getEmail());
-        System.out.println("Phone: " + updatedContact.getPhone());
-
-        System.out.println("\nUpdated Contract:");
-        Contract updatedContract = organizationEntity.getContract();
-        System.out.println("Max Number of Sub Entities: " + updatedContract.getMaxNumberOfSubEntities());
-        System.out.println("Manager ID: " + updatedContract.getUserContracts().getUser().getId());
-
-        System.out.println("\nUpdate operation completed. Organization saved with ID: " + organizationEntity.getId());
         return this.organizationEntityRepository.save(organizationEntity).getId();
     }
 

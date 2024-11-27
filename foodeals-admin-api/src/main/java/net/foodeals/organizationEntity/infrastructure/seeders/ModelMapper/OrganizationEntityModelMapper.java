@@ -90,7 +90,7 @@ public class OrganizationEntityModelMapper {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(manager.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            UserInfoDto userInfoDto = new UserInfoDto(createdAt, manager.getId(), manager.getRole().getName(), manager.getName(), manager.getAddress().getRegion().getCity().getName(), manager.getAddress().getRegion().getName(),manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
+            UserInfoDto userInfoDto = new UserInfoDto(createdAt, manager.getId(), manager.getRole().getName(), manager.getName(), null, null,manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
             formData.setManager(userInfoDto);
             formData.setActivities(organizationEntity.getActivities().stream().map(Activity::getName).collect(Collectors.toList()));
             formData.setMaxNumberOfSubEntities(organizationEntity.getContract().getMaxNumberOfSubEntities());
@@ -140,7 +140,8 @@ public class OrganizationEntityModelMapper {
             EntityAddressDto dto = new EntityAddressDto();
 
             dto.setAddress(address.getAddress());
-            dto.setCountry(address.getRegion().getCity().getCountry().getName());
+            dto.setCountry(address.getRegion().getCity().getState().getCountry().getName());
+            dto.setState(address.getRegion().getCity().getState().getName());
             dto.setCity(address.getRegion().getCity().getName());
             dto.setRegion(address.getRegion().getName());
             dto.setIframe(address.getIframe());
@@ -381,7 +382,7 @@ public class OrganizationEntityModelMapper {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(manager.getCreatedAt(), ZoneId.systemDefault());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
             String createdAt = localDateTime.format(formatter);
-            UserInfoDto userInfoDto = new UserInfoDto(createdAt, manager.getId(), manager.getRole().getName(), manager.getName(), manager.getAddress().getRegion().getCity().getName(), manager.getAddress().getRegion().getName(), manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
+            UserInfoDto userInfoDto = new UserInfoDto(createdAt, manager.getId(), manager.getRole().getName(), manager.getName(), null, null, manager.getAvatarPath(), manager.getEmail(), manager.getPhone());
             formData.setManager(userInfoDto);
             formData.setNumberOfPoints(organizationEntity.getContract().getMaxNumberOfSubEntities());
             // Map EntityAddressDto
@@ -454,7 +455,7 @@ public class OrganizationEntityModelMapper {
         List<String> solutionsNames = organizationEntity.getSolutions().stream().map(solution -> solution.getName()).toList();
         deliveryPartnerDto.setSolutions(solutionsNames);
         int numberOfCoveredCities = organizationEntity.getCoveredZones().stream().map(coveredZone -> coveredZone.getRegion().getCity().getName()).collect(Collectors.toSet()).size();
-        int totalNumberOfCities = this.countryService.countTotalCitiesByCountryName(organizationEntity.getAddress().getRegion().getCity().getCountry().getName());
+        int totalNumberOfCities = this.countryService.countTotalCitiesByCountryName(organizationEntity.getAddress().getRegion().getCity().getState().getCountry().getName());
 
         DistributionType distribution = totalNumberOfCities == numberOfCoveredCities ? DistributionType.EVERYWHERE : DistributionType.MULTI_CITY;
         deliveryPartnerDto.setDistribution(distribution);

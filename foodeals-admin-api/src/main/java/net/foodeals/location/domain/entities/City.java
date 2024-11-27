@@ -28,7 +28,7 @@ public class City extends AbstractEntity<UUID> {
     private String name;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Country country;
+    private State state;
 
     @Builder.Default
     @OneToMany(mappedBy = "city", fetch = FetchType.EAGER, cascade = CascadeType.ALL)

@@ -4,6 +4,7 @@ import net.foodeals.processors.annotations.Processable;
 
 public record UserAddress(
         @Processable String country,
+        @Processable String state,
         @Processable String city,
         @Processable String region
 ) {

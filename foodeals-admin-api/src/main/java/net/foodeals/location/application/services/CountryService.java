@@ -4,6 +4,7 @@ import net.foodeals.common.contracts.CrudService;
 import net.foodeals.location.application.dtos.requests.CountryRequest;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Country;
+import net.foodeals.location.domain.entities.State;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
@@ -19,7 +20,7 @@ public interface CountryService extends CrudService<Country, UUID, CountryReques
 
     public Long count();
 
-    List<City> getCities(UUID id);
+    List<State> getStates(UUID id);
 
     boolean existsByName(String name);
 }
