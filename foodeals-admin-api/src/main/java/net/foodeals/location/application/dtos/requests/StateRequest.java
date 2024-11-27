@@ -5,9 +5,8 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-//public record StateRequest(
-//        @NotBlank String name,
-//        @NotBlank String code,
-//        @NotNull UUID countryId
-//        ) {
-//}
+public record StateRequest(
+        @NotBlank String name,
+        @NotNull String country
+        ) {
+}

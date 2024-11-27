@@ -106,7 +106,9 @@ public class UserModelMapperConfig {
                 map(source.getAddress(), destination.getAddress());
                 map(source.getRegion().getCity().getName(), destination.getCity());
                 map(source.getRegion().getName(), destination.getRegion());
-                map(source.getRegion().getCity().getCountry().getName(), destination.getCountry());
+                map(source.getRegion().getCity().getState().getCountry().getName(), destination.getCountry());
+                map(source.getRegion().getCity().getState().getName(), destination.getState());
+
             }
         });
     }

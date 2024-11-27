@@ -14,6 +14,9 @@ public class CoveredZonesDto {
     private String country;
 
     @Processable
+    private String state;
+
+    @Processable
     private String city;
 
     @Processable

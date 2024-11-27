@@ -9,6 +9,8 @@ public class ClientAddressDto {
 
     private String city;
 
+    private String state;
+
     private String region;
 
     private String address;

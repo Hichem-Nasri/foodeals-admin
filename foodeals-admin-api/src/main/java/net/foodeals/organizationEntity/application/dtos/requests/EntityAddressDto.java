@@ -25,6 +25,10 @@ public class EntityAddressDto {
     @NotNull
     private String city;
 
+    @Processable
+    @NotNull
+    private String state;
+
 
     @Processable
     @NotNull

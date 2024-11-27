@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.UUID;
 
 public interface CountryRepository extends BaseRepository<Country, UUID> {
-    @Query("SELECT COUNT(c) FROM City c WHERE c.country.name = :countryName")
+    @Query("SELECT COUNT(c) FROM City c WHERE c.state.country.name = :countryName")
     int countTotalCitiesByCountryName(@Param("countryName") String countryName);
 
     Country findByName(String name);

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import net.foodeals.location.application.dtos.requests.CountryRequest;
 import net.foodeals.location.application.dtos.responses.CityResponse;
 import net.foodeals.location.application.dtos.responses.CountryResponse;
+import net.foodeals.location.application.dtos.responses.StateResponse;
 import net.foodeals.location.application.services.CountryService;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
@@ -56,12 +57,12 @@ public class CountryController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/cities")
-    public ResponseEntity<List<CityResponse>> getCities(@PathVariable("id") UUID id
+    @GetMapping("/{id}/states")
+    public ResponseEntity<List<StateResponse>> getStates(@PathVariable("id") UUID id
     ) {
-        final List<CityResponse> responses = service.getCities(id)
+        final List<StateResponse> responses = service.getStates(id)
                 .stream()
-                .map(city -> mapper.map(city, CityResponse.class))
+                .map(state -> mapper.map(state, StateResponse.class))
                 .toList();
         return ResponseEntity.ok(responses);
     }

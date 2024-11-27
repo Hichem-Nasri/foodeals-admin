@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-@RequestMapping("/api/v1/regions")
+@RequestMapping("/v1/regions")
 @AllArgsConstructor
 @RestController
 public class RegionController {

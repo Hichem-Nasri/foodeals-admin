@@ -66,6 +66,7 @@ public class ContractService {
         this.userContractService = userContractService;
     }
 
+        @Transactional
         public Contract createPartnerContract(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
         User user = this.userService.findById(createAnOrganizationEntityDto.getManagerId());
         UserContract userContract = UserContract.builder().user(user).build();
