@@ -10,9 +10,12 @@ import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.location.domain.entities.City;
 import net.foodeals.location.domain.entities.Region;
+import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
+import net.foodeals.payment.application.dto.response.PartnerInfoDto;
 import net.foodeals.user.application.dtos.requests.UserFilter;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.*;
@@ -66,8 +69,84 @@ class UserServiceImpl implements UserService {
         dto.setNationality(user.getNationality());
 
         dto.setWorkingHours(mapWorkingHoursToDTO(user.getWorkingHours()));
+        dto.setOrganizationInfo(mapUserToOrganizationInfo(user));
 
         return dto;
+    }
+    
+    public OrganizationInfo mapUserToOrganizationInfo(User user) {
+        Contact responsibleContact = null;
+        String phone = null;
+        String email = null;
+
+        PartnerInfoDto organizationPartner = user.getOrganizationEntity() != null
+                ? new PartnerInfoDto(
+                        user.getOrganizationEntity().getId(),
+                        user.getOrganizationEntity().getName(),
+                        user.getOrganizationEntity().getAvatarPath()
+                )
+                : null;
+
+        PartnerInfoDto subentityPartner = user.getSubEntity() != null
+                ? new PartnerInfoDto(
+                        user.getSubEntity().getId(),
+                        user.getSubEntity().getName(),
+                        user.getSubEntity().getAvatarPath()
+                )
+                : null;
+
+/*         String rayon = user.getRayon() != null ? user.getRayon().getName() : null;
+ */
+        SimpleUserDto manager = user.getResponsible() != null
+                ? new SimpleUserDto(
+                        user.getResponsible().getId(),
+                        user.getResponsible().getName(),
+                        user.getResponsible().getAvatarPath()
+                )
+                : null;
+
+        String city = user.getAddress() != null && user.getAddress().getRegion() != null
+                ? user.getAddress().getRegion().getCity().getName()
+                : null;
+
+        String region = user.getAddress() != null && user.getAddress().getRegion() != null
+                ? user.getAddress().getRegion().getName()
+                : null;
+
+        List<String> solutions = user.getSolutions() != null
+                ? user.getSolutions().stream()
+                        .map(Solution::getName)
+                        .collect(Collectors.toList())
+                : null;
+
+        if (user.getSubEntity() != null && !user.getSubEntity().getContacts().isEmpty()) {
+            responsibleContact = user.getSubEntity().getContacts().stream()
+                    .filter(Contact::isResponsible)
+                    .findFirst()
+                    .orElse(user.getSubEntity().getContacts().get(0));
+        } else if (user.getOrganizationEntity() != null && !user.getOrganizationEntity().getContacts().isEmpty()) {
+            responsibleContact = user.getOrganizationEntity().getContacts().stream()
+                    .filter(Contact::isResponsible)
+                    .findFirst()
+                    .orElse(user.getOrganizationEntity().getContacts().get(0));
+        }
+
+        if (responsibleContact != null) {
+            phone = responsibleContact.getPhone();
+            email = responsibleContact.getEmail();
+        }
+
+        return new OrganizationInfo(
+                organizationPartner,
+                subentityPartner,
+                null,
+                manager,
+                city,
+                region,
+                solutions,
+                phone,
+                email
+        );
     }
 
     public List<WorkingHoursDTO> mapWorkingHoursToDTO(List<WorkingHours> workingHours) {

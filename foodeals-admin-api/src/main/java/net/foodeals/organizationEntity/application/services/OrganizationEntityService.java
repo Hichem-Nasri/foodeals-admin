@@ -47,6 +47,9 @@ import net.foodeals.payment.domain.entities.PartnerCommissions;
 import net.foodeals.payment.domain.entities.PartnerInfo;
 import net.foodeals.payment.domain.entities.Enum.PaymentStatus;
 import net.foodeals.processors.classes.DtoProcessor;
+import net.foodeals.product.application.services.impl.RayonService;
+import net.foodeals.product.domain.entities.Rayon;
+import net.foodeals.product.domain.repositories.RayonRepository;
 import net.foodeals.schedule.utils.PartnerCommissionsUtil;
 import net.foodeals.user.application.dtos.requests.UserAddress;
 import net.foodeals.user.application.dtos.requests.UserRequest;
@@ -98,6 +101,7 @@ public class OrganizationEntityService {
     private final OrderRepository orderRepository;
     private final SubEntityRepository subEntityRepository;
     private final DeliveryRepository deliveryRepository;
+    private final RayonRepository rayonService;
 
     public OrganizationEntity save(OrganizationEntity organizationEntity) {
         return this.organizationEntityRepository.save(organizationEntity);
@@ -473,7 +477,7 @@ public class OrganizationEntityService {
 
             organizationEntity.getSubEntities().add(subEntity);
             Random random = new Random();
-            String[] firstNames = {"test" + i};
+            String[] firstNames = {RandomStringUtils.random(10)};
             String[] lastNames = {""};
             for (int o = 0; o < 1; o++) {
                 UserRequest userRequest = new UserRequest(
@@ -497,6 +501,13 @@ public class OrganizationEntityService {
                 user.setAvatarPath(avatarPaths[random.nextInt(avatarPaths.length)]);
                 subEntity.setUsers(new ArrayList<>(List.of(user)));
                 user.setSolutions(new HashSet<>(organizationEntity.getSolutions()));
+                user = this.userService.save(user);
+                Set<Solution> partnerSolutionss = new HashSet<>(organizationEntity.getSolutions());
+                User finalUser = user;
+                partnerSolutionss.forEach(solution -> {
+                    solution.getUsers().add(finalUser);
+                    this.solutionService.save(solution);
+                });
                 userService.save(user);
             }
             this.organizationEntityRepository.save(organizationEntity);
