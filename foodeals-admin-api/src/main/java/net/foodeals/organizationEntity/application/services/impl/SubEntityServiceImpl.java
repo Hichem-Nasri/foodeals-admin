@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import net.foodeals.common.dto.request.UpdateReason;
 import net.foodeals.common.dto.response.UpdateDetails;
 import net.foodeals.common.entities.DeletionReason;
+import net.foodeals.location.domain.entities.City;
 import net.foodeals.organizationEntity.application.dtos.requests.SubEntityFilter;
 import net.foodeals.organizationEntity.application.dtos.requests.SubEntityRequest;
 import net.foodeals.organizationEntity.application.dtos.responses.SubEntityResponse;
@@ -107,5 +108,10 @@ public class SubEntityServiceImpl implements SubEntityService {
     @Override
     public Page<SubEntity> subEntitiesFilters(Pageable pageable, UUID id, SubEntityFilter filter) {
         return this.subEntityRepository.findWithFilters(id, filter, pageable);    }
+
+    @Override
+    public Page<City> searchCitiesBySubEntityAddress(String cityName, UUID organizationId, Pageable pageable) {
+        return this.subEntityRepository.findCitiesByOrganizationIdAndCityName(organizationId, cityName,pageable);
+    }
 
 }

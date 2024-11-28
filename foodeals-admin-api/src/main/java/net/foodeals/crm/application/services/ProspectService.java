@@ -10,10 +10,13 @@ import net.foodeals.crm.application.dto.responses.ProspectResponse;
 import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
 import net.foodeals.crm.domain.entities.enums.ProspectType;
+import net.foodeals.location.domain.entities.City;
+import net.foodeals.location.domain.entities.Region;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ProspectService extends CrudService<ProspectResponse, UUID, ProspectRequest> {
@@ -39,4 +42,7 @@ public interface ProspectService extends CrudService<ProspectResponse, UUID, Pro
     Page<ProspectResponse> findAllWithFilters(ProspectFilter filter, Pageable pageable);
 
     Page<UpdateDetails> getDeletionDetails(UUID uuid, Pageable pageable);
+
+    Page<City> searchCitiesByProspectAddress(List<ProspectType> types, String cityName, String countryName, Pageable pageable);
+    Page<Region> searchRegionsByProspectAddress(List<ProspectType> types, String regionName, String countryName, Pageable pageable);
 }

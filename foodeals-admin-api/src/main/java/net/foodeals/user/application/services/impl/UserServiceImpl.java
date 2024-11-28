@@ -8,7 +8,10 @@ import net.foodeals.common.entities.DeletionReason;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.domain.entities.Address;
+import net.foodeals.location.domain.entities.City;
+import net.foodeals.location.domain.entities.Region;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.user.application.dtos.requests.UserFilter;
 import net.foodeals.user.application.dtos.requests.UserRequest;
@@ -144,8 +147,8 @@ class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Page<User> filterUsers(UserSearchFilter filter, Pageable pageable) {
-        return repository.findWithFilters(filter, pageable);
+    public Page<User> filterUsersOrganization(UserSearchOrganizationFilter filter, Pageable pageable) {
+        return repository.findWithFiltersOrganization(filter, pageable);
     }
 
 
@@ -250,6 +253,31 @@ class UserServiceImpl implements UserService {
         List<DeletionReason> content = deletionReasons.subList(start, end);
 
         return new PageImpl<>(content, page, deletionReasons.size()).map(d -> new UpdateDetails(d.getType(), d.getDetails(), d.getReason(), Date.from(d.getCreatedAt())));
+    }
+
+    @Override
+    public Page<City> findCitiesUsersByEntityTypeAndCityName(UUID id, String cityName, Pageable pageable) {
+        return this.repository.findCitiesUsersByOrganizationIdAndCityName(id, cityName, pageable);
+    }
+
+    @Override
+    public Page<Region> findRegionsUsersByEntityTypeAndRegionName(UUID id, String regionName, Pageable pageable) {
+        return this.repository.findRegionsUsersByOrganizationIdAndRegionName(id, regionName, pageable);
+    }
+
+    @Override
+    public Page<Region> findRegionsUsersBySubentityAndRegionName(UUID id, String regionName, Pageable pageable) {
+        return this.repository.findRegionsUsersBySubentityIdAndRegionName(id, regionName, pageable);
+    }
+
+    @Override
+    public Page<User> filterUsersSubentity(UserSearchSubentityFilters filter, Pageable pageable) {
+        return this.repository.findWithFiltersSubentity(filter, pageable);
+    }
+
+    @Override
+    public Page<City> findCitiesUsersBySubentityAndCityName(UUID id, String cityName, Pageable pageable) {
+        return this.repository.findCitiesUsersBySubentityIdAndCityName(id, cityName, pageable);
     }
 
     @Override
