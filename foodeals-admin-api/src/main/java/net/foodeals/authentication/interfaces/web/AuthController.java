@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.authentication.application.dtos.requests.LoginRequest;
 import net.foodeals.authentication.application.dtos.requests.RegisterRequest;
+import net.foodeals.authentication.application.dtos.requests.VerifyTokenRequest;
 import net.foodeals.authentication.application.dtos.responses.AuthenticationResponse;
 import net.foodeals.authentication.application.dtos.responses.LoginResponse;
 import net.foodeals.authentication.application.services.AuthenticationService;
@@ -32,9 +33,9 @@ public class AuthController {
     }
 
 
-//    @PostMapping("verify-token")
-//    public ResponseEntity<Boolean> verifyToken(@RequestBody String token) {
-//        boolean isValid = service.verifyToken(token);
-//        return ResponseEntity.ok(isValid);
-//    }
+    @PostMapping("verify-token")
+    public ResponseEntity<Boolean> verifyToken(@RequestBody VerifyTokenRequest verifyTokenRequest) {
+        boolean isValid = service.verifyToken(verifyTokenRequest.token());
+        return ResponseEntity.ok(isValid);
+    }
 }
