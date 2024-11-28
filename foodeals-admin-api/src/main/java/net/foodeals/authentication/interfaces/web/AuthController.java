@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import net.foodeals.authentication.application.dtos.requests.LoginRequest;
 import net.foodeals.authentication.application.dtos.requests.RegisterRequest;
 import net.foodeals.authentication.application.dtos.responses.AuthenticationResponse;
+import net.foodeals.authentication.application.dtos.responses.LoginResponse;
 import net.foodeals.authentication.application.services.AuthenticationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,8 +26,15 @@ public class AuthController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody @Valid LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
         return ResponseEntity.ok(
                 service.login(request));
     }
+
+
+//    @PostMapping("verify-token")
+//    public ResponseEntity<Boolean> verifyToken(@RequestBody String token) {
+//        boolean isValid = service.verifyToken(token);
+//        return ResponseEntity.ok(isValid);
+//    }
 }
