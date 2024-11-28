@@ -15,6 +15,7 @@ import net.foodeals.order.domain.entities.Order;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
+import net.foodeals.product.domain.entities.Rayon;
 import net.foodeals.user.domain.entities.enums.Gender;
 import net.foodeals.user.domain.valueObjects.Name;
 import org.springframework.security.core.GrantedAuthority;
@@ -113,6 +114,18 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @OneToMany(mappedBy = "creator")
     private List<Prospect> createdProspects;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "rayon_id")
+    private Rayon rayon;
+
+    public Rayon getRayon() {
+        return rayon;
+    }
+
+    public void setRayon(Rayon rayon) {
+        this.rayon = rayon;
+    }
+
 
     @OneToMany(mappedBy = "lead")
     private List<Event> events;
@@ -120,12 +133,23 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "responsible_id")
+    private User responsible; // The user who is responsible for this user
+
+    @OneToMany(mappedBy = "responsible", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<User> managedUsers = new ArrayList<>(); // Users managed by this user
+
+
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<DeletionReason> deletionReasons = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
+
 
     public void setNationality(String nationality) {
         this.nationality = nationality;

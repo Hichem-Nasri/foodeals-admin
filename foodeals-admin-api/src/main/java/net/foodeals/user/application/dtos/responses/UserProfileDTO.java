@@ -24,5 +24,6 @@ public class UserProfileDTO {
     private Gender gender;
     private String nationalId;
     private String nationality;
+    private OrganizationInfo organizationInfo;
     private List<WorkingHoursDTO> workingHours;
 }

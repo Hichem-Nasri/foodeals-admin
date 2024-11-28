@@ -6,12 +6,18 @@ import net.foodeals.common.dto.response.UpdateDetails;
 import net.foodeals.location.application.dtos.responses.CityResponse;
 import net.foodeals.organizationEntity.application.dtos.requests.SubEntityFilter;
 import net.foodeals.organizationEntity.application.dtos.responses.AssociationsSubEntitiesDto;
+import net.foodeals.organizationEntity.application.dtos.responses.OrganizationSubEntitiesResponse;
 import net.foodeals.organizationEntity.application.dtos.responses.PartnerSubEntityDto;
+import net.foodeals.organizationEntity.application.dtos.responses.SubEntityResponse;
+import net.foodeals.organizationEntity.application.services.OrganizationEntityService;
 import net.foodeals.organizationEntity.application.services.SubEntityService;
+import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.entities.enums.OrganizationsType;
 import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
+import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
+import net.foodeals.payment.application.dto.response.PartnerInfoDto;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,9 +40,10 @@ public class SubEntityController {
 
     private final SubEntityService subEntityService;
     private final ModelMapper mapper;
+    private final OrganizationEntityRepository organizationEntityRepository;
 
     @GetMapping("/organizations/{id}")
-    public ResponseEntity<Page<?>> partnerSubEntities(
+    public ResponseEntity<OrganizationSubEntitiesResponse> partnerSubEntities(
             Pageable pageable,
             @PathVariable("id") UUID id,
             @RequestParam(value = "startDate", required = false)
@@ -91,9 +98,11 @@ public class SubEntityController {
 
         // Fetch the sub-entities based on the filter
         Page<SubEntity> subEntities = this.subEntityService.subEntitiesFilters(pageable, id, filter);
+        OrganizationEntity organizationEntity = this.organizationEntityRepository.getEntity(id).orElseThrow(() -> new RuntimeException("Organization entity not found"));
+        PartnerInfoDto partnerInfo = new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
         return switch (organizationsType) {
-            case ASSOCIATIONS -> new ResponseEntity<>(subEntities.map(subEntity -> this.mapper.map(subEntity, AssociationsSubEntitiesDto.class)), HttpStatus.OK);
-            case PARTNERS -> new ResponseEntity<>(subEntities.map(subEntity -> this.mapper.map(subEntity, PartnerSubEntityDto.class)), HttpStatus.OK);
+            case ASSOCIATIONS -> new ResponseEntity<>(new OrganizationSubEntitiesResponse(partnerInfo, subEntities.map(subEntity -> this.mapper.map(subEntity, AssociationsSubEntitiesDto.class))), HttpStatus.OK);
+            case PARTNERS -> new ResponseEntity<>(new OrganizationSubEntitiesResponse(partnerInfo, subEntities.map(subEntity -> this.mapper.map(subEntity, PartnerSubEntityDto.class))), HttpStatus.OK);
             default -> null;
         };
     }

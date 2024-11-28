@@ -1,4 +1,2 @@
-package net.foodeals.organizationEntity.application.dtos.responses;
-
-public record SubEntityResponse() {
+package net.foodeals.organizationEntity.application.dtos.responses;public record SubEntityResponse() {
 }
