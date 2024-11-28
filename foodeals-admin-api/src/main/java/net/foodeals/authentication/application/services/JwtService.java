@@ -16,5 +16,7 @@ public interface JwtService {
 
     Long getExpirationTime();
 
+    long getAccessTokenExpirationSeconds();
+
     Boolean isTokenValid(final String token, final UserDetails userDetails);
 }
