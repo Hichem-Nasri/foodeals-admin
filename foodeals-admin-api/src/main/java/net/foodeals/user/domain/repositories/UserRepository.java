@@ -1,8 +1,12 @@
 package net.foodeals.user.domain.repositories;
 
 import net.foodeals.common.contracts.BaseRepository;
+import net.foodeals.location.domain.entities.City;
+import net.foodeals.location.domain.entities.Region;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.user.application.dtos.requests.UserFilter;
-import net.foodeals.user.application.dtos.responses.UserSearchFilter;
+import net.foodeals.user.application.dtos.responses.UserSearchOrganizationFilter;
+import net.foodeals.user.application.dtos.responses.UserSearchSubentityFilters;
 import net.foodeals.user.domain.entities.Role;
 import net.foodeals.user.domain.entities.User;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +14,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,8 +25,17 @@ public interface UserRepository extends BaseRepository<User, Integer> {
             "JOIN u.organizationEntity oe " +
             "WHERE (:#{#filter.query} IS NULL OR CONCAT(u.name.firstName, ' ', u.name.lastName) LIKE CONCAT('%', :#{#filter.query}, '%')) " +
             "AND (:#{#filter.types} IS NULL OR oe.type IN :#{#filter.types}) ")
-    Page<User> findWithFilters(
-            @Param("filter") UserSearchFilter filter,
+    Page<User> findWithFiltersOrganization(
+            @Param("filter") UserSearchOrganizationFilter filter,
+            Pageable pageable
+    );
+
+    @Query("SELECT u FROM User u " +
+            "JOIN u.subEntity se " +
+            "WHERE (:#{#filter.query} IS NULL OR CONCAT(u.name.firstName, ' ', u.name.lastName) LIKE CONCAT('%', :#{#filter.query}, '%')) " +
+            "AND (:#{#filter.organizationId} IS NULL OR se.organizationEntity.id = :#{#filter.organizationId}) ")
+    Page<User> findWithFiltersSubentity(
+            @Param("filter") UserSearchSubentityFilters filter,
             Pageable pageable
     );
 
@@ -111,4 +125,24 @@ public interface UserRepository extends BaseRepository<User, Integer> {
             @Param("filter") UserFilter filter,
             Pageable pageable
     );
+
+    @Query("SELECT DISTINCT u.address.region.city FROM User u " +
+            "WHERE u.organizationEntity.id = :organizationId " +
+            "AND LOWER(u.address.region.city.name) LIKE LOWER(CONCAT('%', :cityName, '%')) ")
+    Page<City> findCitiesUsersByOrganizationIdAndCityName(@Param("organizationId") UUID organizationId, @Param("cityName") String cityName, Pageable pageable);
+
+    @Query("SELECT DISTINCT u.address.region FROM User u " +
+            "WHERE u.organizationEntity.id = :organizationId " +
+            "AND LOWER(u.address.region.name) LIKE LOWER(CONCAT('%', :regionName, '%')) ")
+    Page<Region> findRegionsUsersByOrganizationIdAndRegionName(@Param("organizationId") UUID organizationId, @Param("regionName") String regionName, Pageable pageable);
+
+    @Query("SELECT DISTINCT u.address.region.city FROM User u " +
+            "WHERE u.subEntity.id = :subentityId " +
+            "AND LOWER(u.address.region.city.name) LIKE LOWER(CONCAT('%', :cityName, '%')) ")
+    Page<City> findCitiesUsersBySubentityIdAndCityName(@Param("subentityId") UUID subentityId, @Param("cityName") String cityName, Pageable pageable);
+
+    @Query("SELECT DISTINCT u.address.region FROM User u " +
+            "WHERE u.subEntity.id = :subentityId " +
+            "AND LOWER(u.address.region.name) LIKE LOWER(CONCAT('%', :regionName, '%')) ")
+    Page<Region> findRegionsUsersBySubentityIdAndRegionName(@Param("subentityId") UUID subentityId, @Param("regionName") String regionName, Pageable pageable);
 }

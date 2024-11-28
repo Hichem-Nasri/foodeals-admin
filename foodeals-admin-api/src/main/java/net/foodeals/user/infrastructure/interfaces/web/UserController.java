@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.common.dto.request.UpdateReason;
 import net.foodeals.common.dto.response.UpdateDetails;
+import net.foodeals.location.application.dtos.responses.CityResponse;
+import net.foodeals.location.application.dtos.responses.RegionResponse;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
@@ -40,13 +42,24 @@ public class UserController {
     private final ModelMapper mapper;
     private final OrganizationEntityRepository organizationRepo;
 
-    @GetMapping("/search")
-    public ResponseEntity<Page<SimpleUserDto>> searchUsers(
+    @GetMapping("organizations/search")
+    public ResponseEntity<Page<SimpleUserDto>> searchUsersOrganizations(
             @RequestParam(required = false, name = "name") String name,
             @RequestParam(required = false, name = "types") List<EntityType> types,
             Pageable pageable) {
-        UserSearchFilter filter = new UserSearchFilter(name, types);
-        Page<User> users = service.filterUsers(filter, pageable);
+        UserSearchOrganizationFilter filter = new UserSearchOrganizationFilter(name, types);
+        Page<User> users = service.filterUsersOrganization(filter, pageable);
+        Page<SimpleUserDto> userResponses = users.map(u -> this.mapper.map(u, SimpleUserDto.class));
+        return ResponseEntity.ok(userResponses);
+    }
+
+    @GetMapping("/subentities/search")
+    public ResponseEntity<Page<SimpleUserDto>> searchUsersSubentities(
+            @RequestParam(required = false, name = "name") String name,
+            @RequestParam(required = true, name = "organizationId") UUID organizationId,
+            Pageable pageable) {
+        UserSearchSubentityFilters filter = new UserSearchSubentityFilters(name, organizationId);
+        Page<User> users = service.filterUsersSubentity(filter, pageable);
         Page<SimpleUserDto> userResponses = users.map(u -> this.mapper.map(u, SimpleUserDto.class));
         return ResponseEntity.ok(userResponses);
     }
@@ -219,4 +232,40 @@ public class UserController {
         return ResponseEntity.ok(this.service.mapUserToUserProfileDTO(user));
     }
 
+
+    @GetMapping("/cities/organizations/search")
+    public ResponseEntity<Page<CityResponse>> searchCitiesOrganizations(
+            @RequestParam(name = "city") String cityName,
+            @RequestParam(name = "organizationId") UUID organizationId,
+
+            Pageable pageable) {
+        return ResponseEntity.ok(service.findCitiesUsersByEntityTypeAndCityName(organizationId, cityName, pageable).map(city -> this.mapper.map(city, CityResponse.class)));
+    }
+
+    @GetMapping("/regions/organizations/search")
+    public ResponseEntity<Page<RegionResponse>> searchRegionsOrganizations(
+            @RequestParam(name = "region") String regionName,
+            @RequestParam(name = "organizationId") UUID organizationId,
+
+            Pageable pageable) {
+        return ResponseEntity.ok(service.findRegionsUsersByEntityTypeAndRegionName(organizationId, regionName, pageable).map(region -> this.mapper.map(region, RegionResponse.class)));
+    }
+
+    @GetMapping("/cities/subentities/search")
+    public ResponseEntity<Page<CityResponse>> SubentityUsersSearchCities(
+            @RequestParam(name = "city") String cityName,
+            @RequestParam(name = "subentityId") UUID subentityId,
+
+            Pageable pageable) {
+        return ResponseEntity.ok(service.findCitiesUsersBySubentityAndCityName(subentityId, cityName, pageable).map(city -> this.mapper.map(city, CityResponse.class)));
+    }
+
+    @GetMapping("/regions/subentities/search")
+    public ResponseEntity<Page<RegionResponse>> searchRegionsSubentities(
+            @RequestParam(name = "region") String regionName,
+            @RequestParam(name = "subentityId") UUID subentityId,
+
+            Pageable pageable) {
+        return ResponseEntity.ok(service.findRegionsUsersBySubentityAndRegionName(subentityId, regionName, pageable).map(region -> this.mapper.map(region, RegionResponse.class)));
+    }
 }

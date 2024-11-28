@@ -423,15 +423,15 @@ public class OrganizationEntityService {
             if (!organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER)) {
                 this.contractService.validateContract(organizationEntity.getContract());
             }
-//            if (organizationEntity.getType().equals(EntityType.PARTNER_WITH_SB)) {
-//                // TODO : should be removed after tests.
-//                try {
-//                    this.createSubentity(organizationEntity);
-//                } catch (BadRequestException e) {
-//                    System.out.println("Error creating subEntity : ");
-//                    e.printStackTrace();
-//                }
-//            }
+            if (organizationEntity.getType().equals(EntityType.PARTNER_WITH_SB)) {
+                // TODO : should be removed after tests.
+                try {
+                    this.createSubentity(organizationEntity);
+                } catch (BadRequestException e) {
+                    System.out.println("Error creating subEntity : ");
+                    e.printStackTrace();
+                }
+            }
         }
         organizationEntity.getContract().setContractStatus(ContractStatus.VALIDATED);
         this.organizationEntityRepository.save(organizationEntity);
@@ -475,6 +475,33 @@ public class OrganizationEntityService {
             });
 
             organizationEntity.getSubEntities().add(subEntity);
+            Random random = new Random();
+            String[] firstNames = {"test" + i};
+            String[] lastNames = {""};
+            for (int o = 0; o < 1; o++) {
+                UserRequest userRequest = new UserRequest(
+                        new Name(firstNames[o], lastNames[o]),
+                        String.format("%s.%s@example.com", firstNames[o].toLowerCase(), lastNames[o].toLowerCase()),
+                        String.format("+2126%s%s%s%s%s%s", random.nextInt(10), random.nextInt(10), random.nextInt(10), random.nextInt(10), random.nextInt(10), random.nextInt(10)),
+                        "strongPassword123!",
+                        true,
+                        "SALES_MANAGER",
+                        organizationEntity.getId()
+                );
+                User user = userService.create(userRequest);
+                user.setSubEntity(subEntity);
+                String[] avatarPaths = {
+                    "https://randomuser.me/api/portraits/men/1.jpg",
+                    "https://randomuser.me/api/portraits/men/2.jpg",
+                    "https://randomuser.me/api/portraits/men/3.jpg",
+                    "https://randomuser.me/api/portraits/men/4.jpg",
+                    "https://randomuser.me/api/portraits/men/5.jpg"
+                };
+                user.setAvatarPath(avatarPaths[random.nextInt(avatarPaths.length)]);
+                subEntity.setUsers(new ArrayList<>(List.of(user)));
+                user.setSolutions(new HashSet<>(organizationEntity.getSolutions()));
+                userService.save(user);
+            }
             this.organizationEntityRepository.save(organizationEntity);
             this.subEntityRepository.saveAndFlush(subEntity);
             subEntities.add(subEntity);
@@ -563,59 +590,59 @@ public class OrganizationEntityService {
 
             this.offerRepository.save(offer);
             if (i == 0) {
-                // Create a new Delivery instance
-                User d = new User();
-                OrganizationEntity o = this.organizationEntityRepository.findById(UUID.fromString("e6780181-a601-41bc-8544-1d74051b44d5")).orElse(null);
-                d.setOrganizationEntity(o);
-                d = this.userService.save(d);
-                o.getUsers().add(d);
-                this.organizationEntityRepository.saveAndFlush(o);
-                Delivery delivery = new Delivery();
-                Delivery delivery1 = new Delivery();
-                delivery1.setStatus(DeliveryStatus.DELIVERED);
-                delivery.setStatus(DeliveryStatus.DELIVERED);
-
-
-                delivery.setDeliveryBoy(d);
-                delivery1.setDeliveryBoy(d);
-
+//                // Create a new Delivery instance
+//                User d = new User();
+//                OrganizationEntity o = this.organizationEntityRepository.findById(UUID.fromString("e6780181-a601-41bc-8544-1d74051b44d5")).orElse(null);
+//                d.setOrganizationEntity(o);
+//                d = this.userService.save(d);
+//                o.getUsers().add(d);
+//                this.organizationEntityRepository.saveAndFlush(o);
+//                Delivery delivery = new Delivery();
+//                Delivery delivery1 = new Delivery();
+//                delivery1.setStatus(DeliveryStatus.DELIVERED);
+//                delivery.setStatus(DeliveryStatus.DELIVERED);
 //
-
-
-
-                // Set any necessary properties for the delivery here
-                // e.g., delivery.setSomeProperty(value);
-
-                // Save the delivery only once after setting its properties
-                delivery = this.deliveryRepository.saveAndFlush(delivery);
-                delivery1 = this.deliveryRepository.saveAndFlush(delivery1);
-                d.getDeliveries().add(delivery);
-                d.getDeliveries().add(delivery1);
-                this.userService.save(d);
-
-                // Set properties for order1 and order2 as needed
-                // e.g., order1.setPrice(price1);
-                // e.g., order2.setPrice(price2);
-
-                // Set the delivery reference in each order
-                order2.setDelivery(delivery);
-                order1.setDelivery(delivery);
-                order3.setDelivery(delivery1);
-
-                // Save the orders, this will also update the delivery reference
-                order2 = this.orderRepository.save(order2);
-                order1 = this.orderRepository.save(order1);
-                order3 = this.orderRepository.save(order3);
-
-                // Add orders to the delivery
-                delivery.getOrders().addAll(new ArrayList<>(List.of(order2, order1)));
-                delivery1.getOrders().addAll(new ArrayList<>(List.of(order3)));
-
-
-                // Optional: If you need to update the delivery after adding orders
-                 delivery = this.deliveryRepository.save(delivery); // Usually not needed
-
-                delivery1 = this.deliveryRepository.save(delivery1); // Usually not needed
+//
+//                delivery.setDeliveryBoy(d);
+//                delivery1.setDeliveryBoy(d);
+//
+////
+//
+//
+//
+//                // Set any necessary properties for the delivery here
+//                // e.g., delivery.setSomeProperty(value);
+//
+//                // Save the delivery only once after setting its properties
+//                delivery = this.deliveryRepository.saveAndFlush(delivery);
+//                delivery1 = this.deliveryRepository.saveAndFlush(delivery1);
+//                d.getDeliveries().add(delivery);
+//                d.getDeliveries().add(delivery1);
+//                this.userService.save(d);
+//
+//                // Set properties for order1 and order2 as needed
+//                // e.g., order1.setPrice(price1);
+//                // e.g., order2.setPrice(price2);
+//
+//                // Set the delivery reference in each order
+//                order2.setDelivery(delivery);
+//                order1.setDelivery(delivery);
+//                order3.setDelivery(delivery1);
+//
+//                // Save the orders, this will also update the delivery reference
+//                order2 = this.orderRepository.save(order2);
+//                order1 = this.orderRepository.save(order1);
+//                order3 = this.orderRepository.save(order3);
+//
+//                // Add orders to the delivery
+//                delivery.getOrders().addAll(new ArrayList<>(List.of(order2, order1)));
+//                delivery1.getOrders().addAll(new ArrayList<>(List.of(order3)));
+//
+//
+//                // Optional: If you need to update the delivery after adding orders
+//                 delivery = this.deliveryRepository.save(delivery); // Usually not needed
+//
+//                delivery1 = this.deliveryRepository.save(delivery1); // Usually not needed
             }
 
             i++;

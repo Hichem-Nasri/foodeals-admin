@@ -3,6 +3,7 @@ package net.foodeals.organizationEntity.Controller;
 import lombok.AllArgsConstructor;
 import net.foodeals.common.dto.request.UpdateReason;
 import net.foodeals.common.dto.response.UpdateDetails;
+import net.foodeals.location.application.dtos.responses.CityResponse;
 import net.foodeals.organizationEntity.application.dtos.requests.SubEntityFilter;
 import net.foodeals.organizationEntity.application.dtos.responses.AssociationsSubEntitiesDto;
 import net.foodeals.organizationEntity.application.dtos.responses.PartnerSubEntityDto;
@@ -109,6 +110,14 @@ public class SubEntityController {
             @RequestBody UpdateReason request) {
         subEntityService.deleteSubentity(uuid, request);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/cities/search")
+    public ResponseEntity<Page<CityResponse>> searchCities(
+            @RequestParam(name = "city") String cityName,
+            @RequestParam(name = "organizationId") UUID organizationId,
+            Pageable pageable) {
+        return ResponseEntity.ok(subEntityService.searchCitiesBySubEntityAddress(cityName, organizationId, pageable).map(c -> mapper.map(c, CityResponse.class)));
     }
 
 

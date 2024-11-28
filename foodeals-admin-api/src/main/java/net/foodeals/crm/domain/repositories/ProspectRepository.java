@@ -5,6 +5,9 @@ import net.foodeals.crm.application.dto.responses.ProspectFilter;
 import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
 import net.foodeals.crm.domain.entities.enums.ProspectType;
+import net.foodeals.location.domain.entities.City;
+import net.foodeals.location.domain.entities.Region;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -51,4 +54,26 @@ public interface ProspectRepository extends BaseRepository<Prospect, UUID> {
     // Count prospects by type, excluding deleted ones
     Long countByTypeIn(List<ProspectType> type);
 
+
+    @Query("SELECT DISTINCT c FROM Prospect p " +
+            "JOIN p.address a " +
+            "JOIN a.region r " +
+            "JOIN r.city c " +
+            "JOIN c.state s " +
+            "JOIN s.country co " +
+            "WHERE p.type IN (:types) " +
+            "AND LOWER(c.name) LIKE LOWER(CONCAT('%', :cityName, '%')) " +
+            "AND LOWER(co.name) = LOWER(:countryName)")
+    Page<City> findCitiesByProspectAddress(@Param("types") List<ProspectType> types, @Param("cityName") String cityName, @Param("countryName") String countryName, Pageable pageable);
+
+    @Query("SELECT DISTINCT r FROM Prospect p " +
+            "JOIN p.address a " +
+            "JOIN a.region r " +
+            "JOIN r.city c " +
+            "JOIN c.state s " +
+            "JOIN s.country co " +
+            "WHERE p.type IN (:types) " +
+            "AND LOWER(r.name) LIKE LOWER(CONCAT('%', :regionName, '%')) " +
+            "AND LOWER(co.name) = LOWER(:countryName)")
+    Page<Region> findRegionsByProspectAddress(@Param("types") List<ProspectType> types, @Param("regionName") String regionName, @Param("countryName") String countryName, Pageable pageable);
 }

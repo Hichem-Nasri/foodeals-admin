@@ -22,6 +22,8 @@ import net.foodeals.location.application.services.AddressService;
 import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.application.services.impl.RegionServiceImpl;
 import net.foodeals.location.domain.entities.Address;
+import net.foodeals.location.domain.entities.City;
+import net.foodeals.location.domain.entities.Region;
 import net.foodeals.organizationEntity.application.services.ActivityService;
 import net.foodeals.organizationEntity.application.services.ContactsService;
 import net.foodeals.organizationEntity.application.services.SolutionService;
@@ -29,6 +31,7 @@ import net.foodeals.organizationEntity.domain.entities.Activity;
 import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.Solution;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.user.application.services.RoleService;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.Role;
@@ -80,6 +83,16 @@ public class ProspectServiceImp implements ProspectService {
     @Override
     public ProspectResponse partialUpdate(UUID id, PartialProspectRequest dto) {
         return null;
+    }
+
+    @Override
+    public Page<City> searchCitiesByProspectAddress(List<ProspectType> types, String cityName, String countryName, Pageable pageable) {
+        return prospectRepository.findCitiesByProspectAddress(types, cityName, countryName, pageable);
+    }
+
+    @Override
+    public Page<Region> searchRegionsByProspectAddress(List<ProspectType> types, String regionName, String countryName, Pageable pageable) {
+        return prospectRepository.findRegionsByProspectAddress(types, regionName, countryName, pageable);
     }
 
 //    @Override

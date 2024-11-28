@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserSearchFilter {
+public class UserSearchOrganizationFilter {
     private String query;
     private List<EntityType> types;
 

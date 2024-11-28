@@ -12,6 +12,9 @@ import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
 import net.foodeals.crm.application.services.ProspectService;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
 import net.foodeals.crm.domain.entities.enums.ProspectType;
+import net.foodeals.location.application.dtos.responses.CityResponse;
+import net.foodeals.location.application.dtos.responses.RegionResponse;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
@@ -145,5 +148,23 @@ public final class ProspectController {
     @GetMapping("/prospects/statistics")
     public ResponseEntity<ProspectStatisticDto> statistics(@RequestParam(value = "type", required = true) List<ProspectType> type) {
         return new ResponseEntity<ProspectStatisticDto>(this.prospectService.statistics(type), HttpStatus.OK);
+    }
+
+    @GetMapping("prospects/cities/search")
+    public ResponseEntity<Page<CityResponse>> searchCities(
+            @RequestParam(name = "city") String cityName,
+            @RequestParam(name = "types", required = true) List<ProspectType> types,
+            @RequestParam(name = "country") String countryName,
+            Pageable pageable) {
+        return ResponseEntity.ok(prospectService.searchCitiesByProspectAddress(types, cityName, countryName, pageable).map( c ->this.modelMapper.map(c, CityResponse.class)));
+    }
+
+    @GetMapping("prospects/regions/search")
+    public ResponseEntity<Page<RegionResponse>> searchRegions(
+            @RequestParam(name = "region") String regionName,
+            @RequestParam(name = "types", required = true) List<ProspectType> types,
+            @RequestParam(name = "country") String countryName,
+            Pageable pageable) {
+        return ResponseEntity.ok(prospectService.searchRegionsByProspectAddress(types, regionName, countryName, pageable).map(c -> this.modelMapper.map(c, RegionResponse.class)));
     }
 }

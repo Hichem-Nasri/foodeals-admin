@@ -1,8 +1,10 @@
 package net.foodeals.organizationEntity.domain.repositories;
 
 import net.foodeals.common.contracts.BaseRepository;
+import net.foodeals.location.domain.entities.City;
 import net.foodeals.organizationEntity.application.dtos.requests.SubEntityFilter;
 import net.foodeals.organizationEntity.domain.entities.SubEntity;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface SubEntityRepository extends BaseRepository<SubEntity, UUID> {
@@ -35,4 +38,15 @@ public interface SubEntityRepository extends BaseRepository<SubEntity, UUID> {
             @Param("id") UUID id,
             @Param("filter") SubEntityFilter filter,
             Pageable pageable
-    );}
+    );
+
+    @Query("SELECT DISTINCT c FROM SubEntity s " +
+            "JOIN s.organizationEntity o " +
+            "JOIN s.address a " +
+            "JOIN a.region r " +
+            "JOIN r.city c " +
+            "WHERE o.id = :organizationId " +
+            "AND LOWER(c.name) LIKE LOWER(CONCAT('%', :cityName, '%'))")
+    Page<City> findCitiesByOrganizationIdAndCityName(@Param("organizationId") UUID organizationId, @Param("cityName") String cityName, Pageable pageable);
+
+}

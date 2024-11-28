@@ -3,6 +3,9 @@ package net.foodeals.user.application.services;
 import net.foodeals.common.contracts.CrudService;
 import net.foodeals.common.dto.request.UpdateReason;
 import net.foodeals.common.dto.response.UpdateDetails;
+import net.foodeals.location.domain.entities.City;
+import net.foodeals.location.domain.entities.Region;
+import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.user.application.dtos.requests.UserFilter;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.*;
@@ -13,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface UserService extends CrudService<User, Integer, UserRequest> {
@@ -23,7 +27,7 @@ public interface UserService extends CrudService<User, Integer, UserRequest> {
 
     Page<User> getClientsData(Pageable page);
 
-    Page<User> filterUsers(UserSearchFilter filter, Pageable pageable);
+    Page<User> filterUsersOrganization(UserSearchOrganizationFilter filter, Pageable pageable);
 
     ClientDto toClientDto(User user);
 
@@ -50,4 +54,14 @@ public interface UserService extends CrudService<User, Integer, UserRequest> {
     void deleteUser(Integer id, UpdateReason request);
 
     Page<UpdateDetails> getDeletionDetails(Integer uuid, Pageable pageable);
+
+    Page<City> findCitiesUsersByEntityTypeAndCityName(UUID organizationId, String cityName,  Pageable pageable);
+
+    Page<City> findCitiesUsersBySubentityAndCityName(UUID subentityId, String cityName, Pageable pageable);
+
+    Page<Region> findRegionsUsersByEntityTypeAndRegionName(UUID organizationId, String regionName, Pageable pageable);
+
+    Page<Region> findRegionsUsersBySubentityAndRegionName(UUID subEntityId, String regionName, Pageable pageable);
+
+    Page<User> filterUsersSubentity(UserSearchSubentityFilters filter, Pageable pageable);
 }
