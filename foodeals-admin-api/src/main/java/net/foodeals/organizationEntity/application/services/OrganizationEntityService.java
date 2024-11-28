@@ -408,9 +408,6 @@ public class OrganizationEntityService {
         if (!organizationEntity.getType().equals(EntityType.FOOD_BANK) && !organizationEntity.getType().equals(EntityType.ASSOCIATION)) {
             Solution pro_market = this.solutionService.findByName("pro_market");
             if (organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) || organizationEntity.getSolutions().contains(pro_market)) {
-                Calendar cal = Calendar.getInstance();
-                cal.add(Calendar.MONTH, -1);
-                Date previousMonthDate = cal.getTime();
                 Date date = new Date();
                 PartnerCommissions partnerCommissions = PartnerCommissions.builder()
                         .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType(), organizationEntity.getName()))
