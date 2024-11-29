@@ -172,9 +172,17 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
         return this.contract.isSubscriptionPayedBySubEntities();
     }
 
+
+
     @Override
     public boolean singleSubscription() {
         return this.contract.isSingleSubscription();
+    }
+
+    @Override
+    @Transactional
+    public String getCity() {
+        return this.address.getRegion().getCity().getName();
     }
 
     public List<CoveredZonesDto> getCoveredZonesDto() {

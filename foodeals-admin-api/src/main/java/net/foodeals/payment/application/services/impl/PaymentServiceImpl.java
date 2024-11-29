@@ -328,7 +328,7 @@ public class PaymentServiceImpl implements PaymentService {
                         : Price.ZERO(defaultCurrency);
                 dto.setId(payment.getId());
                 dto.setEntityId(payment.getPartnerInfo().id());
-                PartnerInfoDto partnerInfoDto = new PartnerInfoDto(payment.getPartnerInfo().id(), payment.getPartner().getName(), payment.getPartner().getAvatarPath());
+                PartnerInfoDto partnerInfoDto = new PartnerInfoDto(payment.getPartnerInfo().id(), payment.getPartner().getName(), payment.getPartner().getAvatarPath(), payment.getPartner().getCity());
                 dto.setPartnerInfoDto(partnerInfoDto);
                 dto.setPartnerType(payment.getPartnerInfo().type());
                 dto.setOrganizationId(payment.getPartnerInfo().id());
@@ -424,10 +424,10 @@ public class PaymentServiceImpl implements PaymentService {
         PartnerInfoDto partnerInfoDto = null;
         if (partnerCommission.getPartnerInfo().type().equals(PartnerType.SUB_ENTITY)) {
             SubEntity subEntity = this.subEntityService.getEntityById(partnerCommission.getPartnerInfo().id());
-            partnerInfoDto = new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath());
+            partnerInfoDto = new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath(), subEntity.getCity());
         } else {
             OrganizationEntity partner = this.organizationEntityService.findById(partnerCommission.getPartnerInfo().id());
-            partnerInfoDto = new PartnerInfoDto(partner.getId(), partner.getName(), partner.getAvatarPath());
+            partnerInfoDto = new PartnerInfoDto(partner.getId(), partner.getName(), partner.getAvatarPath(), partner.getCity());
         }
         User emitter = partnerCommission.getEmitter();
         SimpleDateFormat formatter = new SimpleDateFormat("dd/M/y");
@@ -653,10 +653,10 @@ public class PaymentServiceImpl implements PaymentService {
     private PartnerInfoDto getPartnerInfoDto(PartnerCommissions commissions) {
         if (commissions.getPartnerInfo().type().equals(PartnerType.SUB_ENTITY)) {
             SubEntity subEntity = subEntityService.getEntityById(commissions.getPartnerInfo().id());
-            return new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath());
+            return new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath(), subEntity.getCity());
         } else {
             OrganizationEntity partner = organizationEntityService.findById(commissions.getPartnerInfo().id());
-            return new PartnerInfoDto(partner.getId(), partner.getName(), partner.getAvatarPath());
+            return new PartnerInfoDto(partner.getId(), partner.getName(), partner.getAvatarPath(), partner.getCity());
         }
     }
 
@@ -867,20 +867,20 @@ public class PaymentServiceImpl implements PaymentService {
         private PartnerInfoDto mapCommissionToPartnerInfoDto(PartnerCommissions partner) {
             if (partner.getPartnerInfo().type().equals(PartnerType.SUB_ENTITY)) {
                 SubEntity subEntity = this.subEntityService.getEntityById(partner.getPartnerInfo().id());
-                return new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath());
+                return new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath(), subEntity.getCity());
             } else {
                 OrganizationEntity organizationEntity = this.organizationEntityService.findById(partner.getPartnerInfo().id());
-                return new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
+                return new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath(), organizationEntity.getCity());
             }
         }
 
     private PartnerInfoDto mapSubscriptionToPartnerInfoDto(Subscription partner) {
         if (partner.getPartner().type().equals(PartnerType.SUB_ENTITY)) {
             SubEntity subEntity = this.subEntityService.getEntityById(partner.getPartner().id());
-            return new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath());
+            return new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath(), subEntity.getCity());
         } else {
             OrganizationEntity organizationEntity = this.organizationEntityService.findById(partner.getPartner().id());
-            return new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
+            return new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath(), organizationEntity.getCity());
         }
     }
 
@@ -910,7 +910,7 @@ public class PaymentServiceImpl implements PaymentService {
                     return this.mapToSubscriptionsDto(s);
                 })
                 .collect(Collectors.toList());
-        PartnerInfoDto partnerInfoDto = new PartnerInfoDto(partner.getId(), partner.getName(), partner.getAvatarPath());
+        PartnerInfoDto partnerInfoDto = new PartnerInfoDto(partner.getId(), partner.getName(), partner.getAvatarPath(), partner.getCity());
 
         return new SubscriptionDetails(partnerInfoDto, subscriptionsDto);
     }
@@ -1053,7 +1053,8 @@ public class PaymentServiceImpl implements PaymentService {
         PartnerInfoDto partnerInfoDto = new PartnerInfoDto(
                 partner.getId(),
                 partner.getName(),
-                partner.getAvatarPath()
+                partner.getAvatarPath(),
+                partner.getCity()
         );
 
         // Calculate total amount for this partner

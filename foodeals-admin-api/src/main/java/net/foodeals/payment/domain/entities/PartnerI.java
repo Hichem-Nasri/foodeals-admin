@@ -18,4 +18,6 @@ public interface PartnerI {
     boolean subscriptionPayedBySubEntities();
     boolean singleSubscription();
 
+    String getCity();
+
 }
