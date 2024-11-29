@@ -66,4 +66,15 @@ public class CountryController {
                 .toList();
         return ResponseEntity.ok(responses);
     }
+
+
+    @GetMapping("/{id}/cities")
+    public ResponseEntity<List<CityResponse>> getCities(@PathVariable("id") UUID id
+    ) {
+        final List<CityResponse> responses = service.getCities(id)
+                .stream()
+                .map(city -> mapper.map(city, CityResponse.class))
+                .toList();
+        return ResponseEntity.ok(responses);
+    }
 }
