@@ -114,6 +114,6 @@ class CityServiceImpl implements CityService {
 
     @Override
     public boolean existsByName(String name) {
-        return repository.existsByName(name);
+        return repository.existsByName(name.toLowerCase());
     }
 }
