@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -29,6 +31,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
 
+    private static final List<String> WHITE_LIST_PATHS = Arrays.asList(
+            "/api/v1/auth/login",
+            "/api/v1/auth/register",
+            "/api/v1/auth/verify-token",
+            "/api/v1/auth/forgot-password",
+            "/api/v1/auth/reset-password"
+            // Add more whitelisted paths as needed
+    );
+
     @Override
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
@@ -37,7 +48,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         try {
             final String jwt = extractJwtFromCookie(request);
-            if (jwt == null) {
+            if (jwt == null || isWhitelistedPath(request.getRequestURI())) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -74,6 +85,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
         }
         return null;
+    }
+
+    private boolean isWhitelistedPath(String requestPath) {
+        return WHITE_LIST_PATHS.stream().anyMatch(requestPath::startsWith);
     }
 
     private void handleException(HttpServletResponse response, Exception e) throws IOException {

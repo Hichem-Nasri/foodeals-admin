@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.foodeals.common.dto.request.UpdateReason;
 import net.foodeals.common.dto.response.UpdateDetails;
 import net.foodeals.common.entities.DeletionReason;
+import net.foodeals.common.services.AccountValidationService;
 import net.foodeals.common.services.EmailService;
 import net.foodeals.common.valueOjects.Price;
 import net.foodeals.contract.application.service.ContractService;
@@ -102,6 +103,7 @@ public class OrganizationEntityService {
     private final SubEntityRepository subEntityRepository;
     private final DeliveryRepository deliveryRepository;
     private final RayonRepository rayonService;
+    private final AccountValidationService accountValidationService;
 
     public OrganizationEntity save(OrganizationEntity organizationEntity) {
         return this.organizationEntityRepository.save(organizationEntity);
@@ -436,11 +438,7 @@ public class OrganizationEntityService {
         }
         organizationEntity.getContract().setContractStatus(ContractStatus.VALIDATED);
         this.organizationEntityRepository.save(organizationEntity);
-
-//        String receiver = manager.getEmail();
-//        String subject = "Foodeals account validation";
-//        String message = "You're account has been validated\n Your email : " + manager.getEmail() + " \n" + " Your password : " + pass;
-//        this.emailService.sendEmail(receiver, subject, message);
+        accountValidationService.validateManagerAccount(manager, pass);
         return "Contract validated successfully";
     }
 
