@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -29,4 +30,6 @@ public interface SubEntityService extends CrudService<SubEntityResponse, UUID, S
     Page<SubEntity> subEntitiesFilters(Pageable pageable, UUID id, SubEntityFilter filter);
 
     Page<City> searchCitiesBySubEntityAddress(String cityName, UUID organizationId, Pageable pageable);
+
+    Page<SubEntity> searchSubEntitiesByName(UUID id, String name, List<SubEntityType> types, Pageable pageable, boolean includeDeleted);
 }

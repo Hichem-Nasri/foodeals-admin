@@ -114,4 +114,23 @@ public class SubEntityServiceImpl implements SubEntityService {
         return this.subEntityRepository.findCitiesByOrganizationIdAndCityName(organizationId, cityName,pageable);
     }
 
+    @Override
+    public Page<SubEntity> searchSubEntitiesByName(UUID id, String name, List<SubEntityType> types, Pageable pageable, boolean includeDeleted) {
+        if (id != null) {
+            SubEntity subEntity = subEntityRepository.findById(id).orElse(null);
+            if (subEntity == null) {
+                throw new EntityNotFoundException("SubEntity not found with uuid: " + id);
+            }
+            return new PageImpl<>(List.of(subEntity), pageable, 1);
+        }
+
+        Page<SubEntity> subEntities;
+        if (name != null && !name.isEmpty()) {
+            subEntities = subEntityRepository.findByNameContainingAndTypeInAndDeletedAtIs(name, types, includeDeleted, pageable);
+        } else {
+            subEntities = subEntityRepository.findByTypeInAndDeletedAtIs(types, includeDeleted, pageable);
+        }
+        return subEntities;
+    }
+
 }

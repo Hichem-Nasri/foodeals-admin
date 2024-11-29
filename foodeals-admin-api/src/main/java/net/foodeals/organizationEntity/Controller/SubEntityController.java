@@ -107,6 +107,17 @@ public class SubEntityController {
         };
     }
 
+
+    @GetMapping("/search")
+    public ResponseEntity<Page<PartnerInfoDto>> searchsubEntities(
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "id", required = false) UUID id,
+            @RequestParam(name = "types", required = false) List<SubEntityType> types,
+            @RequestParam(name = "deleted", required = false, defaultValue = "false") boolean includeDeleted,
+            Pageable pageable) {
+        return ResponseEntity.ok(subEntityService.searchSubEntitiesByName(id, name, types, pageable, includeDeleted).map(subEntity -> new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath(), subEntity.getAddress().getRegion().getCity().getName())));
+    }
+
     @GetMapping("/{uuid}/deletion-details")
     public ResponseEntity<Page<UpdateDetails>> getDeletionDetails(@PathVariable UUID uuid, Pageable pageable) {
         Page<UpdateDetails> deletionDetails = subEntityService.getDeletionDetails(uuid, pageable);

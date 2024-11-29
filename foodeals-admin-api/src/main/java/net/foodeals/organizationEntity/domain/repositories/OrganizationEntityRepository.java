@@ -64,7 +64,7 @@ public interface OrganizationEntityRepository extends BaseRepository<Organizatio
     Optional<OrganizationEntity> findByIdAndDeletedAtIsNotNull(UUID uuid);
     Page<OrganizationEntity> findByDeletedAtIsNotNullAndTypeIn(Pageable pageable, List<EntityType> type);
 
-    @Query("SELECT o FROM OrganizationEntity o WHERE o.name LIKE %:name% AND o.type IN :types AND ((o.deletedAt IS NOT NULL AND :deleted = true) OR (o.deletedAt IS NULL AND :deleted = false))")
+    @Query("SELECT o FROM OrganizationEntity o WHERE LOWER(o.name) LIKE LOWER(CONCAT('%', :name, '%')) AND o.type IN :types AND ((o.deletedAt IS NOT NULL AND :deleted = true) OR (o.deletedAt IS NULL AND :deleted = false))")
     Page<OrganizationEntity> findByNameContainingAndTypeInAndDeletedAtIs(
             @Param("name") String name,
             @Param("types") List<EntityType> types,
