@@ -68,7 +68,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("jwt".equals(cookie.getName())) {
+                if ("authjs.session-token".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }
