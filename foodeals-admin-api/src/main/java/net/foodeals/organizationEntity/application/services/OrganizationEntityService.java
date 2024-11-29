@@ -167,8 +167,8 @@ public class OrganizationEntityService {
                     CoveredZones coveredZone = CoveredZones.builder().organizationEntity(organizationEntity)
                             .build();
                     Country country = this.countryService.findByName(coveredZonesDto.getCountry());
-                    State state = country.getStates().stream().filter(s -> s.getName().equals(coveredZonesDto.getState().toLowerCase())).findFirst().get();
-                    City city = state.getCities().stream().filter(c -> c.getName().equals(coveredZonesDto.getCity().toLowerCase())).findFirst().get();
+                    List<City> cities = country.getStates().stream().flatMap(state -> state.getCities().stream()).collect(Collectors.toList());
+                    City city = cities.stream().filter(c -> c.getName().equals(coveredZonesDto.getCity().toLowerCase())).findFirst().get();
                     Region region = city.getRegions().stream().filter(r -> r.getName().equals(regionName.toLowerCase())).findFirst().get();
                     coveredZone.setRegion(region);
                     this.coveredZonesService.save(coveredZone);
@@ -270,8 +270,8 @@ public class OrganizationEntityService {
                 for (String regionName : coveredZonesDto.getRegions()) {
                     CoveredZones coveredZone = CoveredZones.builder().organizationEntity(organizationEntity).build();
                     Country country = this.countryService.findByName(coveredZonesDto.getCountry());
-                    State state = country.getStates().stream().filter(s -> s.getName().equalsIgnoreCase(coveredZonesDto.getState())).findFirst().orElseThrow(() -> new RuntimeException("State not found"));
-                    City city = state.getCities().stream().filter(c -> c.getName().equalsIgnoreCase(coveredZonesDto.getCity())).findFirst().orElseThrow(() -> new RuntimeException("City not found"));
+                    List<City> cities = country.getStates().stream().flatMap(state -> state.getCities().stream()).collect(Collectors.toList());
+                    City city = cities.stream().filter(c -> c.getName().equals(coveredZonesDto.getCity().toLowerCase())).findFirst().orElseThrow(() -> new RuntimeException("City not found"));
                     Region region = city.getRegions().stream().filter(r -> r.getName().equalsIgnoreCase(regionName)).findFirst().orElseThrow(() -> new RuntimeException("Region not found"));
                     coveredZone.setRegion(region);
                     this.coveredZonesService.save(coveredZone);
