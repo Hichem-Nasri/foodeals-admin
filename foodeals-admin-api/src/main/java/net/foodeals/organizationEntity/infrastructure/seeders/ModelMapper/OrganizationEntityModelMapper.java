@@ -376,6 +376,7 @@ public class OrganizationEntityModelMapper {
             formData.setStatus(organizationEntity.getContract().getContractStatus());
 
             formData.setSolutions(organizationEntity.getSolutions().stream().map(Solution::getName).collect(Collectors.toList()));
+            formData.setActivities(organizationEntity.getActivities().stream().map(Activity::getName).collect(Collectors.toList()));
 
             formData.setPv(organizationEntity.getCommercialNumber());
             User manager = organizationEntity.getContract().getUserContracts().getUser();
@@ -473,10 +474,12 @@ public class OrganizationEntityModelMapper {
         return  this.mapper.map(organizationEntity, DeliveryFormData.class);
     }
 
+    @Transactional
     public AssociationFormData mapToAssociationFormData(OrganizationEntity organizationEntity) {
         return this.mapper.map(organizationEntity, AssociationFormData.class);
     }
 
+    @Transactional
     public CityResponse convertToCityResponse(City city) {
         return this.mapper.map(city, CityResponse.class);
     }
