@@ -31,4 +31,5 @@ public class AssociationFormData {
     private List<String> solutions;
     private Integer numberOfPoints;
     private ContractStatus status;
+    private List<String> activities;
 }
