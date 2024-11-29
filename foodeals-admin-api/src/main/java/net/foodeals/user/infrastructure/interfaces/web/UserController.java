@@ -1,5 +1,6 @@
 package net.foodeals.user.infrastructure.interfaces.web;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.common.dto.request.UpdateReason;
@@ -11,6 +12,9 @@ import net.foodeals.organizationEntity.domain.entities.SubEntity;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
+import net.foodeals.organizationEntity.domain.repositories.SubEntityRepository;
+import net.foodeals.payment.application.dto.response.PartnerInfoDto;
+import net.foodeals.user.application.dtos.requests.SubentityUsersResponse;
 import net.foodeals.user.application.dtos.requests.UserFilter;
 import net.foodeals.user.application.dtos.requests.UserRequest;
 import net.foodeals.user.application.dtos.responses.*;
@@ -40,7 +44,8 @@ public class UserController {
 
     private final UserService service;
     private final ModelMapper mapper;
-    private final OrganizationEntityRepository organizationRepo;
+    private final OrganizationEntityRepository organizationRepository;
+    private final SubEntityRepository subEntityRepository;
 
     @GetMapping("organizations/search")
     public ResponseEntity<Page<SimpleUserDto>> searchUsersOrganizations(
@@ -79,48 +84,61 @@ public class UserController {
     }
 
 
+    @GetMapping("/organizations/{organizationId}")
+    public ResponseEntity<OrganizationUsersResponse> getUsersByOrganization(
+            @PathVariable("organizationId") UUID organizationId,
+            @PageableDefault(size = 10) Pageable pageable,
 
+            @RequestParam(value = "names", required = false) List<String> names,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "city", required = false) String city,
+            @RequestParam(value = "region", required = false) String region,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "roleName", required = false) String roleName,
+            @RequestParam(value = "entityTypes", required = true) List<EntityType> entityTypes,
+            @RequestParam(value = "solutions", required = false) List<String> solutions,
 
-        @GetMapping("/organizations/{organizationId}")
-        public ResponseEntity<Page<UserInfoDto>> getUsersByOrganization(
-                @PathVariable("organizationId") UUID organizationId,
-                @PageableDefault(size = 10) Pageable pageable,
+            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(value = "deletedAt", required = true) Boolean deletedAt
+    ) {
+        // Retrieve organization
+        OrganizationEntity organization = organizationRepository.findById(organizationId)
+                .orElseThrow(() -> new EntityNotFoundException("Organization not found with ID: " + organizationId));
 
-                @RequestParam(value = "names", required = false) List<String> names,
-                @RequestParam(value = "phone", required = false) String phone,
-                @RequestParam(value = "city", required = false) String city,
-                @RequestParam(value = "region", required = false) String region,
-                @RequestParam(value = "email", required = false) String email,
-                @RequestParam(value = "roleName", required = false) String roleName,
-                @RequestParam(value = "entityTypes", required = true) List<EntityType> entityTypes,
-                @RequestParam(value = "solutions", required = false) List<String> solutions,
+        // Create PartnerInfoDto
+        PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder()
+                .id(organization.getId())
+                .name(organization.getName())
+                .avatarPath(organization.getAvatarPath())
+                .build();
 
-                @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-                @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-                @RequestParam(value = "deletedAt", required = true)
-                Boolean deletedAt
-        ) {
-            UserFilter filter = UserFilter.builder()
-                    .names(names)
-                    .phone(phone)
-                    .city(city)
-                    .region(region)
-                    .email(email)
-                    .roleName(roleName)
-                    .entityTypes(entityTypes)
-                    .solutions(solutions != null ? solutions : new ArrayList<String>())
-                    .startDate(startDate != null ? startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null)
-                    .endDate(endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null)
-                    .deletedAt(deletedAt)
-                    .build();
+        // Create filter
+        UserFilter filter = UserFilter.builder()
+                .names(names)
+                .phone(phone)
+                .city(city)
+                .region(region)
+                .email(email)
+                .roleName(roleName)
+                .entityTypes(entityTypes)
+                .solutions(solutions != null ? solutions : new ArrayList<String>())
+                .startDate(startDate != null ? startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null)
+                .endDate(endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null)
+                .deletedAt(deletedAt)
+                .build();
 
+        // Get users
+        Page<Object> userInfoPage = this.service.getUsersByOrganization(organizationId, filter, pageable);
 
-            Page<UserInfoDto> userInfoPage = this.service.getUsersByOrganization(organizationId, filter, pageable);
-            return ResponseEntity.ok(userInfoPage);
-        }
+        // Create and return response
+        return ResponseEntity.ok(
+                new OrganizationUsersResponse(partnerInfoDto, userInfoPage)
+        );
+    }
 
     @GetMapping("/subentities/{subentityId}")
-    public ResponseEntity<Page<UserInfoDto>> getSubentitiesUsers(
+    public ResponseEntity<SubentityUsersResponse> getSubentitiesUsers(
             @PathVariable("subentityId") UUID subentityId,
             @PageableDefault(size = 10) Pageable pageable,
             @RequestParam(value = "names", required = false) List<String> names,
@@ -136,6 +154,16 @@ public class UserController {
             @RequestParam(value = "deletedAt", required = true)
             Boolean deletedAt
     ) {
+
+        SubEntity subEntity = subEntityRepository.findById(subentityId)
+                .orElseThrow(() -> new EntityNotFoundException("Subentity not found with ID: " + subentityId));
+
+        // Create PartnerInfoDto
+        PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder()
+                .id(subEntity.getId())
+                .name(subEntity.getName())
+                .avatarPath(subEntity.getAvatarPath())
+                .build();
         UserFilter filter = UserFilter.builder()
                 .names(names)
                 .phone(phone)
@@ -151,8 +179,9 @@ public class UserController {
                 .build();
 
 
+
         Page<UserInfoDto> userInfoPage = this.service.getUsersBySubEntity(subentityId, filter, pageable);
-        return ResponseEntity.ok(userInfoPage);
+        return ResponseEntity.ok(new SubentityUsersResponse(partnerInfoDto, userInfoPage));
     }
 
     @GetMapping("/sells-managers")
@@ -213,10 +242,22 @@ public class UserController {
     }
 
     @GetMapping("/delivery-partners/{id}")
-    public ResponseEntity<Page<DeliveryPartnerUserDto>> getCompanyUsers(Pageable pageable, @PathVariable("id") UUID id) {
+    public ResponseEntity<DeliveryUsersResponse> getDeliveryUsers(Pageable pageable, @PathVariable("id") UUID id) {
+
+        // Retrieve organization
+        OrganizationEntity organization = organizationRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Organization not found with ID: " + id));
+
+        // Create PartnerInfoDto
+        PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder()
+                .id(organization.getId())
+                .name(organization.getName())
+                .avatarPath(organization.getAvatarPath())
+                .build();
+
         Page<User> users = this.service.getOrganizationUsers(pageable, id);
         Page<DeliveryPartnerUserDto> deliveyPartnerUsersDtos = users.map(user -> this.mapper.map(user, DeliveryPartnerUserDto.class));
-        return new ResponseEntity<Page<DeliveryPartnerUserDto>>(deliveyPartnerUsersDtos, HttpStatus.OK);
+        return new ResponseEntity<DeliveryUsersResponse>(new DeliveryUsersResponse(partnerInfoDto, deliveyPartnerUsersDtos), HttpStatus.OK);
     }
 
     @GetMapping("/associations/{id}")
