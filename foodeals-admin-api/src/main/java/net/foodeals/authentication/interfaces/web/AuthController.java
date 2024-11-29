@@ -36,13 +36,13 @@ public class AuthController {
     }
 
     @PostMapping("verify-token")
-    public ResponseEntity<Boolean> verifyToken(@CookieValue(name = "jwt", required = false) String token) {
+    public ResponseEntity<Boolean> verifyToken(@CookieValue(name = "authjs.session-token", required = false) String token) {
         boolean isValid = service.verifyToken(token);
         return ResponseEntity.ok(isValid);
     }
 
     private void addTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("jwt", token);
+        Cookie cookie = new Cookie("authjs.session-token", token);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         cookie.setMaxAge((int) jwtService.getAccessTokenExpirationSeconds());        cookie.setPath("/");
