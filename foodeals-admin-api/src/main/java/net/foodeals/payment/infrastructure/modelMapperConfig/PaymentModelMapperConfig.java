@@ -60,7 +60,7 @@ public class PaymentModelMapperConfig {
                 OrganizationEntity partner = organizationEntityService.findById(partnerCommissions.getPartnerInfo().id());
                 partnerCommissions.setPartner(partner);
             }
-            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(partnerCommissions.getPartner().getId(), partnerCommissions.getPartner().getName(), partnerCommissions.getPartner().getAvatarPath());
+            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(partnerCommissions.getPartner().getId(), partnerCommissions.getPartner().getName(), partnerCommissions.getPartner().getAvatarPath(), partnerCommissions.getPartner().getCity());
             UUID organizationId = !partnerCommissions.getPartner().getPartnerType().equals(PartnerType.SUB_ENTITY) ? partnerCommissions.getPartner().getId() : ((SubEntity) partnerCommissions.getPartner()).getOrganizationEntity().getId();
             Commission commission = this.commissionService.getCommissionByPartnerId(organizationId);
             SimpleDateFormat formatter = new SimpleDateFormat("M/yyyy");
@@ -88,6 +88,7 @@ public class PaymentModelMapperConfig {
 
             PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder().id(organizationEntity.getId()).name(organizationEntity.getName())
                     .avatarPath(organizationEntity.getAvatarPath())
+                    .city(organizationEntity.getCity())
                     .build();
             return CommissionPaymentDto.builder()
                     .entityId(organizationEntity.getId())

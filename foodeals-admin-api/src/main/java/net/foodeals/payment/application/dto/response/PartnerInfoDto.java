@@ -18,4 +18,6 @@ public class PartnerInfoDto {
     private String name;
 
     private String avatarPath;
+
+    private String city;
 }

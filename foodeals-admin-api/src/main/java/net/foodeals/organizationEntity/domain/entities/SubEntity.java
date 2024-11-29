@@ -161,6 +161,12 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     public boolean commissionPayedBySubEntities() {
         return this.organizationEntity.getContract().isCommissionPayedBySubEntities();
     }
+
+    @Override
+    @Transactional
+    public String getCity() {
+        return this.address.getRegion().getCity().getName();
+    }
 }
 
 

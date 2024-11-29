@@ -99,7 +99,7 @@ public class SubEntityController {
         // Fetch the sub-entities based on the filter
         Page<SubEntity> subEntities = this.subEntityService.subEntitiesFilters(pageable, id, filter);
         OrganizationEntity organizationEntity = this.organizationEntityRepository.getEntity(id).orElseThrow(() -> new RuntimeException("Organization entity not found"));
-        PartnerInfoDto partnerInfo = new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
+        PartnerInfoDto partnerInfo = new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath(), organizationEntity.getAddress().getRegion().getCity().getName());
         return switch (organizationsType) {
             case ASSOCIATIONS -> new ResponseEntity<>(new OrganizationSubEntitiesResponse(partnerInfo, subEntities.map(subEntity -> this.mapper.map(subEntity, AssociationsSubEntitiesDto.class))), HttpStatus.OK);
             case PARTNERS -> new ResponseEntity<>(new OrganizationSubEntitiesResponse(partnerInfo, subEntities.map(subEntity -> this.mapper.map(subEntity, PartnerSubEntityDto.class))), HttpStatus.OK);

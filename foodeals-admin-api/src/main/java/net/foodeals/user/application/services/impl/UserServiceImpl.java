@@ -83,7 +83,8 @@ class UserServiceImpl implements UserService {
                 ? new PartnerInfoDto(
                         user.getOrganizationEntity().getId(),
                         user.getOrganizationEntity().getName(),
-                        user.getOrganizationEntity().getAvatarPath()
+                        user.getOrganizationEntity().getAvatarPath(),
+                        user.getOrganizationEntity().getAddress().getRegion().getCity().getName()
                 )
                 : null;
 
@@ -91,7 +92,8 @@ class UserServiceImpl implements UserService {
                 ? new PartnerInfoDto(
                         user.getSubEntity().getId(),
                         user.getSubEntity().getName(),
-                        user.getSubEntity().getAvatarPath()
+                        user.getSubEntity().getAvatarPath(),
+                        user.getSubEntity().getAddress().getRegion().getCity().getName()
                 )
                 : null;
 

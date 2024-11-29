@@ -111,6 +111,7 @@ public class UserController {
                 .id(organization.getId())
                 .name(organization.getName())
                 .avatarPath(organization.getAvatarPath())
+                .city(organization.getAddress().getRegion().getCity().getName())
                 .build();
 
         // Create filter
@@ -163,6 +164,7 @@ public class UserController {
                 .id(subEntity.getId())
                 .name(subEntity.getName())
                 .avatarPath(subEntity.getAvatarPath())
+                .city(subEntity.getAddress().getRegion().getCity().getName())
                 .build();
         UserFilter filter = UserFilter.builder()
                 .names(names)
@@ -253,6 +255,7 @@ public class UserController {
                 .id(organization.getId())
                 .name(organization.getName())
                 .avatarPath(organization.getAvatarPath())
+                .city(organization.getAddress().getRegion().getCity().getName())
                 .build();
 
         Page<User> users = this.service.getOrganizationUsers(pageable, id);

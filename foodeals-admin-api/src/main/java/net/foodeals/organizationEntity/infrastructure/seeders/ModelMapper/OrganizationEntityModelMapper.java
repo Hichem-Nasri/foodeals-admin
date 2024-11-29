@@ -219,7 +219,7 @@ public class OrganizationEntityModelMapper {
             OffsetDateTime dateTime = OffsetDateTime.parse(organizationEntity.getCreatedAt().toString());
             LocalDate date = dateTime.toLocalDate();
 
-            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
+            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath(), organizationEntity.getAddress().getRegion().getCity().getName());
             Optional<User> responsible = organizationEntity.getUsers().stream()
                     .filter(user -> user.getRole().getName().equals("MANAGER"))
                     .findFirst();
@@ -300,7 +300,7 @@ public class OrganizationEntityModelMapper {
                 ContactDto contactDto = new ContactDto(contact.getName(), contact.getEmail(), contact.getPhone());
                 organizationEntityDto.setContactDto(contactDto);
             });
-            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
+            PartnerInfoDto partnerInfoDto = new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath(), organizationEntity.getAddress().getRegion().getCity().getName());
             organizationEntityDto.setPartnerInfoDto(partnerInfoDto);
             Long offers = this.offerService.countByPublisherId(organizationEntity.getId());
             Long orders = this.offerService.countOrdersByPublisherInfoId(organizationEntity.getId());
@@ -403,7 +403,7 @@ public class OrganizationEntityModelMapper {
 
     @Transactional
     public PartnerInfoDto convertToPartnerInfoDto(OrganizationEntity organizationEntity) {
-        return new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath());
+        return new PartnerInfoDto(organizationEntity.getId(), organizationEntity.getName(), organizationEntity.getAvatarPath(), organizationEntity.getAddress().getRegion().getCity().getName());
     }
 
     @Transactional
@@ -425,6 +425,7 @@ public class OrganizationEntityModelMapper {
 
         PartnerInfoDto  partnerInfoDto = PartnerInfoDto.builder().id(organizationEntity.getId()).name(organizationEntity.getName())
                 .avatarPath(organizationEntity.getAvatarPath())
+                .city(organizationEntity.getAddress().getRegion().getCity().getName())
                 .build();
         deliveryPartnerDto.setId(organizationEntity.getId());
         deliveryPartnerDto.setEntityType(organizationEntity.getType());
