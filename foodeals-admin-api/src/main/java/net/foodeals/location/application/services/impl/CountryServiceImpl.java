@@ -102,5 +102,14 @@ class CountryServiceImpl implements CountryService {
     public boolean existsByName(String name) {
         return repository.existsByName(name);
     }
+
+    @Override
+    public List<City> getCities(UUID id) {
+        Country existingCountry = repository.findById(id)
+                .orElseThrow(() -> new CountryNotFoundException(id));
+        return existingCountry.getStates().stream()
+                .flatMap(state -> state.getCities().stream())
+                .toList();
+    }
 }
 
