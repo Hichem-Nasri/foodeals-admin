@@ -164,24 +164,28 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserInfoDto> getUsersByOrganization(UUID organizationId, UserFilter filter, Pageable pageable) {
+    public Page<Object> getUsersByOrganization(UUID organizationId, UserFilter filter, Pageable pageable) {
         Page<User> userPage = this.repository.findByOrganizationIdWithFilters(organizationId, filter, pageable);
 
         return userPage.map(user -> {
-            LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
-            String createdAt = localDateTime.format(formatter);
+            if (filter.getEntityTypes() != null && filter.getEntityTypes().contains(EntityType.DELIVERY_PARTNER)) {
+                return this.modelMapper.map(user, DeliveryPartnerUserDto.class);
+            } else {
+                LocalDateTime localDateTime = LocalDateTime.ofInstant(user.getCreatedAt(), ZoneId.systemDefault());
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/y");
+                String createdAt = localDateTime.format(formatter);
 
-            return new UserInfoDto(
-                    createdAt,
-                    user.getId(),
-                    user.getRole().getName(),
-                    user.getName(),
-                    user.getAddress().getRegion().getCity().getName(),
-                    user.getAddress().getRegion().getName(),
-                    user.getAvatarPath(),
-                    user.getEmail(),
-                    user.getPhone());
+                return new UserInfoDto(
+                        createdAt,
+                        user.getId(),
+                        user.getRole().getName(),
+                        user.getName(),
+                        user.getAddress().getRegion().getCity().getName(),
+                        user.getAddress().getRegion().getName(),
+                        user.getAvatarPath(),
+                        user.getEmail(),
+                        user.getPhone());
+            }
         });
     }
 

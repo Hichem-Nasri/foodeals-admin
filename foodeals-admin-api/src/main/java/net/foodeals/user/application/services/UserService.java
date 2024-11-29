@@ -47,7 +47,7 @@ public interface UserService extends CrudService<User, Integer, UserRequest> {
 
     Page<User> getSellsManagers(String name, Pageable pageable);
 
-    Page<UserInfoDto> getUsersByOrganization(UUID organizationId, UserFilter filter, Pageable pageable);
+    Page<Object> getUsersByOrganization(UUID organizationId, UserFilter filter, Pageable pageable);
 
     Page<UserInfoDto> getUsersBySubEntity(UUID subEntityId, UserFilter filter, Pageable pageable);
 
