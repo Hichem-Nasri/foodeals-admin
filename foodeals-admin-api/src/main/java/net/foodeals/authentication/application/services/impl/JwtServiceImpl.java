@@ -64,6 +64,11 @@ public class JwtServiceImpl implements JwtService {
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
+    @Override
+    public long getAccessTokenExpirationSeconds() {
+        return expirationTime / 1000; // Convert milliseconds to seconds
+    }
+
     private Boolean isTokenExpired(final String token) {
         return extractExpirationDate(token).before(new Date());
     }

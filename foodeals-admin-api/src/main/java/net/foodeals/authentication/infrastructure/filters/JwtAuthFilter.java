@@ -2,21 +2,25 @@ package net.foodeals.authentication.infrastructure.filters;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.authentication.application.services.JwtService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -27,52 +31,56 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
-
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
-
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain
+    ) throws ServletException, IOException {
         try {
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                logger.debug("No JWT token found in request headers");
+            final String jwt = extractJwtFromCookie(request);
+            if (jwt == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            jwt = authHeader.substring(7);
-            userEmail = jwtService.extractUsername(jwt);
-            logger.debug("JWT token found in request headers");
-
+            final String userEmail = jwtService.extractUsername(jwt);
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities());
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    logger.debug("Valid JWT token processed, security context updated");
-                    logger.debug("User authorities: {}", userDetails.getAuthorities());
-                } else {
-                    logger.warn("Invalid JWT token");
                 }
             }
-
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            logger.error("Cannot set user authentication", e);
+            logger.error("Error occurred while processing JWT: ", e);
             handleException(response, e);
         }
+    }
+
+    private String extractJwtFromCookie(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 
     private void handleException(HttpServletResponse response, Exception e) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        String jsonError = String.format("{\n \"error\": \"%s\"\n}", e.getMessage());
+        String jsonError = String.format("{\"error\": \"%s\"}", e.getMessage());
         response.getWriter().write(jsonError);
     }
 }
+

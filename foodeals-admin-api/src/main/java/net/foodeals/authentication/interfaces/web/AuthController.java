@@ -1,5 +1,7 @@
 package net.foodeals.authentication.interfaces.web;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.authentication.application.dtos.requests.LoginRequest;
@@ -8,34 +10,42 @@ import net.foodeals.authentication.application.dtos.requests.VerifyTokenRequest;
 import net.foodeals.authentication.application.dtos.responses.AuthenticationResponse;
 import net.foodeals.authentication.application.dtos.responses.LoginResponse;
 import net.foodeals.authentication.application.services.AuthenticationService;
+import net.foodeals.authentication.application.services.JwtService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthenticationService service;
+    private final JwtService jwtService;
 
     @PostMapping("register")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody @Valid RegisterRequest request) {
-        return ResponseEntity.ok(
-                service.register(request));
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody @Valid RegisterRequest request, HttpServletResponse response) {
+        AuthenticationResponse authResponse = service.register(request);
+        addTokenCookie(response, authResponse.accessToken());
+        return ResponseEntity.ok(authResponse);
     }
 
     @PostMapping("login")
-    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request) {
-        return ResponseEntity.ok(
-                service.login(request));
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request, HttpServletResponse response) {
+        LoginResponse loginResponse = service.login(request);
+        addTokenCookie(response, loginResponse.getToken().accessToken());
+        return ResponseEntity.ok(loginResponse);
     }
 
-
     @PostMapping("verify-token")
-    public ResponseEntity<Boolean> verifyToken(@RequestBody VerifyTokenRequest verifyTokenRequest) {
-        boolean isValid = service.verifyToken(verifyTokenRequest.token());
+    public ResponseEntity<Boolean> verifyToken(@CookieValue(name = "jwt", required = false) String token) {
+        boolean isValid = service.verifyToken(token);
         return ResponseEntity.ok(isValid);
+    }
+
+    private void addTokenCookie(HttpServletResponse response, String token) {
+        Cookie cookie = new Cookie("jwt", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setMaxAge((int) jwtService.getAccessTokenExpirationSeconds());        cookie.setPath("/");
+        response.addCookie(cookie);
     }
 }
