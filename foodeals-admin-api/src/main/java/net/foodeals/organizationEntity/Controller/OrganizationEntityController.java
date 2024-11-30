@@ -13,6 +13,7 @@ import net.foodeals.organizationEntity.application.services.OrganizationEntitySe
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.entities.enums.OrganizationsType;
+import net.foodeals.organizationEntity.domain.exceptions.AssociationCreationException;
 import net.foodeals.organizationEntity.infrastructure.seeders.ModelMapper.OrganizationEntityModelMapper;
 import net.foodeals.payment.application.dto.response.PartnerInfoDto;
 import org.springframework.data.domain.Page;
@@ -53,11 +54,20 @@ public class OrganizationEntityController {
             return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ? this.modelMapper.mapDeliveryPartners(organizationEntity) : this.modelMapper.mapOrganizationEntity(organizationEntity), HttpStatus.CREATED);
     }
 
+
     @PostMapping(value = "/associations/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Transactional
-    public ResponseEntity<UUID> createAssociation(@RequestPart("dto") CreateAssociationDto createAssociationDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) {
-        System.out.println(createAssociationDto);
-        return new ResponseEntity<UUID>(this.organizationEntityService.createAssociation(createAssociationDto, logo, cover), HttpStatus.OK);
+    public ResponseEntity<?> createAssociation(
+            @RequestPart("dto") CreateAssociationDto createAssociationDto,
+            @RequestPart(value = "logo", required = false) MultipartFile logo,
+            @RequestPart(value = "cover", required = false) MultipartFile cover) {
+        try {
+            UUID associationId = this.organizationEntityService.createAssociation(createAssociationDto, logo, cover);
+            return ResponseEntity.ok(associationId);
+        } catch (AssociationCreationException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An unexpected error occurred: " + e.getMessage());
+        }
     }
 
     @PutMapping(value = "/associations/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -1,10 +1,14 @@
 package net.foodeals.organizationEntity.application.services;
 
+import jakarta.transaction.Transactional;
 import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
 import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
+import net.foodeals.organizationEntity.domain.exceptions.AssociationCreationException;
 import net.foodeals.organizationEntity.domain.repositories.ContactRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class ContactsService {
@@ -32,13 +36,16 @@ public class ContactsService {
         return this.contactRepository.save(contact);
     }
 
+    @Transactional
     public Contact create(ContactDto contactDto, OrganizationEntity organizationEntity, Boolean isResponsible) {
-        Contact contact = Contact.builder().name(contactDto.getName())
+        Contact contact = Contact.builder()
+                .name(contactDto.getName())
                 .phone(contactDto.getPhone())
                 .email(contactDto.getEmail())
                 .isResponsible(isResponsible)
                 .organizationEntity(organizationEntity)
                 .build();
-        return this.contactRepository.save(contact);
+        return Optional.ofNullable(contactRepository.save(contact))
+                .orElseThrow(() -> new AssociationCreationException("Failed to create contact"));
     }
 }

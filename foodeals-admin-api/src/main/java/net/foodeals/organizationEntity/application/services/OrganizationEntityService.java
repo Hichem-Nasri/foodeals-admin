@@ -3,6 +3,7 @@ package net.foodeals.organizationEntity.application.services;
 import com.lowagie.text.DocumentException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.foodeals.common.dto.request.UpdateReason;
@@ -41,6 +42,7 @@ import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEn
 import net.foodeals.organizationEntity.domain.entities.*;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
+import net.foodeals.organizationEntity.domain.exceptions.AssociationCreationException;
 import net.foodeals.organizationEntity.domain.repositories.OrganizationEntityRepository;
 import net.foodeals.organizationEntity.domain.repositories.SubEntityRepository;
 import net.foodeals.payment.domain.entities.Enum.PaymentResponsibility;
@@ -678,44 +680,54 @@ public class OrganizationEntityService {
         return this.organizationEntityRepository.findByType(EntityType.DELIVERY_PARTNER, pageable);
     }
 
-    @Transactional
-    public UUID createAssociation(CreateAssociationDto createAssociationDto, MultipartFile logo, MultipartFile cover) {
+    @Transactional(rollbackOn = { Exception.class })
+    public UUID createAssociation(@Valid CreateAssociationDto createAssociationDto, MultipartFile logo, MultipartFile cover) {
+        try {
+            dtoProcessor.processDto(createAssociationDto);
+        } catch(Exception e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+
+        try {
             AddressRequest addressRequest = new AddressRequest(
-                createAssociationDto.associationAddress().getCountry(),
-                createAssociationDto.associationAddress().getAddress(),
-                createAssociationDto.associationAddress().getState(), // Added state here
-                createAssociationDto.associationAddress().getCity(),
-                createAssociationDto.associationAddress().getRegion(),
-                createAssociationDto.associationAddress().getIframe()
+                    createAssociationDto.getAssociationAddress().getCountry(),
+                    createAssociationDto.getAssociationAddress().getAddress(),
+                    createAssociationDto.getAssociationAddress().getState(),
+                    createAssociationDto.getAssociationAddress().getCity(),
+                    createAssociationDto.getAssociationAddress().getRegion(),
+                    createAssociationDto.getAssociationAddress().getIframe()
             );
-        Address address = this.addressService.create(addressRequest);
-        Set<Activity> activities = this.activityService.getActivitiesByName(createAssociationDto.activities());
-        Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAssociationDto.solutions());
-        OrganizationEntity organizationEntity = OrganizationEntity.builder().name(createAssociationDto.companyName())
-                .activities(activities)
-                .address(address)
-                .type(createAssociationDto.entityType())
-                .solutions(solutions)
-                .commercialNumber(createAssociationDto.pv())
-                .build();
-        organizationEntity = this.organizationEntityRepository.save(organizationEntity);
-        Contact manager1 = this.contactsService.create(createAssociationDto.responsible(), organizationEntity, true);
-        organizationEntity.getContacts().add(manager1);
-        User manager = this.userService.findById(createAssociationDto.managerID());
+            Address address = this.addressService.create(addressRequest);
+            Set<Activity> activities = this.activityService.getActivitiesByName(createAssociationDto.getActivities());
+            Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAssociationDto.getSolutions());
+            OrganizationEntity organizationEntity = OrganizationEntity.builder().name(createAssociationDto.getCompanyName())
+                    .activities(activities)
+                    .address(address)
+                    .type(createAssociationDto.getEntityType())
+                    .solutions(solutions)
+                    .commercialNumber(createAssociationDto.getPv())
+                    .build();
+            organizationEntity = this.organizationEntityRepository.save(organizationEntity);
+            Contact manager1 = this.contactsService.create(createAssociationDto.getResponsible(), organizationEntity, true);
+            organizationEntity.getContacts().add(manager1);
+            User manager = this.userService.findById(createAssociationDto.getManagerID());
 
-
-        OrganizationEntity finalOrganizationEntity = organizationEntity;
-        activities.forEach(activity -> {
-            activity.getOrganizationEntities().add(finalOrganizationEntity);
-            this.activityService.save(activity);
-        });
-        solutions.forEach(solution -> {
-            solution.getOrganizationEntities().add(finalOrganizationEntity);
-            this.solutionService.save(solution);
-        });
-        Contract contract = this.contractService.createAssociationContract(createAssociationDto.numberOfPoints(), organizationEntity, manager);
-        organizationEntity.setContract(contract);
-        return this.organizationEntityRepository.save(organizationEntity).getId();
+            OrganizationEntity finalOrganizationEntity = organizationEntity;
+            activities.forEach(activity -> {
+                activity.getOrganizationEntities().add(finalOrganizationEntity);
+                this.activityService.save(activity);
+            });
+            solutions.forEach(solution -> {
+                solution.getOrganizationEntities().add(finalOrganizationEntity);
+                this.solutionService.save(solution);
+            });
+            Contract contract = this.contractService.createAssociationContract(createAssociationDto.getNumberOfPoints(), organizationEntity, manager);
+            organizationEntity.setContract(contract);
+            return this.organizationEntityRepository.save(organizationEntity).getId();
+        } catch (Exception e) {
+            throw new AssociationCreationException("Error creating association: " + e.getMessage());
+        }
     }
 
     @Transactional
@@ -724,10 +736,10 @@ public class OrganizationEntityService {
         OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(organizationId).orElseThrow(() -> new ResourceNotFoundException("Organization not found"));
 
         // Update Address
-        AddressRequest addressRequest = new AddressRequest(updateAssociationDto.associationAddress().getCountry(), updateAssociationDto.associationAddress().getAddress(), updateAssociationDto.associationAddress().getState(), updateAssociationDto.associationAddress().getCity(), updateAssociationDto.associationAddress().getRegion(), updateAssociationDto.associationAddress().getIframe());
+        AddressRequest addressRequest = new AddressRequest(updateAssociationDto.getAssociationAddress().getCountry(), updateAssociationDto.getAssociationAddress().getAddress(), updateAssociationDto.getAssociationAddress().getState(), updateAssociationDto.getAssociationAddress().getCity(), updateAssociationDto.getAssociationAddress().getRegion(), updateAssociationDto.getAssociationAddress().getIframe());
         Address address = this.addressService.update(organizationEntity.getAddress().getId(), addressRequest);
         // Update Activities
-        List<String> activitiesNames = updateAssociationDto.activities();
+        List<String> activitiesNames = updateAssociationDto.getActivities();
         Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
 
         Set<Activity> activitiesToRemove = organizationEntity.getActivities()
@@ -753,7 +765,7 @@ public class OrganizationEntityService {
             this.activityService.save(activity);
         });
 
-        List<String> solutionsNames = updateAssociationDto.solutions();
+        List<String> solutionsNames = updateAssociationDto.getSolutions();
         Set<Solution> solutions = this.solutionService.getSolutionsByNames(solutionsNames);
 
         Set<Solution> solutionsToRemove = organizationEntity.getSolutions()
@@ -779,17 +791,17 @@ public class OrganizationEntityService {
             this.solutionService.save(solution);
         });
         Contact contact = organizationEntity.getContacts().getFirst();
-        this.contactsService.update(contact, updateAssociationDto.responsible());
+        this.contactsService.update(contact, updateAssociationDto.getResponsible());
         
 
         // Update Company Name
-        organizationEntity.setName(updateAssociationDto.companyName());
+        organizationEntity.setName(updateAssociationDto.getCompanyName());
 
         // Update Entity Type
-        organizationEntity.setType(updateAssociationDto.entityType());
+        organizationEntity.setType(updateAssociationDto.getEntityType());
 
         // Update Commercial Number
-        organizationEntity.setCommercialNumber(updateAssociationDto.pv());
+        organizationEntity.setCommercialNumber(updateAssociationDto.getPv());
 
         // Update Contract
         Contract contract = this.contractService.updateAssociationContract(updateAssociationDto, organizationEntity);
@@ -828,4 +840,3 @@ public Page<OrganizationEntity> searchPartnersByName(UUID id, String name, List<
         return organizationEntityRepository.findCitiesByOrganizationAddress(types, cityName, countryName, pageable);
     }
 }
-
