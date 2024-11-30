@@ -36,8 +36,8 @@ public class AuthController {
     }
 
     @PostMapping("verify-token")
-    public ResponseEntity<Boolean> verifyToken(@CookieValue(name = "authjs.session-token", required = false) String token) {
-        boolean isValid = service.verifyToken(token);
+    public ResponseEntity<Boolean> verifyToken(@RequestBody @Valid VerifyTokenRequest request) {
+        boolean isValid = service.verifyToken(request.token());
         return ResponseEntity.ok(isValid);
     }
 
