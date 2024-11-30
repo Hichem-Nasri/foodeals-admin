@@ -5,6 +5,7 @@ import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
 import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.exceptions.AssociationCreationException;
+import net.foodeals.organizationEntity.domain.exceptions.AssociationUpdateException;
 import net.foodeals.organizationEntity.domain.repositories.ContactRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class ContactsService {
         this.contactRepository.softDelete(contact.getId());
     }
 
+    @Transactional
     public Contact update(Contact contact, ContactDto contactDto) {
         if (contactDto.getName() != null) {
             contact.setName(contactDto.getName());
@@ -33,7 +35,8 @@ public class ContactsService {
         if (contactDto.getPhone() != null) {
             contact.setPhone(contactDto.getPhone());
         }
-        return this.contactRepository.save(contact);
+        return Optional.ofNullable(this.contactRepository.save(contact))
+                .orElseThrow(() -> new AssociationUpdateException("Failed to update contact"));
     }
 
     @Transactional

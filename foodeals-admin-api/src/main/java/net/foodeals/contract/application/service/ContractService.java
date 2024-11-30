@@ -15,6 +15,7 @@ import net.foodeals.location.domain.repositories.CityRepository;
 import net.foodeals.organizationEntity.application.dtos.requests.*;
 import net.foodeals.organizationEntity.application.services.*;
 import net.foodeals.organizationEntity.domain.entities.*;
+import net.foodeals.organizationEntity.domain.exceptions.AssociationUpdateException;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -219,6 +220,7 @@ public class ContractService {
         return this.contractRepository.findByContractStatus(status);
     }
 
+
     @Transactional
     public Contract updateAssociationContract(CreateAssociationDto updateAssociationDto, OrganizationEntity organizationEntity) {
         Contract contract = organizationEntity.getContract();
@@ -226,6 +228,9 @@ public class ContractService {
         UserContract userContract = contract.getUserContracts();
         if (userContract.getUser().getId() != updateAssociationDto.getManagerID()) {
             User manager = this.userService.findById(updateAssociationDto.getManagerID());
+                    if (manager == null) {
+                        throw new AssociationUpdateException("Manager not found");
+                    }
             User old = userContract.getUser();
             old.getUserContracts().remove(userContract);
             userContract.setUser(manager);

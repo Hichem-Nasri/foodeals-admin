@@ -14,6 +14,7 @@ import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
 import net.foodeals.organizationEntity.domain.entities.enums.OrganizationsType;
 import net.foodeals.organizationEntity.domain.exceptions.AssociationCreationException;
+import net.foodeals.organizationEntity.domain.exceptions.AssociationUpdateException;
 import net.foodeals.organizationEntity.infrastructure.seeders.ModelMapper.OrganizationEntityModelMapper;
 import net.foodeals.payment.application.dto.response.PartnerInfoDto;
 import org.springframework.data.domain.Page;
@@ -70,10 +71,21 @@ public class OrganizationEntityController {
         }
     }
 
-    @PutMapping(value = "/associations/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Transactional
-    public ResponseEntity<UUID> updateAssociation(@PathVariable("id") UUID id, @RequestPart("dto") CreateAssociationDto createAssociationDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) {
-        return new ResponseEntity<UUID>(this.organizationEntityService.updateAssociation(id, createAssociationDto, cover, logo), HttpStatus.OK);
+
+    @PutMapping(value = "associations/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateAssociation(
+            @PathVariable("id") UUID id,
+            @RequestPart("dto") CreateAssociationDto updateAssociationDto,
+            @RequestPart(value = "logo", required = false) MultipartFile logo,
+            @RequestPart(value = "cover", required = false) MultipartFile cover) {
+        try {
+            UUID updatedAssociationId = this.organizationEntityService.updateAssociation(id, updateAssociationDto, cover, logo);
+            return ResponseEntity.ok(updatedAssociationId);
+        } catch (AssociationUpdateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("An unexpected error occurred: " + e.getMessage());
+        }
     }
 
     @PutMapping(value = "/partners/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

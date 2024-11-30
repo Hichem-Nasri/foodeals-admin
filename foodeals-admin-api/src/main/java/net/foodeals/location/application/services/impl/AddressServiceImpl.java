@@ -11,6 +11,7 @@ import net.foodeals.location.application.services.CityService;
 import net.foodeals.location.domain.exceptions.AddressNotFoundException;
 import net.foodeals.location.domain.repositories.AddressRepository;
 import net.foodeals.organizationEntity.domain.exceptions.AssociationCreationException;
+import net.foodeals.organizationEntity.domain.exceptions.AssociationUpdateException;
 import net.foodeals.user.application.dtos.requests.UserAddress;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -76,14 +77,27 @@ class AddressServiceImpl implements AddressService {
         return repository.save(address);
     }
 
+    @Transactional
     @Override
     public Address update(UUID id, AddressRequest request) {
         Address address = repository.findById(id)
-                .orElseThrow(() -> new AddressNotFoundException(id));
+                .orElseThrow(() -> new AssociationUpdateException("Address not found"));
         Country country = this.countryService.findByName(request.country().toLowerCase());
-        State state = country.getStates().stream().filter(s -> s.getName().equals(request.stateName().toLowerCase())).findFirst().get();
-        City city = state.getCities().stream().filter(c -> c.getName().equals(request.cityName().toLowerCase())).findFirst().get();
-        Region region = city.getRegions().stream().filter(r -> r.getName().equals(request.regionName().toLowerCase())).findFirst().get();
+        if (country == null) {
+            throw new AssociationUpdateException("Country not found: " + request.country());
+        }
+        State state = country.getStates().stream()
+                .filter(s -> s.getName().equals(request.stateName().toLowerCase()))
+                .findFirst()
+                .orElseThrow(() -> new AssociationUpdateException("State not found: " + request.stateName()));
+        City city = state.getCities().stream()
+                .filter(c -> c.getName().equals(request.cityName().toLowerCase()))
+                .findFirst()
+                .orElseThrow(() -> new AssociationUpdateException("City not found: " + request.cityName()));
+        Region region = city.getRegions().stream()
+                .filter(r -> r.getName().equals(request.regionName().toLowerCase()))
+                .findFirst()
+                .orElseThrow(() -> new AssociationUpdateException("Region not found: " + request.regionName()));
         address.setRegion(region);
         address.setAddress(request.address());
         address.setIframe(request.iframe());
