@@ -65,32 +65,38 @@ public class ProspectServiceImp implements ProspectService {
     private final RoleService roleService;
 
     @Override
+    @Transactional
     public List<ProspectResponse> findAll() {
         return List.of();
     }
 
     @Override
+    @Transactional
     public Page<ProspectResponse> findAll(Integer pageNumber, Integer pageSize) {
         return null;
     }
 
 
     @Override
+    @Transactional
     public Page<ProspectResponse> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
+    @Transactional
     public ProspectResponse partialUpdate(UUID id, PartialProspectRequest dto) {
         return null;
     }
 
     @Override
+    @Transactional
     public Page<City> searchCitiesByProspectAddress(List<ProspectType> types, String cityName, String countryName, Pageable pageable) {
         return prospectRepository.findCitiesByProspectAddress(types, cityName, countryName, pageable);
     }
 
     @Override
+    @Transactional
     public Page<Region> searchRegionsByProspectAddress(List<ProspectType> types, String regionName, String countryName, Pageable pageable) {
         return prospectRepository.findRegionsByProspectAddress(types, regionName, countryName, pageable);
     }
@@ -167,6 +173,7 @@ public class ProspectServiceImp implements ProspectService {
 //    }
 
     @Override
+    @Transactional
     public EventResponse createEvent(UUID id, EventRequest eventRequest) {
         Prospect prospect = this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + id.toString()));
 
@@ -177,6 +184,7 @@ public class ProspectServiceImp implements ProspectService {
     }
 
     @Override
+    @Transactional
     public Page<EventResponse> getEvents(UUID id, Pageable pageable) {
         Prospect prospect = this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + id.toString()));
 
@@ -191,6 +199,7 @@ public class ProspectServiceImp implements ProspectService {
     }
 
     @Override
+    @Transactional
     public EventResponse getEventById(UUID prospectId, UUID eventId) {
         Prospect prospect = this.prospectRepository.findById(prospectId).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + prospectId.toString()));
         Optional<Event> event = prospect.getEvents().stream().filter(eventItem -> eventItem.getId().equals(eventId)).findFirst();
@@ -201,6 +210,7 @@ public class ProspectServiceImp implements ProspectService {
     }
 
     @Override
+    @Transactional
     public EventResponse updateEvent(UUID prospectId, UUID eventId, EventRequest dto) {
         Prospect prospect = this.prospectRepository.findById(prospectId).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + prospectId.toString()));
         Optional<Event> event = prospect.getEvents().stream().filter(eventItem -> eventItem.getId().equals(eventId)).findFirst();
@@ -213,6 +223,7 @@ public class ProspectServiceImp implements ProspectService {
     }
 
     @Override
+    @Transactional
     public EventResponse partialUpdateEvent(UUID prospectId, UUID eventId, PartialEventRequest dto) {
         Prospect prospect = this.prospectRepository.findById(prospectId).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + prospectId.toString()));
         Optional<Event> event = prospect.getEvents().stream().filter(eventItem -> eventItem.getId().equals(eventId)).findFirst();
@@ -225,6 +236,7 @@ public class ProspectServiceImp implements ProspectService {
     }
 
     @Override
+    @Transactional
     public void deleteEvent(UUID prospectId, UUID eventId) {
         Prospect prospect = this.prospectRepository.findById(prospectId).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + prospectId.toString()));
         Optional<Event> event = prospect.getEvents().stream().filter(eventItem -> eventItem.getId().equals(eventId)).findFirst();
@@ -236,6 +248,7 @@ public class ProspectServiceImp implements ProspectService {
     }
 
     @Override
+    @Transactional
     public ProspectStatisticDto statistics(List<ProspectType> type) {
 
         Long inProgressCount = this.prospectRepository.countByStatusAndTypeInAndDeletedAtIsNull(ProspectStatus.IN_PROGRESS, type);
@@ -261,6 +274,7 @@ public class ProspectServiceImp implements ProspectService {
     }
 
     @Override
+    @Transactional
     public String changeStatus(UUID id, ProspectStatusRequest dto) {
         Prospect prospect = this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("prospect not found with id " + id.toString()));
         prospect.setStatus(dto.status());
@@ -277,17 +291,20 @@ public class ProspectServiceImp implements ProspectService {
     }
 
     @Override
+    @Transactional
     public Page<ProspectResponse> findAllWithFilters(ProspectFilter filter, Pageable pageable) {
         Page<Prospect> prospects = prospectRepository.findAllWithFilters(filter, pageable);
         return prospects.map(p -> this.modelMapper.map(p, ProspectResponse.class));
     }
 
     @Override
+    @Transactional
     public ProspectResponse findById(UUID id) {
         return this.modelMapper.map(this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("prospect not found")), ProspectResponse.class);
     }
 
     @Override
+    @Transactional
     public ProspectResponse create(ProspectRequest dto) {
         Prospect prospect = Prospect.builder().name(dto.companyName())
                 .type(dto.type())
@@ -354,6 +371,7 @@ public class ProspectServiceImp implements ProspectService {
     }
 
     @Override
+    @Transactional
     public ProspectResponse update(UUID id, ProspectRequest dto) {
         Prospect prospect = this.prospectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + id.toString()));
@@ -409,6 +427,7 @@ public class ProspectServiceImp implements ProspectService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         Prospect prospect = this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Prospect not found with id: " + id.toString()));
         this.prospectRepository.softDelete(id);
