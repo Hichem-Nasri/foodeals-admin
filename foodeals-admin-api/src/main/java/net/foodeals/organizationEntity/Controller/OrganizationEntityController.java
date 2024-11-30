@@ -2,6 +2,7 @@ package net.foodeals.organizationEntity.Controller;
 
 import com.lowagie.text.DocumentException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import net.foodeals.common.dto.request.UpdateReason;
 import net.foodeals.common.dto.response.UpdateDetails;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
@@ -75,7 +76,7 @@ public class OrganizationEntityController {
     @PutMapping(value = "associations/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateAssociation(
             @PathVariable("id") UUID id,
-            @RequestPart("dto") CreateAssociationDto updateAssociationDto,
+            @Valid  @RequestPart("dto") CreateAssociationDto updateAssociationDto,
             @RequestPart(value = "logo", required = false) MultipartFile logo,
             @RequestPart(value = "cover", required = false) MultipartFile cover) {
         try {
