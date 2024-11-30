@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Controller
+@RequestMapping("/api/v1/activities")
 public class ActivityController {
 
     private final ActivityService activityService;
@@ -27,7 +28,7 @@ public class ActivityController {
         this.modelMapper = modelMapper;
     }
 
-    @GetMapping("/Activities")
+    @GetMapping
     public ResponseEntity<Page<ActivityResponseDto>> getAllActivities(
             @RequestParam(required = true) List<String> types,
             Pageable pageable) {
@@ -37,28 +38,28 @@ public class ActivityController {
         return new ResponseEntity<>(activityResponses, HttpStatus.OK);
     }
 
-    @GetMapping("/Activity/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<ActivityResponseDto> getActivityById(@PathVariable("id") UUID id) {
         Activity activity = this.activityService.findById(id);
         ActivityResponseDto activityResponse = this.modelMapper.map(activity, ActivityResponseDto.class);
         return new ResponseEntity<ActivityResponseDto>(activityResponse, HttpStatus.OK);
     }
 
-    @PostMapping("/Activities")
+    @PostMapping
     public ResponseEntity<ActivityResponseDto> createAnActivity(@RequestBody ActivityRequest activityRequest) {
         Activity activity = this.activityService.create(activityRequest);
         ActivityResponseDto activityResponse = this.modelMapper.map(activity, ActivityResponseDto.class);
         return new ResponseEntity<ActivityResponseDto>(activityResponse, HttpStatus.CREATED);
     }
 
-    @PutMapping("/Activity/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ActivityResponseDto> updateAnActivity(@RequestBody ActivityRequest activityRequest, @PathVariable("id") UUID id) {
         Activity activity = this.activityService.update(id, activityRequest);
         ActivityResponseDto activityResponse = this.modelMapper.map(activity, ActivityResponseDto.class);
         return new ResponseEntity<ActivityResponseDto>(activityResponse, HttpStatus.OK);
     }
 
-    @DeleteMapping("/Activity/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAnActivity(@PathVariable("id") UUID id) {
         this.activityService.delete(id);
         return ResponseEntity.noContent().build();
