@@ -30,4 +30,6 @@ public class DeliveryFormData {
     private List<CoveredZonesDto> coveredZonesDtos;
 
     private ContractStatus status;
+
+    private List<String> activities;
 }

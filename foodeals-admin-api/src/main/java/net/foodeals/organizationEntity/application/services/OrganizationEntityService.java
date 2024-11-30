@@ -129,15 +129,21 @@ public class OrganizationEntityService {
                 .isResponsible(true)
                 .build();
         Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAnOrganizationEntityDto.getSolutions());
+        Set<Activity> activities = this.activityService.getActivitiesByName(createAnOrganizationEntityDto.getActivities());
         OrganizationEntity organizationEntity = OrganizationEntity.builder().name(createAnOrganizationEntityDto.getEntityName())
                 .type(createAnOrganizationEntityDto.getEntityType())
                 .solutions(solutions)
+                .activities(activities)
                 .address(address)
                 .build();
         OrganizationEntity finalOrganizationEntity = organizationEntity;
         solutions.forEach(solution -> {
             solution.getOrganizationEntities().add(finalOrganizationEntity);
             this.solutionService.save(solution);
+        });
+        activities.forEach(activity -> {
+            activity.getOrganizationEntities().add(finalOrganizationEntity);
+            this.activityService.save(activity);
         });
         contact.setOrganizationEntity(organizationEntity);
         List<Contact> contacts = organizationEntity.getContacts();
@@ -193,15 +199,15 @@ public class OrganizationEntityService {
                 .rib(createAnOrganizationEntityDto.getEntityBankInformationDto().getRib())
                 .build();
         organizationEntity.setBankInformation(bankInformation);
-        Set<Activity> activities = this.activityService.getActivitiesByName(createAnOrganizationEntityDto.getActivities());
+//        Set<Activity> activities = this.activityService.getActivitiesByName(createAnOrganizationEntityDto.getActivities());
         Set<Features> features = this.featureService.findFeaturesByNames(createAnOrganizationEntityDto.getFeatures());
-        organizationEntity.setActivities(activities);
+//        organizationEntity.setActivities(activities);
         organizationEntity.setFeatures(features);
-        organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
-        activities.forEach(activity -> {
-            activity.getOrganizationEntities().add(organizationEntity);
-            this.activityService.save(activity);
-        });
+//        organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
+//        activities.forEach(activity -> {
+//            activity.getOrganizationEntities().add(organizationEntity);
+//            this.activityService.save(activity);
+//        });
         features.forEach(feature -> {
             feature.getOrganizationEntities().add(organizationEntity);
             this.featureService.save(feature);
@@ -249,6 +255,28 @@ public class OrganizationEntityService {
             this.solutionService.save(solution);
             return solution;
         }).toList();
+        List<String> activitiesNames = updateOrganizationEntityDto.getActivities();
+        Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
+
+        Set<Activity> activitiesToRemove = organizationEntity.getActivities()
+                .stream()
+                .filter(activity -> !activitiesNames.contains(activity.getName()))
+                .collect(Collectors.toSet());
+
+        Set<Activity> activitiesToAdd = activities.stream()
+                .filter(activity -> !finalOrganizationEntity1.getActivities().contains(activity))
+                .collect(Collectors.toSet());
+
+        activitiesToRemove.forEach(activity -> {
+            activity.getOrganizationEntities().remove(finalOrganizationEntity1);
+            finalOrganizationEntity1.getActivities().remove(activity);
+            this.activityService.save(activity);
+        });
+        activitiesToAdd.forEach(activity -> {
+            activity.getOrganizationEntities().add(finalOrganizationEntity1);
+            finalOrganizationEntity1.getActivities().add(activity);
+            this.activityService.save(activity);
+        });
         switch (organizationEntity.getType()) {
             case EntityType.PARTNER_WITH_SB:
             case EntityType.NORMAL_PARTNER:
@@ -325,29 +353,6 @@ public class OrganizationEntityService {
     }
     @Transactional
     private OrganizationEntity updatePartner(CreateAnOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
-        List<String> activitiesNames = updateOrganizationEntityDto.getActivities();
-        Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
-
-        Set<Activity> activitiesToRemove = organizationEntity.getActivities()
-                .stream()
-                .filter(activity -> !activitiesNames.contains(activity.getName()))
-                .collect(Collectors.toSet());
-
-        Set<Activity> activitiesToAdd = activities.stream()
-                .filter(activity -> !organizationEntity.getActivities().contains(activity))
-                .collect(Collectors.toSet());
-
-        activitiesToRemove.forEach(activity -> {
-            activity.getOrganizationEntities().remove(organizationEntity);
-            organizationEntity.getActivities().remove(activity);
-            this.activityService.save(activity);
-        });
-        activitiesToAdd.forEach(activity -> {
-            activity.getOrganizationEntities().add(organizationEntity);
-            organizationEntity.getActivities().add(activity);
-            this.activityService.save(activity);
-        });
-
         Set<Features> newFeatures = this.featureService.findFeaturesByNames(updateOrganizationEntityDto.getFeatures());
         Iterator<Features> iterator = organizationEntity.getFeatures().iterator();
         while (iterator.hasNext()) {

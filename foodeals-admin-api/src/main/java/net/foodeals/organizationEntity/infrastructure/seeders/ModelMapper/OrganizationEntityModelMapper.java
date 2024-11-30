@@ -329,6 +329,7 @@ public class OrganizationEntityModelMapper {
 
 
             formData.setSolutions(organizationEntity.getSolutions().stream().map(Solution::getName).collect(Collectors.toList()));
+            formData.setActivities(organizationEntity.getActivities().stream().map(Activity::getName).collect(Collectors.toList()));
 
             formData.setCommercialNumber(organizationEntity.getCommercialNumber());
 
