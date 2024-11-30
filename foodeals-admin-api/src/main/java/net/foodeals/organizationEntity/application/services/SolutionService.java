@@ -1,5 +1,6 @@
 package net.foodeals.organizationEntity.application.services;
 
+import jakarta.transaction.Transactional;
 import net.foodeals.organizationEntity.domain.entities.Solution;
 import net.foodeals.organizationEntity.domain.repositories.SolutionRepository;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class SolutionService {
         return this.solutionRepository.findByNameIn(solutionsNames.stream().map(String::toLowerCase).collect(Collectors.toList()));
     }
 
+    @Transactional
     public Solution save(Solution solution) {
         return this.solutionRepository.save(solution);
     }

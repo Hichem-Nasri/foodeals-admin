@@ -15,6 +15,7 @@ import net.foodeals.location.domain.repositories.CityRepository;
 import net.foodeals.organizationEntity.application.dtos.requests.*;
 import net.foodeals.organizationEntity.application.services.*;
 import net.foodeals.organizationEntity.domain.entities.*;
+import net.foodeals.organizationEntity.domain.exceptions.AssociationUpdateException;
 import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
 import org.apache.velocity.exception.ResourceNotFoundException;
@@ -219,13 +220,17 @@ public class ContractService {
         return this.contractRepository.findByContractStatus(status);
     }
 
+
     @Transactional
     public Contract updateAssociationContract(CreateAssociationDto updateAssociationDto, OrganizationEntity organizationEntity) {
         Contract contract = organizationEntity.getContract();
-        contract.setMaxNumberOfSubEntities(updateAssociationDto.numberOfPoints());
+        contract.setMaxNumberOfSubEntities(updateAssociationDto.getNumberOfPoints());
         UserContract userContract = contract.getUserContracts();
-        if (userContract.getUser().getId() != updateAssociationDto.managerID()) {
-            User manager = this.userService.findById(updateAssociationDto.managerID());
+        if (userContract.getUser().getId() != updateAssociationDto.getManagerID()) {
+            User manager = this.userService.findById(updateAssociationDto.getManagerID());
+                    if (manager == null) {
+                        throw new AssociationUpdateException("Manager not found");
+                    }
             User old = userContract.getUser();
             old.getUserContracts().remove(userContract);
             userContract.setUser(manager);
@@ -383,16 +388,24 @@ public class ContractService {
         this.contractRepository.save(contract);
     }
 
+    @Transactional
     public Contract createAssociationContract(Integer maxNumberOfPoints, OrganizationEntity organizationEntity, User manager) {
-        Contract contract = Contract.builder().maxNumberOfSubEntities(maxNumberOfPoints)
+        Contract contract = Contract.builder()
+                .maxNumberOfSubEntities(maxNumberOfPoints)
                 .organizationEntity(organizationEntity)
                 .contractStatus(ContractStatus.IN_PROGRESS)
                 .build();
-        contract =  this.contractRepository.save(contract);
-        UserContract userContract = UserContract.builder().user(manager).contract(contract).build();
-        this.userContractService.save(userContract);
+        contract = contractRepository.save(contract);
+
+        UserContract userContract = UserContract.builder()
+                .user(manager)
+                .contract(contract)
+                .build();
+        userContractService.save(userContract);
+
         manager.getUserContracts().add(userContract);
-        this.userService.save(manager);
+        userService.save(manager);
+
         return contract;
     }
 
