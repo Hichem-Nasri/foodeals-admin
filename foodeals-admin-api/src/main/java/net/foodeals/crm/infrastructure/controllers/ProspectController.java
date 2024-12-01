@@ -1,5 +1,6 @@
 package net.foodeals.crm.infrastructure.controllers;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import net.foodeals.common.dto.request.UpdateReason;
@@ -56,6 +57,7 @@ public final class ProspectController {
     }
 
     @GetMapping("/prospects")
+    @Transactional
     public ResponseEntity<Page<ProspectResponse>> getAll(
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
