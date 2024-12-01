@@ -100,7 +100,7 @@ public class OrganizationEntitySeeder {
             for (int i = 0; i < 5; i++) {
                 if (!userRepository.existsByEmail(emails[i])) {
                     UserRequest userRequest = new UserRequest(
-                            new Name(names[i], ""),
+                            new Name(names[i].split(" ")[0], names[i].split(" ")[1]),
                             emails[i],
                             "2126000000000",
                             "foodeals123",
