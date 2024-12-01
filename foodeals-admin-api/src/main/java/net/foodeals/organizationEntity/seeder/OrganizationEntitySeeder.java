@@ -11,6 +11,7 @@ import net.foodeals.user.domain.entities.UserStatus;
 import net.foodeals.user.domain.entities.WorkingHours;
 import net.foodeals.user.domain.entities.enums.Gender;
 import net.foodeals.user.domain.repositories.RoleRepository;
+import net.foodeals.user.domain.repositories.UserRepository;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;//package net.foodeals.organizationEntity.seeder;
 
@@ -76,6 +77,7 @@ public class OrganizationEntitySeeder {
     private final ContactRepository contactRepository;
     private final PartnerCommissionsRepository pr;
     private final RoleRepository role;
+    private final UserRepository userRepository;
 
     //
     @EventListener(ApplicationReadyEvent.class)
@@ -88,28 +90,27 @@ public class OrganizationEntitySeeder {
             Random random = new Random();
             String[] firstNames = {"Driis", "Amine", "Youssef", "Omar", "Hamza", "Ali", "Mohammed", "Abdel"};
             String[] lastNames = {"Sabir", "El", "Bennouna", "Ait", "Lahlou", "Arahou", "El Moussaoui", "Oubrahim"};
-            for (int i = 0; i < 8; i++) {
-                UserRequest userRequest = new UserRequest(
-                        new Name(firstNames[i], lastNames[i]),
-                        String.format("%s.%s@example.com", firstNames[i].toLowerCase(), lastNames[i].toLowerCase()),
-                        String.format("+2126%s%s%s%s%s%s", random.nextInt(10), random.nextInt(10), random.nextInt(10), random.nextInt(10), random.nextInt(10), random.nextInt(10)),
-                        "strongPassword123!",
-                        true,
-                        "SALES_MANAGER",
-                        organizationEntity.getId()
-                );
-                User user = userService.create(userRequest);
-                String[] avatarPaths = {
-                        "https://randomuser.me/api/portraits/men/21.jpg",
-                        "https://randomuser.me/api/portraits/men/22.jpg",
-                        "https://randomuser.me/api/portraits/men/23.jpg",
-                        "https://randomuser.me/api/portraits/men/24.jpg",
-                        "https://randomuser.me/api/portraits/men/25.jpg",
-                        "https://randomuser.me/api/portraits/men/26.jpg",
-                        "https://randomuser.me/api/portraits/men/27.jpg",
-                        "https://randomuser.me/api/portraits/men/28.jpg"
-                };
-                user.setAvatarPath(avatarPaths[random.nextInt(avatarPaths.length)]);
+            String[] avatars = {"https://media.licdn.com/dms/image/v2/C5603AQE4qIqZ7BP72g/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1648051607490?e=1738195200&v=beta&t=bBOsxoXBYopItC5__X8qt0k1hKKZv6JQni1JcQms3F4",
+                    "https://cdn.vectorstock.com/i/1000v/74/57/green-user-icon-vector-42797457.jpg",
+                    "https://media.licdn.com/dms/image/v2/C4D03AQFnXZY6Eoy4ng/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1642890536880?e=1738195200&v=beta&t=BtvhNrnNYKdG99-YZ74c0XNL6tsDvvAqM2_APUJI9YQ",
+                    "https://cdn.vectorstock.com/i/1000v/74/57/green-user-icon-vector-42797457.jpg",
+                    "https://cdn.vectorstock.com/i/1000v/74/57/green-user-icon-vector-42797457.jpg"};
+            String[] emails = {"admin-test1@gmail.com", "admin-test2@gmail.com", "admin-test3@gmail.com", "admin-test4@gmail.com", "admin-test5@gmail.com"};
+            String[] names = {"yassine ben taleb", "Manare Saidi ", "driss machkour ", "Zakaria", "Ayman"};
+            for (int i = 0; i < 5; i++) {
+                if (!userRepository.existsByEmail(emails[i])) {
+                    UserRequest userRequest = new UserRequest(
+                            new Name(names[i], ""),
+                            emails[i],
+                            "2126000000000",
+                            "foodeals123",
+                            true,
+                            "SUPER_ADMIN",
+                            organizationEntity.getId()
+                    );
+                    User user = userService.create(userRequest);
+                    user.setAvatarPath(avatars[i]);
+                }
             }
         }
     }
