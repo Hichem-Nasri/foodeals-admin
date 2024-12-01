@@ -145,4 +145,6 @@ public interface UserRepository extends BaseRepository<User, Integer> {
             "WHERE u.subEntity.id = :subentityId " +
             "AND LOWER(u.address.region.name) LIKE LOWER(CONCAT('%', :regionName, '%')) ")
     Page<Region> findRegionsUsersBySubentityIdAndRegionName(@Param("subentityId") UUID subentityId, @Param("regionName") String regionName, Pageable pageable);
+
+    boolean existsByEmail(String email);
 }

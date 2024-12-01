@@ -16,13 +16,13 @@ public class ActivitySeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (repository.count() == 0) {
-            repository.saveAll(List.of(
-                    Activity.create("Activity 1".toLowerCase()),
-                    Activity.create("Activity 2".toLowerCase()),
-                    Activity.create("Activity 3".toLowerCase()),
-                    Activity.create("Activity 4".toLowerCase())
-            ));
-        }
+//        if (repository.count() == 0) {
+//            repository.saveAll(List.of(
+//                    Activity.create("Activity 1".toLowerCase()),
+//                    Activity.create("Activity 2".toLowerCase()),
+//                    Activity.create("Activity 3".toLowerCase()),
+//                    Activity.create("Activity 4".toLowerCase())
+//            ));
+//        }
     }
 }

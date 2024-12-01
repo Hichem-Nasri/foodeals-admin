@@ -48,29 +48,43 @@ public class LocationSeeder {
 // Assuming you have a method to find a country by its name
         Country country = this.countryService.findByName("morocco"); // Replace with the actual country name
 
-// Check if the state "Casablanca-Settat" exists
-        State existingState = this.stateService.findByName("Casablanca-Settat");
-        if (existingState == null) {
-            StateRequest stateRequest = new StateRequest( "Casablanca-Settat", "morocco"); // Pass the country ID
-            this.stateService.create(stateRequest);
-            System.out.println("State 'Casablanca-Settat' created");
-        }
+// Create states and associated cities and regions
+        String[] states = {"Casablanca-Settat", "Rabat-Salé-Kénitra", "Marrakesh-Safi"};
+        String[][] cities = {{"Casablanca", "Settat", "Mohammedia"}, {"Rabat", "Salé", "Kénitra"}, {"Marrakesh", "Safi", "Essaouira"}};
+        String[][][] regions = {
+                {{"Maarif", "Hay Hassani", "Anfa"}, {"Sidi Bouzid", "Sidi Yahya", "Bouznika"}, {"Ain Sebaa", "Bouskoura", "Had Soualem"}},
+                {{"Agdal", "Hay Riad", "Souissi"}, {"Tabriquet", "Bettana", "Hassan"}, {"Mehdia", "Gharb", "Larache"}},
+                {{"Guéliz", "Medina", "Menara"}, {"Sidi Bouzid", "Jamaâ El Fna", "Kasbah"}, {"Zerktouni", "Sidi Youssef Ben Ali", "Chichaoua"}}
+        };
 
-// Now check for the city "Casablanca"
-        State state = this.stateService.findByName("Casablanca-Settat"); // Get the state again after creation
-        if (!this.cityService.existsByName("Casablanca")) {
-            CityRequest cityRequest = new CityRequest("morocco","Casablanca-Settat",  "Casablanca"); // Pass the state ID
-            this.cityService.create(cityRequest);
-            System.out.println("City 'Casablanca' created");
-        }
+        for (int i = 0; i < states.length; i++) {
+            State existingState = this.stateService.findByName(states[i]);
+            if (existingState == null) {
+                StateRequest stateRequest = new StateRequest(states[i], "morocco");
+                this.stateService.create(stateRequest);
+                System.out.println("State '" + states[i] + "' created");
+            }
 
-// Check if region exists and create if not
-        City city = this.cityService.findByName("Casablanca-Settat"); // Get the state again after creation
-        if (!this.regionService.existsByName("maarif")) {
-            RegionRequest regionRequest = new RegionRequest("morocco","Casablanca-Settat", "Casablanca", "Maarif");
-            this.regionService.create(regionRequest);
-            entityManager.flush();
-            System.out.println("Region created");
+            State state = this.stateService.findByName(states[i]);
+
+            for (int j = 0; j < cities[i].length; j++) {
+                if (!this.cityService.existsByName(cities[i][j])) {
+                    CityRequest cityRequest = new CityRequest("morocco", states[i], cities[i][j]);
+                    this.cityService.create(cityRequest);
+                    System.out.println("City '" + cities[i][j] + "' created");
+                }
+
+                City city = this.cityService.findByName(cities[i][j]);
+
+                for (int k = 0; k < regions[i][j].length; k++) {
+                    if (!this.regionService.existsByName(regions[i][j][k])) {
+                        RegionRequest regionRequest = new RegionRequest("morocco", states[i], cities[i][j], regions[i][j][k]);
+                        this.regionService.create(regionRequest);
+                        entityManager.flush();
+                        System.out.println("Region '" + regions[i][j][k] + "' created");
+                    }
+                }
+            }
         }
     }
 }
