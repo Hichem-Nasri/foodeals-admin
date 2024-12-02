@@ -35,7 +35,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/crm")
 @AllArgsConstructor
-public final class ProspectController {
+public class ProspectController {
 
     private final ProspectService prospectService;
     private final ModelMapper modelMapper;
@@ -44,7 +44,6 @@ public final class ProspectController {
     public ResponseEntity<ProspectResponse> create(@RequestBody @Valid ProspectRequest prospectRequest) {
         return new ResponseEntity<ProspectResponse>(this.prospectService.create(prospectRequest), HttpStatus.CREATED);
     }
-
 
     @GetMapping("/prospects/{id}")
     public ResponseEntity<ProspectResponse> getById(@PathVariable UUID id) {
