@@ -80,7 +80,7 @@ public class SubEntityServiceImpl implements SubEntityService {
     @Override
     @Transactional
     public void deleteSubentity(UUID uuid, UpdateReason reason) {
-        SubEntity subEntity = subEntityRepository.findById(uuid).orElseThrow(() -> new EntityNotFoundException("SubEntity not found with uuid: " + uuid));
+        SubEntity subEntity = subEntityRepository.getEntity(uuid).orElseThrow(() -> new EntityNotFoundException("SubEntity not found with uuid: " + uuid));
         DeletionReason deletionReason = DeletionReason.builder()
                 .details(reason.details())
                 .reason(reason.reason())
