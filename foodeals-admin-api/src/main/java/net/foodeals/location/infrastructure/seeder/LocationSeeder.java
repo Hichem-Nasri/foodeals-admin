@@ -49,12 +49,12 @@ public class LocationSeeder {
         Country country = this.countryService.findByName("morocco"); // Replace with the actual country name
 
 // Create states and associated cities and regions
-        String[] states = {"Casablanca-Settat", "Rabat-Salé-Kénitra", "Marrakesh-Safi"};
-        String[][] cities = {{"Casablanca", "Settat", "Mohammedia"}, {"Rabat", "Salé", "Kénitra"}, {"Marrakesh", "Safi", "Essaouira"}};
+        String[] states = {"casablanca-settat", "rabat-salé-kénitra", "marrakesh-safi"};
+        String[][] cities = {{"casablanca", "settat", "mohammedia"}, {"rabat", "salé", "kénitra"}, {"marrakesh", "safi", "essaouira"}};
         String[][][] regions = {
-                {{"Maarif", "Hay Hassani", "Anfa"}, {"Sidi Bouzid", "Sidi Yahya", "Bouznika"}, {"Ain Sebaa", "Bouskoura", "Had Soualem"}},
-                {{"Agdal", "Hay Riad", "Souissi"}, {"Tabriquet", "Bettana", "Hassan"}, {"Mehdia", "Gharb", "Larache"}},
-                {{"Guéliz", "Medina", "Menara"}, {"Sidi Bouzid", "Jamaâ El Fna", "Kasbah"}, {"Zerktouni", "Sidi Youssef Ben Ali", "Chichaoua"}}
+                {{"maarif", "hay hassani", "anfa"}, {"sidi bouzid", "sidi yahya", "bouznika"}, {"ain sebaa", "bouskoura", "had soualem"}},
+                {{"agdal", "hay riad", "souissi"}, {"tabriquet", "bettana", "hassan"}, {"mehdia", "gharb", "larache"}},
+                {{"guéliz", "medina", "menara"}, {"sidi bouzid", "jamaâ el fna", "kasbah"}, {"zerktouni", "sidi youssef ben ali", "chichaoua"}}
         };
 
         for (int i = 0; i < states.length; i++) {
