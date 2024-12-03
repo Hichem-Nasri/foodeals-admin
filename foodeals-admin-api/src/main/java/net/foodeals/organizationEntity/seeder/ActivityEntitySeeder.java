@@ -29,39 +29,41 @@ public class ActivityEntitySeeder {
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
     public void ActivitySeeder() {
-        List<String> names = List.of("Supermarché", "Pâtisserie", "Boulangerie", "Épicerie", "Confiserie");
-        List<Activity> activities = names.stream()
-                .filter(name -> !this.activityRepository.existsByName(name))
-                .map(name -> Activity.builder()
-                        .name(name)
-                        .type(ActivityType.PARTNER)
-                        .build())
-                .collect(Collectors.toList());
+        if (activityRepository.count() == 0) {
+            List<String> names = List.of("supermarché", "pâtisserie", "boulangerie", "épicerie", "confiserie");
+            List<Activity> activities = names.stream()
+                    .filter(name -> !this.activityRepository.existsByName(name))
+                    .map(name -> Activity.builder()
+                            .name(name)
+                            .type(ActivityType.PARTNER)
+                            .build())
+                    .collect(Collectors.toList());
 
-        this.activityRepository.saveAll(activities);
+            this.activityRepository.saveAll(activities);
 
-        if (!this.activityRepository.existsByName("Dar diafa")) {
-            Activity activity2 = Activity.builder()
-                    .name("Dar diafa")
-                    .type(ActivityType.ASSOCIATION) // Set the type here
-                    .build();
-            this.activityRepository.save(activity2);
-        }
+            if (!this.activityRepository.existsByName("dar diafa")) {
+                Activity activity2 = Activity.builder()
+                        .name("dar diafa")
+                        .type(ActivityType.ASSOCIATION) // Set the type here
+                        .build();
+                this.activityRepository.save(activity2);
+            }
 
-        if (!this.activityRepository.existsByName("Banque alimentaire")) {
-            Activity activity4 = Activity.builder()
-                    .name("Banque alimentaire")
-                    .type(ActivityType.ASSOCIATION) // Set the type here
-                    .build();
-            this.activityRepository.save(activity4);
-        }
+            if (!this.activityRepository.existsByName("banque alimentaire")) {
+                Activity activity4 = Activity.builder()
+                        .name("banque alimentaire")
+                        .type(ActivityType.ASSOCIATION) // Set the type here
+                        .build();
+                this.activityRepository.save(activity4);
+            }
 
-        if (!this.activityRepository.existsByName("Livraison")) {
-            Activity activity3 = Activity.builder()
-                    .name("Livraison")
-                    .type(ActivityType.DELIVERY_PARTNER) // Set the type here
-                    .build();
-            this.activityRepository.save(activity3);
+            if (!this.activityRepository.existsByName("livraison")) {
+                Activity activity3 = Activity.builder()
+                        .name("livraison")
+                        .type(ActivityType.DELIVERY_PARTNER) // Set the type here
+                        .build();
+                this.activityRepository.save(activity3);
+            }
         }
     }
 }

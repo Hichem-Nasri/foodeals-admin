@@ -96,7 +96,7 @@ public class OrganizationEntitySeeder {
                     "https://cdn.vectorstock.com/i/1000v/74/57/green-user-icon-vector-42797457.jpg",
                     "https://cdn.vectorstock.com/i/1000v/74/57/green-user-icon-vector-42797457.jpg"};
             String[] emails = {"admin-test1@gmail.com", "admin-test2@gmail.com", "admin-test3@gmail.com", "admin-test4@gmail.com", "admin-test5@gmail.com"};
-            String[] names = {"yassine ben taleb", "Manare Saidi ", "driss machkour ", "Zakaria", "Ayman"};
+            String[] names = {"yassine ben taleb", "Manare Saidi ", "driss machkour ", "Zakaria aabou", "Ayman 1337"};
             for (int i = 0; i < 5; i++) {
                 if (!userRepository.existsByEmail(emails[i])) {
                     UserRequest userRequest = new UserRequest(

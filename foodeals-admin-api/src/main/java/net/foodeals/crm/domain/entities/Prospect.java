@@ -31,7 +31,7 @@ public class Prospect extends AbstractEntity<UUID> {
 
     private String name;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private Set<Activity> activities = new HashSet<>();
 

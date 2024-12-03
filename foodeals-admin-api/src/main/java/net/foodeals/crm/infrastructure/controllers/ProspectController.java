@@ -16,6 +16,7 @@ import net.foodeals.crm.domain.entities.enums.ProspectType;
 import net.foodeals.location.application.dtos.responses.CityResponse;
 import net.foodeals.location.application.dtos.responses.RegionResponse;
 import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
+import net.foodeals.payment.application.dto.response.PartnerInfoDto;
 import org.modelmapper.ModelMapper;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
@@ -40,6 +41,7 @@ public class ProspectController {
     private final ProspectService prospectService;
     private final ModelMapper modelMapper;
 
+    @Transactional
     @PostMapping("/prospects/create")
     public ResponseEntity<ProspectResponse> create(@RequestBody @Valid ProspectRequest prospectRequest) {
         return new ResponseEntity<ProspectResponse>(this.prospectService.create(prospectRequest), HttpStatus.CREATED);
@@ -53,6 +55,19 @@ public class ProspectController {
     @PutMapping("/prospects/{id}")
     public ResponseEntity<ProspectResponse> update(@PathVariable UUID id, @RequestBody ProspectRequest prospectRequest) {
         return new ResponseEntity<>(this.prospectService.update(id, prospectRequest), HttpStatus.OK);
+    }
+
+    @GetMapping("/prospects/search")
+    @Transactional
+    public ResponseEntity<Page<PartnerInfoDto>> searchProspects(
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "types", required = false) List<ProspectType> types,
+            @RequestParam(name = "deleted", required = false, defaultValue = "false") boolean includeDeleted,
+            Pageable pageable) {
+        return ResponseEntity.ok(
+                prospectService.searchProspectsByName(name, types, pageable, includeDeleted)
+                        .map(p -> this.modelMapper.map(p, PartnerInfoDto.class))
+        );
     }
 
     @GetMapping("/prospects")

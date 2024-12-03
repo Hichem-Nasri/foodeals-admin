@@ -303,6 +303,18 @@ public class ProspectServiceImp implements ProspectService {
         return this.modelMapper.map(this.prospectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("prospect not found")), ProspectResponse.class);
     }
 
+    @Transactional
+    @Override
+    public Page<Prospect> searchProspectsByName(String name, List<ProspectType> types, Pageable pageable, boolean includeDeleted) {
+        Page<Prospect> entities;
+        if (name != null && !name.isEmpty()) {
+            entities = prospectRepository.findByNameContainingAndTypeInAndDeletedAtIs(name, types, includeDeleted, pageable);
+        } else {
+            entities = prospectRepository.findByTypeInAndDeletedAtIs(types, includeDeleted, pageable);
+        }
+        return entities;
+    }
+
     @Override
     @Transactional
     public ProspectResponse create(ProspectRequest dto) {
@@ -348,6 +360,9 @@ public class ProspectServiceImp implements ProspectService {
         activities.forEach(activity -> {
             activity.getProspects().add(prospect);
         });
+        this.activityService.saveAll(activities);
+        prospect.setActivities(activities);
+
         prospect.getContacts().add(contact);
 
         Set<Solution> solutions = this.solutionService.getSolutionsByNames(dto.solutions());

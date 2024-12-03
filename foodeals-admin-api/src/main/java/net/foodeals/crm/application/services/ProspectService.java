@@ -8,6 +8,7 @@ import net.foodeals.crm.application.dto.responses.EventResponse;
 import net.foodeals.crm.application.dto.responses.ProspectFilter;
 import net.foodeals.crm.application.dto.responses.ProspectResponse;
 import net.foodeals.crm.application.dto.responses.ProspectStatisticDto;
+import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
 import net.foodeals.crm.domain.entities.enums.ProspectType;
 import net.foodeals.location.domain.entities.City;
@@ -21,6 +22,10 @@ import java.util.UUID;
 
 public interface ProspectService extends CrudService<ProspectResponse, UUID, ProspectRequest> {
     Page<ProspectResponse> findAll(Pageable pageable);
+
+
+
+    Page<Prospect> searchProspectsByName(String name, List<ProspectType> types, Pageable pageable, boolean includeDeleted);
 
     ProspectResponse partialUpdate(UUID id, PartialProspectRequest dto);
 
