@@ -198,6 +198,8 @@ public class SolutionContractService {
                 } else {
                     subscription.setSolutionContracts(null);
                     solutionContract.setSubscription(null);
+                    contract.getOrganizationEntity().getSubscriptions().remove(subscription);
+                    this.organizationEntityRepository.save(contract.getOrganizationEntity());
                     this.subscriptionService.delete(subscription);
                 }
                 this.solutionContractRepository.delete(solutionContract);

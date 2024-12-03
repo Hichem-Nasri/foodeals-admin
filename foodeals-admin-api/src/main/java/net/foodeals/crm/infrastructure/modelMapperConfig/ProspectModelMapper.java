@@ -14,6 +14,7 @@ import net.foodeals.crm.domain.entities.enums.ProspectStatus;
 import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
 import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.entities.Solution;
+import net.foodeals.payment.application.dto.response.PartnerInfoDto;
 import net.foodeals.user.domain.entities.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -44,6 +45,12 @@ public class ProspectModelMapper {
         }, User.class, CreatorInfoDto.class);
 
         modelMapper.addConverter(mappingContext -> {
+            final Prospect prospect = mappingContext.getSource();
+
+            return new PartnerInfoDto(prospect.getId(), prospect.getName(), "", prospect.getAddress().getRegion().getCity().getName());
+        }, Prospect.class, PartnerInfoDto.class);
+
+        modelMapper.addConverter(mappingContext -> {
             final User user = mappingContext.getSource();
 
             return new ManagerInfoDto(user.getName(), user.getAvatarPath(), user.getId());
@@ -55,7 +62,7 @@ public class ProspectModelMapper {
             OffsetDateTime dateTime = OffsetDateTime.parse(prospect.getCreatedAt().toString());
             LocalDate date = dateTime.toLocalDate();
 
-            String category = prospect.getActivities().iterator().next().getName();
+            String category = prospect.getActivities().size() > 0 ? prospect.getActivities().iterator().next().getName() : "";
 
             Contact contact = prospect.getContacts().get(0);
 

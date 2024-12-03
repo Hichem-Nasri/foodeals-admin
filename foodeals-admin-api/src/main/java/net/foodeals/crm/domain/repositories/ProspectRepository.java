@@ -48,6 +48,16 @@ public interface ProspectRepository extends BaseRepository<Prospect, UUID> {
             Pageable pageable
     );
 
+    @Query("SELECT p FROM Prospect p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) AND p.type IN :types AND ((p.deletedAt IS NOT NULL AND :deleted = true) OR (p.deletedAt IS NULL AND :deleted = false))")
+    Page<Prospect> findByNameContainingAndTypeInAndDeletedAtIs(
+            @Param("name") String name,
+            @Param("types") List<ProspectType> types,
+            @Param("deleted") boolean deleted,
+            Pageable pageable
+    );
+
+    @Query("SELECT p FROM Prospect p WHERE p.type IN :types AND ((p.deletedAt IS NOT NULL AND :deleted = true) OR (p.deletedAt IS NULL AND :deleted = false))")
+    Page<Prospect> findByTypeInAndDeletedAtIs(@Param("types") List<ProspectType> types, @Param("deleted") boolean deleted, Pageable pageable);
     // Count prospects by status and type, excluding deleted ones
     Long countByStatusAndTypeInAndDeletedAtIsNull(ProspectStatus status, List<ProspectType> type);
 
