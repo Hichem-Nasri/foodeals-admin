@@ -87,9 +87,6 @@ public class OrganizationEntitySeeder {
             OrganizationEntity organizationEntity = new OrganizationEntity();
             organizationEntity.setName("manager test");
             organizationEntityService.save(organizationEntity);
-            Random random = new Random();
-            String[] firstNames = {"Driis", "Amine", "Youssef", "Omar", "Hamza", "Ali", "Mohammed", "Abdel"};
-            String[] lastNames = {"Sabir", "El", "Bennouna", "Ait", "Lahlou", "Arahou", "El Moussaoui", "Oubrahim"};
             String[] avatars = {"https://media.licdn.com/dms/image/v2/C5603AQE4qIqZ7BP72g/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1648051607490?e=1738195200&v=beta&t=bBOsxoXBYopItC5__X8qt0k1hKKZv6JQni1JcQms3F4",
                     "https://cdn.vectorstock.com/i/1000v/74/57/green-user-icon-vector-42797457.jpg",
                     "https://media.licdn.com/dms/image/v2/C4D03AQFnXZY6Eoy4ng/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1642890536880?e=1738195200&v=beta&t=BtvhNrnNYKdG99-YZ74c0XNL6tsDvvAqM2_APUJI9YQ",
@@ -112,6 +109,33 @@ public class OrganizationEntitySeeder {
                     user.setAvatarPath(avatars[i]);
                 }
             }
+Random random = new Random();
+String[] firstNames = {"Driis", "Amine", "Youssef", "Omar", "Hamza", "Ali", "Mohammed", "Abdel"};
+String[] lastNames = {"Sabir", "El", "Bennouna", "Ait", "Lahlou", "Arahou", "El Moussaoui", "Oubrahim"};
+String[] avatarPaths = {
+        "https://randomuser.me/api/portraits/men/21.jpg",
+        "https://randomuser.me/api/portraits/men/22.jpg",
+        "https://randomuser.me/api/portraits/men/23.jpg",
+        "https://randomuser.me/api/portraits/men/24.jpg",
+        "https://randomuser.me/api/portraits/men/25.jpg",
+        "https://randomuser.me/api/portraits/men/26.jpg",
+        "https://randomuser.me/api/portraits/men/27.jpg",
+        "https://randomuser.me/api/portraits/men/28.jpg"
+};
+
+for (int i = 0; i < 8; i++) {
+    UserRequest userRequest = new UserRequest(
+            new Name(firstNames[i], lastNames[i]),
+            String.format("%s.%s@example.com", firstNames[i].toLowerCase(), lastNames[i].toLowerCase()),
+            String.format("+2126%s%s%s%s%s%s", random.nextInt(10), random.nextInt(10), random.nextInt(10), random.nextInt(10), random.nextInt(10), random.nextInt(10)),
+            "strongPassword123!",
+            true,
+            "SALES_MANAGER",
+            organizationEntity.getId()
+    );
+    User user = userService.create(userRequest);
+    user.setAvatarPath(avatarPaths[random.nextInt(avatarPaths.length)]);
+}
         }
     }
 
