@@ -21,7 +21,7 @@ public class OrganizationEntityFormData {
 
     private Boolean commissionPayedBySubEntities;
 
-    private EntityAddressDto entityAddressDto; // valid
+    private EntityFormDataAddress entityAddressDto; // valid
 
     private List<String> solutions;
 
