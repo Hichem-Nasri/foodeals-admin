@@ -147,11 +147,15 @@ public class OrganizationEntityModelMapper {
             CityResponse cityResponse = mapper.map(address.getRegion().getCity(), CityResponse.class);
             RegionResponse regionResponse = mapper.map(address.getRegion(), RegionResponse.class);
 
+
+
             dto.setCountry(countryResponse);
             dto.setState(stateResponse);
             dto.setCity(cityResponse);
             dto.setRegion(regionResponse);
-
+            dto.setAddress(address.getAddress());
+            dto.setIframe(address.getIframe());
+            
             return dto;
         }, Address.class, EntityFormDataAddress.class);
 
