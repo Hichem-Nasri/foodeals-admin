@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/api/v1/organizations")
@@ -184,7 +185,7 @@ public class OrganizationEntityController {
             List<EntityType> types,
 
             @RequestParam(value = "names", required = false)
-            List<String> names,
+            String names,
 
             @RequestParam(value = "solutions", required = false)
             List<String> solutions,
@@ -212,11 +213,17 @@ public class OrganizationEntityController {
 
             Pageable pageable
     ) {
+        List<String> namesList = names != null
+                ? Arrays.stream(names.split(","))
+                .collect(Collectors.toList())
+                : null;
+
+
         OrganizationEntityFilter filter = OrganizationEntityFilter.builder()
                 .startDate(startDate != null ? startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null)
                 .endDate(endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null)
                 .types(types)
-                .names(names)
+                .names(namesList)
                 .email(email)
                 .phone(phone)
                 .solutions(solutions != null ? solutions : new ArrayList<String>())

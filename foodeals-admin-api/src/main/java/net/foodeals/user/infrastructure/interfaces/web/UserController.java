@@ -34,8 +34,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("v1/users")
@@ -89,7 +91,7 @@ public class UserController {
             @PathVariable("organizationId") UUID organizationId,
             @PageableDefault(size = 10) Pageable pageable,
 
-            @RequestParam(value = "names", required = false) List<String> names,
+            @RequestParam(value = "names", required = false) String names,
             @RequestParam(value = "phone", required = false) String phone,
             @RequestParam(value = "city", required = false) String city,
             @RequestParam(value = "region", required = false) String region,
@@ -102,6 +104,12 @@ public class UserController {
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(value = "deletedAt", required = true) Boolean deletedAt
     ) {
+
+        List<String> namesList = names != null
+                ? Arrays.stream(names.split(","))
+                .collect(Collectors.toList())
+                : null;
+
         // Retrieve organization
         OrganizationEntity organization = organizationRepository.findById(organizationId)
                 .orElseThrow(() -> new EntityNotFoundException("Organization not found with ID: " + organizationId));
@@ -116,7 +124,7 @@ public class UserController {
 
         // Create filter
         UserFilter filter = UserFilter.builder()
-                .names(names)
+                .names(namesList)
                 .phone(phone)
                 .city(city)
                 .region(region)
@@ -142,7 +150,7 @@ public class UserController {
     public ResponseEntity<SubentityUsersResponse> getSubentitiesUsers(
             @PathVariable("subentityId") UUID subentityId,
             @PageableDefault(size = 10) Pageable pageable,
-            @RequestParam(value = "names", required = false) List<String> names,
+            @RequestParam(value = "names", required = false) String names,
             @RequestParam(value = "phone", required = false) String phone,
             @RequestParam(value = "city", required = false) String city,
             @RequestParam(value = "region", required = false) String region,
@@ -159,6 +167,11 @@ public class UserController {
         SubEntity subEntity = subEntityRepository.findById(subentityId)
                 .orElseThrow(() -> new EntityNotFoundException("Subentity not found with ID: " + subentityId));
 
+        List<String> namesList = names != null
+                ? Arrays.stream(names.split(","))
+                .collect(Collectors.toList())
+                : null;
+
         // Create PartnerInfoDto
         PartnerInfoDto partnerInfoDto = PartnerInfoDto.builder()
                 .id(subEntity.getId())
@@ -167,7 +180,7 @@ public class UserController {
                 .city(subEntity.getAddress().getRegion().getCity().getName())
                 .build();
         UserFilter filter = UserFilter.builder()
-                .names(names)
+                .names(namesList)
                 .phone(phone)
                 .city(city)
                 .region(region)

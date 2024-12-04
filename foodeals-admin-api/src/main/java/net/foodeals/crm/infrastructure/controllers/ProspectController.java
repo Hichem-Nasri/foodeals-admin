@@ -30,8 +30,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/crm")
@@ -75,7 +77,7 @@ public class ProspectController {
     public ResponseEntity<Page<ProspectResponse>> getAll(
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-            @RequestParam(value = "names", required = false) List<String> names,
+            @RequestParam(value = "names", required = false) String names,
             @RequestParam(value = "categories", required = false) List<String> categories,
             @RequestParam(value = "cityId", required = false) UUID cityId,
             @RequestParam(value = "countryId", required = false) UUID countryId,
@@ -87,11 +89,16 @@ public class ProspectController {
             @RequestParam(value = "types", required = false) List<ProspectType> types,
             Pageable pageable) {
 
+        List<String> namesList = names != null
+                ? Arrays.stream(names.split(","))
+                .collect(Collectors.toList())
+                : null;
+
 
         ProspectFilter filter = ProspectFilter.builder()
                 .startDate(startDate != null ?  startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null)
                 .endDate(endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null)
-                .names(names)
+                .names(namesList)
                 .categories(categories != null ? categories : new ArrayList<String>())
                 .cityId(cityId)
                 .countryId(countryId)
