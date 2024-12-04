@@ -25,7 +25,7 @@ public class AssociationFormData {
     private String coverPath;
     private EntityType type;
     private String Pv;
-    private EntityAddressDto address;
+    private EntityFormDataAddress address;
     private ContactDto contactDto;
     private UserInfoDto manager;
     private List<String> solutions;

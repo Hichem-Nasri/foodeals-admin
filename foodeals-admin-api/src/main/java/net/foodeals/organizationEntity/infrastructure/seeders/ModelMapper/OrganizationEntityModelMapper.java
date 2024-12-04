@@ -10,6 +10,9 @@ import net.foodeals.contract.domain.entities.SolutionContract;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.delivery.application.services.DeliveryService;
 import net.foodeals.location.application.dtos.responses.CityResponse;
+import net.foodeals.location.application.dtos.responses.CountryResponse;
+import net.foodeals.location.application.dtos.responses.RegionResponse;
+import net.foodeals.location.application.dtos.responses.StateResponse;
 import net.foodeals.location.application.services.CountryService;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.location.domain.entities.City;
@@ -99,7 +102,7 @@ public class OrganizationEntityModelMapper {
             formData.setOneSubscription(organizationEntity.getContract().isSingleSubscription());
             formData.setStatus(organizationEntity.getContract().getContractStatus());
             // Map EntityAddressDto
-            formData.setEntityAddressDto(mapper.map(organizationEntity.getAddress(), EntityAddressDto.class));
+            formData.setEntityAddressDto(mapper.map(organizationEntity.getAddress(), EntityFormDataAddress.class));
 
             // Map ContactDto (assuming the first contact is the main contact)
             if (!organizationEntity.getContacts().isEmpty()) {
@@ -137,17 +140,20 @@ public class OrganizationEntityModelMapper {
 
         mapper.addConverter(mappingContext -> {
             Address address = mappingContext.getSource();
-            EntityAddressDto dto = new EntityAddressDto();
+            EntityFormDataAddress dto = new EntityFormDataAddress();
 
-            dto.setAddress(address.getAddress());
-            dto.setCountry(address.getRegion().getCity().getState().getCountry().getName());
-            dto.setState(address.getRegion().getCity().getState().getName());
-            dto.setCity(address.getRegion().getCity().getName());
-            dto.setRegion(address.getRegion().getName());
-            dto.setIframe(address.getIframe());
+            CountryResponse countryResponse = mapper.map(address.getRegion().getCity().getState().getCountry(), CountryResponse.class);
+            StateResponse stateResponse = mapper.map(address.getRegion().getCity().getState(), StateResponse.class);
+            CityResponse cityResponse = mapper.map(address.getRegion().getCity(), CityResponse.class);
+            RegionResponse regionResponse = mapper.map(address.getRegion(), RegionResponse.class);
+
+            dto.setCountry(countryResponse);
+            dto.setState(stateResponse);
+            dto.setCity(cityResponse);
+            dto.setRegion(regionResponse);
 
             return dto;
-        }, Address.class, EntityAddressDto.class);
+        }, Address.class, EntityFormDataAddress.class);
 
         mapper.addConverter(mappingContext -> {
             Contact contact = mappingContext.getSource();
@@ -334,7 +340,7 @@ public class OrganizationEntityModelMapper {
             formData.setCommercialNumber(organizationEntity.getCommercialNumber());
 
             // Map EntityAddressDto
-            formData.setEntityAddressDto(mapper.map(organizationEntity.getAddress(), EntityAddressDto.class));
+            formData.setEntityAddressDto(mapper.map(organizationEntity.getAddress(), EntityFormDataAddress.class));
 
             // Map ContactDto (assuming the first contact is the main contact)
             if (!organizationEntity.getContacts().isEmpty()) {
@@ -388,7 +394,7 @@ public class OrganizationEntityModelMapper {
             formData.setManager(userInfoDto);
             formData.setNumberOfPoints(organizationEntity.getContract().getMaxNumberOfSubEntities());
             // Map EntityAddressDto
-            formData.setAddress(mapper.map(organizationEntity.getAddress(), EntityAddressDto.class));
+            formData.setAddress(mapper.map(organizationEntity.getAddress(), EntityFormDataAddress.class));
 
             // Map ContactDto (assuming the first contact is the main contact)
             if (!organizationEntity.getContacts().isEmpty()) {

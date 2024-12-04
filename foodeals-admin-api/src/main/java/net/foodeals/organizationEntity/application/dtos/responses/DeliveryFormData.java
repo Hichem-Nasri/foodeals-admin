@@ -15,7 +15,7 @@ public class DeliveryFormData {
 
     private String entityName;
 
-    private EntityAddressDto entityAddressDto; // valid
+    private EntityFormDataAddress entityAddressDto; // valid
 
     private List<String> solutions;
 

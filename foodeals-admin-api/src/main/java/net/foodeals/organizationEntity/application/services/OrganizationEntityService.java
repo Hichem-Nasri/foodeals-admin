@@ -202,15 +202,9 @@ public class OrganizationEntityService {
                 .rib(createAnOrganizationEntityDto.getEntityBankInformationDto().getRib())
                 .build();
         organizationEntity.setBankInformation(bankInformation);
-//        Set<Activity> activities = this.activityService.getActivitiesByName(createAnOrganizationEntityDto.getActivities());
         Set<Features> features = this.featureService.findFeaturesByNames(createAnOrganizationEntityDto.getFeatures());
-//        organizationEntity.setActivities(activities);
         organizationEntity.setFeatures(features);
-//        organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
-//        activities.forEach(activity -> {
-//            activity.getOrganizationEntities().add(organizationEntity);
-//            this.activityService.save(activity);
-//        });
+        organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
         features.forEach(feature -> {
             feature.getOrganizationEntities().add(organizationEntity);
             this.featureService.save(feature);
