@@ -9,5 +9,5 @@ import net.foodeals.organizationEntity.application.dtos.responses.ResponsibleInf
 import java.util.List;
 import java.util.UUID;
 
-public record ProspectResponse(UUID id, String createdAt, String companyName, String category, ContactDto contact, AddressDto address, CreatorInfoDto creatorInfo, ManagerInfoDto managerInfo, ProspectStatus status, List<EventResponse> event, List<String> solutions, ProspectType type) {
+public record ProspectResponse(UUID id, String createdAt, String companyName, String category, ContactDto contact, ProspectAddress address, CreatorInfoDto creatorInfo, ManagerInfoDto managerInfo, ProspectStatus status, List<EventResponse> event, List<String> solutions, ProspectType type) {
 }
