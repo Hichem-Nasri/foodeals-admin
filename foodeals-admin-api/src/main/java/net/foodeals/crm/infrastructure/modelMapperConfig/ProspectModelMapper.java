@@ -4,13 +4,14 @@ import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import net.foodeals.crm.application.dto.requests.AddressDto;
 import net.foodeals.crm.application.dto.requests.EventRequest;
-import net.foodeals.crm.application.dto.responses.CreatorInfoDto;
-import net.foodeals.crm.application.dto.responses.EventResponse;
-import net.foodeals.crm.application.dto.responses.ManagerInfoDto;
-import net.foodeals.crm.application.dto.responses.ProspectResponse;
+import net.foodeals.crm.application.dto.responses.*;
 import net.foodeals.crm.domain.entities.Event;
 import net.foodeals.crm.domain.entities.Prospect;
 import net.foodeals.crm.domain.entities.enums.ProspectStatus;
+import net.foodeals.location.application.dtos.responses.CityResponse;
+import net.foodeals.location.application.dtos.responses.CountryResponse;
+import net.foodeals.location.application.dtos.responses.RegionResponse;
+import net.foodeals.location.application.dtos.responses.StateResponse;
 import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
 import net.foodeals.organizationEntity.domain.entities.Contact;
 import net.foodeals.organizationEntity.domain.entities.Solution;
@@ -68,12 +69,12 @@ public class ProspectModelMapper {
 
             ContactDto contactInfo = new ContactDto(contact.getName(), contact.getEmail(), contact.getPhone());
 
-            String country = prospect.getAddress().getRegion().getCity().getState().getCountry().getName();
-            String state = prospect.getAddress().getRegion().getCity().getState().getName();
-            String city = prospect.getAddress().getRegion().getCity().getName();
-            String region =  prospect.getAddress().getRegion().getName();
-            String address =  prospect.getAddress().getAddress();
-            AddressDto addressDto = new AddressDto(country, city, state, address, region, null);
+            CityResponse cityResponse = this.modelMapper.map(prospect.getAddress().getRegion().getCity(), CityResponse.class);
+            StateResponse stateResponse = this.modelMapper.map(prospect.getAddress().getRegion().getCity().getState(), StateResponse.class);
+            CountryResponse countryResponse = this.modelMapper.map(prospect.getAddress().getRegion().getCity().getState().getCountry(), CountryResponse.class);
+            RegionResponse regionResponse = this.modelMapper.map(prospect.getAddress().getRegion(), RegionResponse.class);
+            String address = prospect.getAddress().getAddress();
+            ProspectAddress addressDto = new ProspectAddress(address, countryResponse, cityResponse, stateResponse, regionResponse, null);
 
             final User creator = prospect.getCreator();
             final User lead = prospect.getLead();
