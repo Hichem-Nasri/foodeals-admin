@@ -30,8 +30,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/v1/sub-entities")
@@ -58,7 +60,7 @@ public class SubEntityController {
             OrganizationsType organizationsType,
 
             @RequestParam(value = "names", required = false)
-            List<String> names,
+            String names,
 
             @RequestParam(value = "types", required = true)
             List<SubEntityType> types,
@@ -81,12 +83,16 @@ public class SubEntityController {
             @RequestParam(value = "deletedAt", required = true)
             Boolean deletedAt
     ) {
-        System.out.println("test");
+        List<String> namesList = names != null
+                ? Arrays.stream(names.split(","))
+                .collect(Collectors.toList())
+                : null;
+
         // Create a filter object with the provided parameters
         SubEntityFilter filter = SubEntityFilter.builder()
                 .startDate(startDate != null ? startDate.atStartOfDay(ZoneOffset.UTC).toInstant() : null)
                 .endDate(endDate != null ? endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC).toInstant() : null)
-                .names(names)
+                .names(namesList)
                 .email(email)
                 .phone(phone)
                 .solutions(solutions != null ? solutions : new ArrayList<String>())
