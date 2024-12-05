@@ -2,6 +2,7 @@ package net.foodeals.schedule;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.foodeals.schedule.utils.PartnerCommissionsUtil;
@@ -21,15 +22,18 @@ public class PartnerCommissionsScheduler {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @PostConstruct
+    @Transactional
     public void init() {
     }
 
     @PreDestroy
+    @Transactional
     public void destroy() {
         scheduler.shutdownNow();
     }
 
     @Scheduled(cron = "0 0 0 1 * ?")
+    @Transactional
     public void createMonthlyPartnerCommissions() {
         log.info("Starting monthly partner commissions creation");
         try {

@@ -13,6 +13,7 @@ import net.foodeals.authentication.application.services.AuthenticationService;
 import net.foodeals.authentication.application.services.JwtService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("api/v1/auth")
@@ -22,6 +23,7 @@ public class AuthController {
     private final JwtService jwtService;
 
     @PostMapping("register")
+    @Transactional
     public ResponseEntity<AuthenticationResponse> register(@RequestBody @Valid RegisterRequest request, HttpServletResponse response) {
         AuthenticationResponse authResponse = service.register(request);
         addTokenCookie(response, authResponse.accessToken());
@@ -29,6 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("login")
+    @Transactional
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request, HttpServletResponse response) {
         LoginResponse loginResponse = service.login(request);
         addTokenCookie(response, loginResponse.getToken().accessToken());
@@ -36,6 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("verify-token")
+    @Transactional
     public ResponseEntity<Boolean> verifyToken(@RequestBody @Valid VerifyTokenRequest request) {
         boolean isValid = service.verifyToken(request.token());
         return ResponseEntity.ok(isValid);
@@ -45,7 +49,8 @@ public class AuthController {
         Cookie cookie = new Cookie("authjs.session-token", token);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
-        cookie.setMaxAge((int) jwtService.getAccessTokenExpirationSeconds());        cookie.setPath("/");
+        cookie.setMaxAge((int) jwtService.getAccessTokenExpirationSeconds());
+        cookie.setPath("/");
         response.addCookie(cookie);
     }
 }

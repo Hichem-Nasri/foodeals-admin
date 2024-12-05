@@ -1,6 +1,7 @@
 package net.foodeals.location.infrastructure.modelMapperConfig;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 //import net.foodeals.location.application.dtos.responses.AddressResponse;
 import net.foodeals.location.application.dtos.responses.CityResponse;
@@ -18,6 +19,7 @@ public class LocationModelMapperConfig {
     private final ModelMapper mapper;
 
     @PostConstruct
+    @Transactional
     public void configure() {
         mapper.addConverter(context -> {
             final Country country = context.getSource();

@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -45,6 +46,7 @@ public class SubEntityController {
     private final OrganizationEntityRepository organizationEntityRepository;
 
     @GetMapping("/organizations/{id}")
+    @Transactional
     public ResponseEntity<OrganizationSubEntitiesResponse> partnerSubEntities(
             Pageable pageable,
             @PathVariable("id") UUID id,
@@ -115,22 +117,26 @@ public class SubEntityController {
 
 
     @GetMapping("/search")
+    @Transactional
     public ResponseEntity<Page<PartnerInfoDto>> searchsubEntities(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "id", required = false) UUID id,
+            @RequestParam(name = "organizationId", required = false) UUID organizationId,
             @RequestParam(name = "types", required = false) List<SubEntityType> types,
             @RequestParam(name = "deleted", required = false, defaultValue = "false") boolean includeDeleted,
             Pageable pageable) {
-        return ResponseEntity.ok(subEntityService.searchSubEntitiesByName(id, name, types, pageable, includeDeleted).map(subEntity -> new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath(), subEntity.getAddress().getRegion().getCity().getName())));
+        return ResponseEntity.ok(subEntityService.searchSubEntitiesByName(id, name, types, pageable, includeDeleted, organizationId).map(subEntity -> new PartnerInfoDto(subEntity.getId(), subEntity.getName(), subEntity.getAvatarPath(), subEntity.getAddress().getRegion().getCity().getName())));
     }
 
     @GetMapping("/{uuid}/deletion-details")
+    @Transactional
     public ResponseEntity<Page<UpdateDetails>> getDeletionDetails(@PathVariable UUID uuid, Pageable pageable) {
         Page<UpdateDetails> deletionDetails = subEntityService.getDeletionDetails(uuid, pageable);
         return ResponseEntity.ok(deletionDetails);
     }
 
     @DeleteMapping("/{uuid}")
+    @Transactional
     public ResponseEntity<Void> deleteSubentity(
             @PathVariable UUID uuid,
             @RequestBody UpdateReason request) {
@@ -139,6 +145,7 @@ public class SubEntityController {
     }
 
     @GetMapping("/cities/search")
+    @Transactional
     public ResponseEntity<Page<CityResponse>> searchCities(
             @RequestParam(name = "city") String cityName,
             @RequestParam(name = "organizationId") UUID organizationId,

@@ -14,6 +14,7 @@ public class FeatureModelMapperConfig {
 
     private ModelMapper modelMapper;
     @PostConstruct
+    @Transactional
     private void postConstruct() {
         this.modelMapper.addConverter(mappingContext -> {
             Features feature = mappingContext.getSource();

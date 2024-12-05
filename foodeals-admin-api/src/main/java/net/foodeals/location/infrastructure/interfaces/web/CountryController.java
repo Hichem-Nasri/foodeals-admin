@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,8 +25,8 @@ public class CountryController {
     private final ModelMapper mapper;
 
     @GetMapping
-    public ResponseEntity<List<CountryResponse>> getAll(Pageable pageable
-                                                        ) {
+    @Transactional
+    public ResponseEntity<List<CountryResponse>> getAll(Pageable pageable) {
         final List<CountryResponse> responses = service.findAll(pageable)
                 .stream()
                 .map(country -> mapper.map(country, CountryResponse.class))
@@ -34,32 +35,36 @@ public class CountryController {
     }
 
     @GetMapping("/{id}")
+    @Transactional
     public ResponseEntity<CountryResponse> getById(@PathVariable("id") UUID id) {
         final CountryResponse response = mapper.map(service.findById(id), CountryResponse.class);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<CountryResponse> create(@RequestBody @Valid CountryRequest request) {
         final CountryResponse response = mapper.map(service.create(request), CountryResponse.class);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<CountryResponse> update(@PathVariable UUID id, @RequestBody @Valid CountryRequest request) {
         final CountryResponse response = mapper.map(service.update(id, request), CountryResponse.class);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/states")
-    public ResponseEntity<List<StateResponse>> getStates(@PathVariable("id") UUID id
-    ) {
+    @Transactional
+    public ResponseEntity<List<StateResponse>> getStates(@PathVariable("id") UUID id) {
         final List<StateResponse> responses = service.getStates(id)
                 .stream()
                 .map(state -> mapper.map(state, StateResponse.class))
@@ -67,10 +72,9 @@ public class CountryController {
         return ResponseEntity.ok(responses);
     }
 
-
     @GetMapping("/{id}/cities")
-    public ResponseEntity<List<CityResponse>> getCities(@PathVariable("id") UUID id
-    ) {
+    @Transactional
+    public ResponseEntity<List<CityResponse>> getCities(@PathVariable("id") UUID id) {
         final List<CityResponse> responses = service.getCities(id)
                 .stream()
                 .map(city -> mapper.map(city, CityResponse.class))

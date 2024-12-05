@@ -8,6 +8,7 @@ import net.foodeals.user.application.services.UserService;
 import net.foodeals.user.domain.entities.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -25,24 +26,21 @@ public class UserContractService {
         this.userService = userService;
     }
 
+
     public List<UserContract> getUserContracts() {
         return this.userContractRepository.findAll();
     }
 
     public UserContract getUserContractById(UUID id) {
-        UserContract userContract =  this.userContractRepository.findById(id).orElse(null);
-
-        if (userContract == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "UserContract not found");
-        }
-
-        return userContract;
+        return this.userContractRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "UserContract not found"));
     }
 
+    @Transactional
     public UserContract save(UserContract userContract) {
         return this.userContractRepository.save(userContract);
     }
 
+    @Transactional
     public UserContract updateUserContract(UserContract userContract, CreateAnOrganizationEntityDto updateOrganizationEntityDto) {
         User oldUser = userContract.getUser();
         oldUser.getUserContracts().remove(userContract);

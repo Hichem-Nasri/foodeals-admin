@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -33,30 +34,36 @@ public class RegionServiceImpl implements RegionService {
         this.cityService = cityService;
     }
 
+    @Transactional
     public Region findByName(String name) {
         return this.regionRepository.findByName(name.toLowerCase());
     }
 
+    @Transactional
     @Override
     public List<Region> findAll() {
         return List.of();
     }
 
+    @Transactional
     @Override
     public Page<Region> findAll(Integer pageNumber, Integer pageSize) {
         return null;
     }
 
+    @Transactional
     @Override
     public Page<Region> findAll(Pageable pageable) {
         return this.regionRepository.findAll(pageable);
     }
 
+    @Transactional
     @Override
     public Region findById(UUID uuid) {
         return this.regionRepository.findById(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Region with Id : " + uuid + " not found"));
     }
 
+    @Transactional
     @Override
     public Region create(RegionRequest dto) {
         Country country = this.countryService.findByName(dto.country().toLowerCase());
@@ -71,6 +78,7 @@ public class RegionServiceImpl implements RegionService {
         return region;
     }
 
+    @Transactional
     @Override
     public Region update(UUID uuid, RegionRequest dto) {
         Region region = this.regionRepository.findById(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Region with Id : " + uuid + " not found"));
@@ -88,6 +96,7 @@ public class RegionServiceImpl implements RegionService {
         return this.regionRepository.save(region);
     }
 
+    @Transactional
     @Override
     public void delete(UUID uuid) {
         Region region = this.regionRepository.findById(uuid).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Region with Id : " + uuid + " not found"));
@@ -95,11 +104,13 @@ public class RegionServiceImpl implements RegionService {
         this.regionRepository.softDelete(region.getId());
     }
 
+    @Transactional
     @Override
     public Long count() {
         return this.regionRepository.count();
     }
 
+    @Transactional
     @Override
     public boolean existsByName(String region) {
         return regionRepository.existsByName(region);

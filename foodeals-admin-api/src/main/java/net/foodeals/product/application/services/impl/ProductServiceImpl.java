@@ -31,27 +31,32 @@ class ProductServiceImpl implements ProductService {
     private final ModelMapper mapper;
 
     @Override
+    @Transactional
     public List<Product> findAll() {
         return repository.findAll();
     }
 
     @Override
+    @Transactional
     public Page<Product> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
     }
 
     @Override
+    @Transactional
     public Page<Product> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
+    @Transactional
     public Product findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     @Override
+    @Transactional
     public Product create(ProductRequest request) {
         final ProductCategory category = categoryService.findById(request.categoryId());
         final Product product = mapper.map(request, Product.class);
@@ -63,6 +68,7 @@ class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public Product update(UUID id, ProductRequest request) {
         final Product product = findById(id);
         final ProductCategory category = categoryService.findById(request.categoryId());
@@ -75,6 +81,7 @@ class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         if (!repository.existsById(id))
             throw new ProductNotFoundException(id);

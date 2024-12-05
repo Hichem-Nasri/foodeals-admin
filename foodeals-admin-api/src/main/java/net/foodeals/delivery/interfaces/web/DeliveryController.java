@@ -1,5 +1,6 @@
 package net.foodeals.delivery.interfaces.web;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.delivery.application.dtos.requests.delivery.DeliveryRequest;
@@ -20,30 +21,35 @@ public class DeliveryController {
     private final DeliveryService service;
 
     @GetMapping
+    @Transactional
     public ResponseEntity<List<Delivery>> findAll() {
         final List<Delivery> deliveries = service.findAll();
         return ResponseEntity.ok(deliveries);
     }
 
     @GetMapping("{id}")
+    @Transactional
     public ResponseEntity<Delivery> findById(@PathVariable UUID id) {
         final Delivery delivery = service.findById(id);
         return ResponseEntity.ok(delivery);
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<Delivery> create(@RequestBody @Valid DeliveryRequest request) {
         final Delivery delivery = service.create(request);
         return new ResponseEntity<>(delivery, HttpStatus.CREATED);
     }
 
     @PatchMapping("{id}")
+    @Transactional
     public ResponseEntity<Delivery> update(@PathVariable UUID id, @RequestBody @Valid DeliveryRequest request) {
         final Delivery delivery = service.update(id, request);
         return ResponseEntity.ok(delivery);
     }
 
     @DeleteMapping("{id}")
+    @Transactional
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 class AddressServiceImpl implements AddressService {
 
@@ -33,21 +32,25 @@ class AddressServiceImpl implements AddressService {
     private final ModelMapper modelMapper;
     private final RegionServiceImpl regionServiceImpl;
 
+    @Transactional
     @Override
     public List<Address> findAll() {
         return repository.findAll();
     }
 
+    @Transactional
     @Override
     public Page<Address> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
     }
 
+    @Transactional
     @Override
     public Page<Address> findAll(Pageable pageable) {
         return null;
     }
 
+    @Transactional
     @Override
     public Address findById(UUID id) {
         return repository.findById(id)
@@ -104,6 +107,7 @@ class AddressServiceImpl implements AddressService {
         return repository.save(address);
     }
 
+    @Transactional
     @Override
     public void delete(UUID id) {
         if (!repository.existsById(id))
@@ -124,6 +128,7 @@ class AddressServiceImpl implements AddressService {
         return this.repository.save(address);
     }
 
+    @Transactional
     @Override
     public Address createUserAddress(UserAddress userAddress) {
         Country country = this.countryService.findByName(userAddress.country().toLowerCase());

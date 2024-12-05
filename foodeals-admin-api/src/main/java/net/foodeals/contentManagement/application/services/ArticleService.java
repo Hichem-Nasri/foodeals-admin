@@ -8,6 +8,7 @@ import net.foodeals.contentManagement.domain.entities.Article;
 import net.foodeals.contentManagement.domain.repositories.ArticleRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -31,6 +32,7 @@ public class ArticleService {
         return this.articleRepository.findById(uuidObj).orElse(null);
     }
 
+    @Transactional
     public Article createAnArticle(CreateArticleDto createArticleDto) {
         Article article = Article.builder().title(createArticleDto.getTitle())
                 .content(createArticleDto.getContent()).build();
@@ -40,6 +42,7 @@ public class ArticleService {
         return this.articleRepository.save(article);
     }
 
+    @Transactional
     public Article deleteAnArticleByUuid(String uuid) {
         UUID uuidObj = UUID.fromString(uuid);
         Article article = this.articleRepository.findById(uuidObj).orElse(null);
@@ -51,6 +54,7 @@ public class ArticleService {
         return article;
     }
 
+    @Transactional
     public Article updateAnArticleByUuid(String uuid, UpdateArticleDto updateArticleDto) {
         UUID uuidObj = UUID.fromString(uuid);
         Article article = this.articleRepository.findById(uuidObj).orElse(null);
@@ -71,6 +75,7 @@ public class ArticleService {
         return this.articleRepository.save(article);
     }
 
+    @Transactional
     public Article save(Article article) {
         return this.articleRepository.save(article);
     }

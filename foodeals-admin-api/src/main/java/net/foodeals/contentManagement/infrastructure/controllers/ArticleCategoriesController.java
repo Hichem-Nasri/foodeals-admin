@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -28,6 +29,7 @@ public class ArticleCategoriesController {
         this.modelMapper = modelMapper;
     }
 
+    @Transactional
     @GetMapping("/ArticleCategories")
     public ResponseEntity<List<ArticleCategoryDto>> getAllCategories() {
         List<ArticleCategory> articleCategories = this.articleCategoryService.getAllArticleCategories();
@@ -37,6 +39,7 @@ public class ArticleCategoriesController {
         return new ResponseEntity<List<ArticleCategoryDto>>(articleCategoryDto, HttpStatus.OK);
     }
 
+    @Transactional
     @GetMapping("/ArticleCategory/{uuid}")
     public ResponseEntity<ArticleCategoryDto> getArticleCategoryByUuid(@PathVariable("uuid") String uuid) {
         ArticleCategory articleCategory = this.articleCategoryService.getArticleByUuid(uuid);
@@ -48,6 +51,7 @@ public class ArticleCategoriesController {
         return new ResponseEntity<ArticleCategoryDto>(articleCategoryDto, HttpStatus.OK);
     }
 
+    @Transactional
     @PostMapping("/ArticleCategory")
     public ResponseEntity<ArticleCategoryDto> createAnArticleCategory(@RequestBody CreateArticleCategoryDto createArticleCategoryDto) {
         ArticleCategory articleCategory = this.articleCategoryService.createAnArticleCategory(createArticleCategoryDto);
@@ -55,6 +59,7 @@ public class ArticleCategoriesController {
         return new ResponseEntity<ArticleCategoryDto>(articleCategoryDto, HttpStatus.OK);
     }
 
+    @Transactional
     @PutMapping("ArticleCategory/{uuid}")
     public ResponseEntity<ArticleCategoryDto> updateAnArticle(@PathVariable("uuid") String uuid, @RequestBody UpdateArticleCategoryDto updateArticleCategoryDto) {
         ArticleCategory articleCategory = this.articleCategoryService.updateAnArticleCategoryById(uuid, updateArticleCategoryDto);
@@ -62,18 +67,21 @@ public class ArticleCategoriesController {
         return new ResponseEntity<ArticleCategoryDto>(articleCategoryDto, HttpStatus.OK);
     }
 
+    @Transactional
     @DeleteMapping("ArticleCategory/{uuid}")
     public ResponseEntity<String> deleteAnArticleCategory(@PathVariable("uuid") String uuid) {
         this.articleCategoryService.deleteAnArticleCategoryByUuid(uuid);
         return new ResponseEntity<String>("category has been deleted", HttpStatus.OK);
     }
 
+    @Transactional
     @PostMapping("/ArticleCategory/{CategoryId}/addArticle")
     public ResponseEntity<String> addAnArticleToCategory(@PathVariable("CategoryId") String categoryId, @RequestBody AddArticleToCategoryDto addArticleToCategoryDto) {
         this.articleCategoryService.addAnArticleToCategory(categoryId, addArticleToCategoryDto);
         return new ResponseEntity<String>("Article was added successfully", HttpStatus.OK);
     }
 
+    @Transactional
     @DeleteMapping("/ArticleCategory/{CategoryId}/deleteArticle")
     public ResponseEntity<String> DeleteAnArticleFromCategory(@PathVariable("CategoryId") String categoryId, @RequestBody DeleteArticleFromCategoryDto deleteArticleFromCategoryDto) {
         this.articleCategoryService.deleteAnArticleFromCategory(categoryId, deleteArticleFromCategoryDto);

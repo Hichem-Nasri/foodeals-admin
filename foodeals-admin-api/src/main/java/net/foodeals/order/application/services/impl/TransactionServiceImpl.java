@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
 
@@ -28,27 +27,32 @@ public class TransactionServiceImpl implements TransactionService {
     private final ModelMapper mapper;
 
     @Override
+    @Transactional
     public List<Transaction> findAll() {
         return repository.findAll();
     }
 
     @Override
+    @Transactional
     public Page<Transaction> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
     }
 
     @Override
+    @Transactional
     public Page<Transaction> findAll(Pageable pageable) {
-        return null;
+        return repository.findAll(pageable);
     }
 
     @Override
+    @Transactional
     public Transaction findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new TransactionNotFoundException(id));
     }
 
     @Override
+    @Transactional
     public Transaction create(TransactionRequest request) {
         final Transaction transaction = mapper.map(request, Transaction.class);
         transaction.setOrder(
@@ -58,11 +62,15 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    @Transactional
     public Transaction update(UUID id, TransactionRequest request) {
-        return null;
+        final Transaction existingTransaction = findById(id);
+        mapper.map(request, existingTransaction);
+        return repository.save(existingTransaction);
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         if (repository.existsById(id))
             throw new TransactionNotFoundException(id);

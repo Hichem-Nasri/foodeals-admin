@@ -27,38 +27,45 @@ public class ActivityServiceImpl implements ActivityService {
     private final DtoProcessor dtoProcessor;
 
     @Override
+    @Transactional
     public List<Activity> findAll() {
         return this.repository.findAll();
     }
 
     @Override
+    @Transactional
     public Page<Activity> findAll(Integer pageNumber, Integer pageSize) {
         return null;
     }
 
     @Override
+    @Transactional
     public Page<Activity> findAll(Pageable pageable) {
         return this.repository.findAll(pageable);
     }
 
     @Override
+    @Transactional
     public Page<Activity> findAllByTypes(List<String> types, Pageable pageable) {
         return this.repository.findByTypeIn(types, pageable); // Assuming you have this method in your repository
     }
 
     @Override
+    @Transactional
     public Activity findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ActivityNotFoundException(id));
     }
 
     @Override
+    @Transactional
     public Activity create(ActivityRequest dto) {
         Activity activity = Activity.builder().name(dto.name().toLowerCase()).type(dto.type()).build();
         return this.repository.save(activity);
     }
 
     @Override
+    @Transactional
     public Activity update(UUID id, ActivityRequest dto) {
         Activity activity = repository.findById(id)
                 .orElseThrow(() -> new ActivityNotFoundException(id));
@@ -69,6 +76,7 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         Activity activity = repository.findById(id)
                 .orElseThrow(() -> new ActivityNotFoundException(id));
@@ -77,16 +85,19 @@ public class ActivityServiceImpl implements ActivityService {
     }
 
     @Override
+    @Transactional
     public Set<Activity> getActivitiesByName(List<String>  activitiesNames) {
         return this.repository.findByNameIn(activitiesNames.stream().map(String::toLowerCase).collect(Collectors.toList()));
     }
 
     @Override
+    @Transactional
     public Activity getActivityByName(String name) {
         return this.repository.findByName(name.toLowerCase());
     }
 
     @Override
+    @Transactional
     public List<Activity> saveAll(Set<Activity> activities) {
         return this.repository.saveAll(activities);
     }

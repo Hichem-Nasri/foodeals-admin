@@ -50,14 +50,16 @@ public interface SubEntityRepository extends BaseRepository<SubEntity, UUID> {
             "AND LOWER(c.name) LIKE LOWER(CONCAT('%', :cityName, '%'))")
     Page<City> findCitiesByOrganizationIdAndCityName(@Param("organizationId") UUID organizationId, @Param("cityName") String cityName, Pageable pageable);
 
-    @Query("SELECT s FROM SubEntity s WHERE LOWER(s.name) LIKE LOWER(CONCAT('%', :name, '%')) AND s.type IN :types AND ((s.deletedAt IS NOT NULL AND :deleted = true) OR (s.deletedAt IS NULL AND :deleted = false))")
+    @Query("SELECT s FROM SubEntity s WHERE (:organizationId IS NULL OR s.organizationEntity.id = :organizationId) " +
+            "AND LOWER(s.name) LIKE LOWER(CONCAT('%', :name, '%')) AND s.type IN :types AND ((s.deletedAt IS NOT NULL AND :deleted = true) OR (s.deletedAt IS NULL AND :deleted = false))")
     Page<SubEntity> findByNameContainingAndTypeInAndDeletedAtIs(
+            @Param("organizationId") UUID organizationId,
             @Param("name") String name,
             @Param("types") List<SubEntityType> types,
             @Param("deleted") boolean deleted,
             Pageable pageable
     );
 
-    @Query("SELECT s FROM SubEntity s WHERE s.type IN :types AND ((s.deletedAt IS NOT NULL AND :deleted = true) OR (s.deletedAt IS NULL AND :deleted = false)) ")
-    Page<SubEntity> findByTypeInAndDeletedAtIs(@Param("types") List<SubEntityType> types, @Param("deleted") boolean deleted, Pageable pageable);
+    @Query("SELECT s FROM SubEntity s WHERE (:organizationId IS NULL OR s.organizationEntity.id = :organizationId) AND s.type IN :types AND ((s.deletedAt IS NOT NULL AND :deleted = true) OR (s.deletedAt IS NULL AND :deleted = false)) ")
+    Page<SubEntity> findByTypeInAndDeletedAtIs(@Param("organizationId") UUID organizationId, @Param("types") List<SubEntityType> types, @Param("deleted") boolean deleted, Pageable pageable);
 }

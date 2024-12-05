@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import jakarta.transaction.Transactional;
 
 @Service
 public class JwtServiceImpl implements JwtService {
@@ -35,23 +36,28 @@ public class JwtServiceImpl implements JwtService {
         this.refreshTokenExpirationTime = refreshTokenExpirationTime;
     }
 
+    @Transactional
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
+    @Transactional
     public <T> T extractClaim(final String token, final Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
+    @Transactional
     public String generateToken(final UserDetails userDetails, final Map<String, Object> extraClaims) {
         return buildToken(extraClaims, userDetails, expirationTime);
     }
 
+    @Transactional
     public String generateRefreshToken(final UserDetails userDetails, final Map<String, Object> extraClaims) {
         return buildToken(Map.of(), userDetails, refreshTokenExpirationTime);
     }
 
+    @Transactional
     public AuthenticationResponse generateTokens(final UserDetails userDetails, final Map<String, Object> extraClaims) {
         return new AuthenticationResponse(
                 generateToken(userDetails, extraClaims),
@@ -59,12 +65,14 @@ public class JwtServiceImpl implements JwtService {
         );
     }
 
+    @Transactional
     public Boolean isTokenValid(final String token, final UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
     @Override
+    @Transactional
     public long getAccessTokenExpirationSeconds() {
         return expirationTime / 1000; // Convert milliseconds to seconds
     }

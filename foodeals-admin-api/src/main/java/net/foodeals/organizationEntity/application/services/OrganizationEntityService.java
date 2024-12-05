@@ -108,10 +108,13 @@ public class OrganizationEntityService {
     private final RayonRepository rayonService;
     private final AccountValidationService accountValidationService;
 
+
+    @Transactional
     public OrganizationEntity save(OrganizationEntity organizationEntity) {
         return this.organizationEntityRepository.save(organizationEntity);
     }
 
+    @Transactional
     public void delete(OrganizationEntity organizationEntity) {
         this.organizationEntityRepository.softDelete(organizationEntity.getId());
     }
@@ -318,6 +321,7 @@ public class OrganizationEntityService {
         return this.organizationEntityRepository.save(organizationEntity);
     }
 
+    @Transactional
     public void deleteOrganization(UUID uuid, UpdateReason reason) {
         OrganizationEntity organization = organizationEntityRepository.getEntity(uuid).orElseThrow(() -> new EntityNotFoundException("Organization not found with uuid: " + uuid));
         DeletionReason deletionReason = DeletionReason.builder()
@@ -380,6 +384,7 @@ public class OrganizationEntityService {
         return this.organizationEntityRepository.save(organizationEntity);
     }
 
+    @Transactional
     public OrganizationEntity getOrganizationEntityById(UUID id) {
         OrganizationEntity organizationEntity = this.organizationEntityRepository.getEntity(id).orElse(null);
 
@@ -657,6 +662,7 @@ public class OrganizationEntityService {
         }
     }
 
+    @Transactional
     public byte[] getContractDocument(UUID id) {
         OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
 
@@ -666,11 +672,12 @@ public class OrganizationEntityService {
 
         return this.contractService.getContractDocument(organizationEntity.getContract().getId());
     }
-
+    @Transactional
     public OrganizationEntity findById(UUID id) {
         return this.organizationEntityRepository.findById(id).orElse(null);
     }
 
+    @Transactional
     public Page<OrganizationEntity> getDeliveryPartners(Pageable pageable) {
         return this.organizationEntityRepository.findByType(EntityType.DELIVERY_PARTNER, pageable);
     }
@@ -810,11 +817,14 @@ public class OrganizationEntityService {
             throw new AssociationUpdateException("Error updating association: " + e.getMessage());
         }
     }
+
+    @Transactional
     public Page<OrganizationEntity> getAssociations(Pageable pageable) {
         return this.organizationEntityRepository.findByType(List.of(EntityType.ASSOCIATION, EntityType.FOOD_BANK, EntityType.FOOD_BANK_ASSO), pageable);
     }
 
-public Page<OrganizationEntity> searchPartnersByName(UUID id, String name, List<EntityType> types, Pageable pageable, boolean includeDeleted) {
+    @Transactional
+    public Page<OrganizationEntity> searchPartnersByName(UUID id, String name, List<EntityType> types, Pageable pageable, boolean includeDeleted) {
     if (id != null) {
 
         OrganizationEntity entity = organizationEntityRepository.getEntity(id).orElse(null);
@@ -836,6 +846,7 @@ public Page<OrganizationEntity> searchPartnersByName(UUID id, String name, List<
     return entities;
 }
 
+    @Transactional
     public Page<City> searchCitiesByOrganizationAddress(List<EntityType> types, String cityName, String countryName, Pageable pageable) {
         return organizationEntityRepository.findCitiesByOrganizationAddress(types, cityName, countryName, pageable);
     }

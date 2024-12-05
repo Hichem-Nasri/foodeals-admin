@@ -52,21 +52,25 @@ public class OrderServiceImpl implements OrderService {
     private final CommissionService commissionService;
 
     @Override
+    @Transactional
     public List<Order> findByOfferPublisherInfoIdAndDate(UUID publisherId, Date date) {
         return this.repository.findOrdersByPublisherIdAndOrderDate(publisherId, date);
     }
 
     @Override
+    @Transactional
     public Page<Order> findByOfferPublisherInfoIdAndDateAndStatus(UUID publisherId, Date date, OrderStatus status, TransactionStatus transactionStatus, Pageable pageable) {
         return this.repository.findOrdersByPublisherIdAndOrderDateAndStatusAndTransactionStatus(publisherId, date, status, transactionStatus, pageable);
     }
 
     @Override
+    @Transactional
     public Page<Order> findByOfferPublisherInfoIdAndDate(UUID publisherId, Date date, Pageable pageable) {
         return this.repository.findOrdersByPublisherIdAndOrderDate(publisherId, date, pageable);
     }
 
     @Override
+    @Transactional
     public List<Order> findByOfferPublisherInfoIdAndDateAndStatus(UUID publisherId, Date date, OrderStatus status, TransactionStatus transactionStatus) {
         return this.repository.findOrdersByPublisherIdAndOrderDateAndStatusAndTransactionStatus(publisherId, date, status, transactionStatus);
     }
@@ -84,6 +88,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public Page<OperationsDto> getOperationsByOrderId(UUID orderId, Pageable pageable) {
         Order order = this.repository.findById(orderId).orElseThrow(() -> new OrderNotFoundException(orderId));
         List<Order> orders = this.repository.findOrdersByDeliveryId(order.getDelivery().getId());
@@ -118,27 +123,32 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public List<Order> findAll() {
         return repository.findAll();
     }
 
     @Override
+    @Transactional
     public Page<Order> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
     }
 
     @Override
+    @Transactional
     public Page<Order> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
+    @Transactional
     public Order findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
     }
 
     @Override
+    @Transactional
     public Order create(OrderRequest request) {
         final User client = userService.findById(request.clientId());
         final Offer offer = offerService.findById(request.offerId());
@@ -161,11 +171,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public Order update(UUID id, OrderRequest request) {
         return null;
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         if (repository.existsById(id))
             throw new OrderNotFoundException(id);

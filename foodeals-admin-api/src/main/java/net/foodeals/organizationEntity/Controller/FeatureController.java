@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +32,7 @@ public class FeatureController {
 
     // Get All Features
     @GetMapping
+    @Transactional
     public ResponseEntity<Page<FeatureResponse>> getAllFeatures(Pageable pageable) {
         Page<Features> features = featureService.findAll(pageable);
         Page<FeatureResponse> featureResponses = features
@@ -40,6 +42,7 @@ public class FeatureController {
 
     // Get Feature by ID
     @GetMapping("/{id}")
+    @Transactional
     public ResponseEntity<FeatureResponse> getFeatureById(@PathVariable("id") UUID id) {
         Features feature = featureService.findById(id);
         FeatureResponse featureResponse = modelMapper.map(feature, FeatureResponse.class);
@@ -48,6 +51,7 @@ public class FeatureController {
 
     // Create a Feature
     @PostMapping
+    @Transactional
     public ResponseEntity<FeatureResponse> createFeature(@RequestBody FeatureRequest featureRequest) {
         Features feature = featureService.create(featureRequest);
         FeatureResponse featureResponse = modelMapper.map(feature, FeatureResponse.class);
@@ -56,6 +60,7 @@ public class FeatureController {
 
     // Update a Feature
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<FeatureResponse> updateFeature(@RequestBody FeatureRequest featureRequest, @PathVariable("id") UUID id) {
         Features feature = featureService.update(id, featureRequest);
         FeatureResponse featureResponse = modelMapper.map(feature, FeatureResponse.class);
@@ -64,6 +69,7 @@ public class FeatureController {
 
     // Delete a Feature
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<?> deleteFeature(@PathVariable("id") UUID id) {
         featureService.delete(id);
         return ResponseEntity.noContent().build();

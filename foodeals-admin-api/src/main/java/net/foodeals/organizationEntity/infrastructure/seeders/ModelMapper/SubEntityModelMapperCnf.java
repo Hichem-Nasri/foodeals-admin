@@ -1,6 +1,7 @@
 package net.foodeals.subEntitie.infrastructure.seeders.ModelMapper;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import net.foodeals.contract.domain.entities.enums.ContractStatus;
 import net.foodeals.offer.application.services.DonationService;
@@ -36,6 +37,7 @@ public class SubEntityModelMapperCnf {
     private final OfferService offerService;
 
     @PostConstruct
+    @Transactional
     private void postConstruct() {
 
         mapper.addConverter(mappingContext -> {

@@ -8,6 +8,7 @@ import org.apache.velocity.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -24,39 +25,47 @@ public class FeaturesServiceImpl implements FeatureService {
         this.featureRepository = featureRepository;
     }
 
+    @Transactional
     public Set<Features> findFeaturesByNames(List<String> features) {
         return this.featureRepository.findByNameIn(features.stream().map(String::toLowerCase).collect(Collectors.toList()));
     }
+    @Transactional
     @Override
     public Features save(Features feature) {
         return this.featureRepository.save(feature);
     }
 
+    @Transactional
     @Override
     public List<Features> findAll() {
         return List.of();
     }
 
+    @Transactional
     @Override
     public Page<Features> findAll(Integer pageNumber, Integer pageSize) {
         return null;
     }
 
+    @Transactional
     @Override
     public Page<Features> findAll(Pageable pageable) {
         return this.featureRepository.findAll(pageable);
     }
 
+    @Transactional
     @Override
     public Features findById(UUID uuid) {
         return this.featureRepository.findById(uuid).orElse(null);
     }
 
+    @Transactional
     @Override
     public Features create(FeatureRequest dto) {
         Features feature = Features.builder().name(dto.name().toLowerCase()).build();
         return this.featureRepository.save(feature);    }
 
+    @Transactional
     @Override
     public Features update(UUID uuid, FeatureRequest dto) {
         Features feature = featureRepository.findById(uuid)
@@ -66,6 +75,7 @@ public class FeaturesServiceImpl implements FeatureService {
         return this.featureRepository.save(feature);
     }
 
+    @Transactional
     @Override
     public void delete(UUID uuid) {
         Features feature = featureRepository.findById(uuid)

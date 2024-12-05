@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -25,6 +26,7 @@ public class ArticlesController {
         this.modelMapper = modelMapper;
     }
 
+    @Transactional
     @GetMapping("/Articles")
     public ResponseEntity<List<ArticleDto>> getAllArticles() {
         List<Article> articles = this.articleService.getAllArticles();
@@ -32,6 +34,7 @@ public class ArticlesController {
         return new ResponseEntity<List<ArticleDto>>(articlesDto, HttpStatus.OK);
     }
 
+    @Transactional
     @GetMapping("/Article/{uuid}")
     public ResponseEntity<ArticleDto> getArticleByUuid(@PathVariable("uuid") String uuid) {
         Article article = this.articleService.getArticleByUuid(uuid);
@@ -43,6 +46,7 @@ public class ArticlesController {
         return new ResponseEntity<ArticleDto>(articleDto, HttpStatus.OK);
     }
 
+    @Transactional
     @PostMapping("/Articles")
     public ResponseEntity<ArticleDto> createAnArticle(@RequestBody CreateArticleDto createArticleDto) {
         Article article = this.articleService.createAnArticle(createArticleDto);
@@ -50,6 +54,7 @@ public class ArticlesController {
         return new ResponseEntity<ArticleDto>(articleDto, HttpStatus.OK);
     }
 
+    @Transactional
     @PutMapping("Article/{uuid}")
     public ResponseEntity<ArticleDto> updateAnArticle(@PathVariable("uuid") String uuid, @RequestBody UpdateArticleDto updateArticleDto) {
         Article article = this.articleService.updateAnArticleByUuid(uuid, updateArticleDto);
@@ -57,6 +62,7 @@ public class ArticlesController {
         return new ResponseEntity<ArticleDto>(articleDto, HttpStatus.OK);
     }
 
+    @Transactional
     @DeleteMapping("Article/{uuid}")
     public ResponseEntity<String> deleteAnArticle(@PathVariable("uuid") String uuid) {
         this.articleService.deleteAnArticleByUuid(uuid);

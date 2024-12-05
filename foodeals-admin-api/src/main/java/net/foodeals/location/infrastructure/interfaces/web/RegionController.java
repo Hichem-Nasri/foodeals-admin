@@ -1,5 +1,6 @@
 package net.foodeals.location.infrastructure.interfaces.web;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import net.foodeals.location.application.dtos.requests.RegionRequest;
@@ -25,6 +26,7 @@ public class RegionController {
     private final ModelMapper mapper;
 
     @GetMapping
+    @Transactional
     public ResponseEntity<List<RegionResponse>> getAll(Pageable pageable
     ) {
         final List<RegionResponse> responses = service.findAll(pageable)
@@ -35,24 +37,28 @@ public class RegionController {
     }
 
     @GetMapping("/{id}")
+    @Transactional
     public ResponseEntity<RegionResponse> getById(@PathVariable("id") UUID id) {
         final RegionResponse response = mapper.map(service.findById(id), RegionResponse.class);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<RegionResponse> create(@RequestBody @Valid RegionRequest request) {
         final RegionResponse response = mapper.map(service.create(request), RegionResponse.class);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<RegionResponse> update(@PathVariable UUID id, @RequestBody @Valid RegionRequest request) {
         final RegionResponse response = mapper.map(service.update(id, request), RegionResponse.class);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();

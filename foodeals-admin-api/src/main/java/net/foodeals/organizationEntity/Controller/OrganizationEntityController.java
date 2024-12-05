@@ -46,12 +46,14 @@ public class OrganizationEntityController {
 
 
         @GetMapping("/associations/form-data/{id}")
+        @Transactional
         public ResponseEntity<AssociationFormData> getAssociationFormData(@PathVariable UUID id) {
             OrganizationEntity organizationEntity = organizationEntityService.findById(id);
             return new ResponseEntity<>(this.modelMapper.mapToAssociationFormData(organizationEntity), HttpStatus.OK);
         }
 
     @PostMapping(value = "/partners/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
     public ResponseEntity<?> addAnOrganizationEntity(@RequestPart("dto") CreateAnOrganizationEntityDto createAnOrganizationEntityDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) throws DocumentException, IOException {
             OrganizationEntity  organizationEntity = this.organizationEntityService.createAnewOrganizationEntity(createAnOrganizationEntityDto, logo, cover);
             return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ? this.modelMapper.mapDeliveryPartners(organizationEntity) : this.modelMapper.mapOrganizationEntity(organizationEntity), HttpStatus.CREATED);
@@ -59,6 +61,7 @@ public class OrganizationEntityController {
 
 
     @PostMapping(value = "/associations/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
     public ResponseEntity<?> createAssociation(
             @RequestPart("dto") CreateAssociationDto createAssociationDto,
             @RequestPart(value = "logo", required = false) MultipartFile logo,
@@ -75,6 +78,7 @@ public class OrganizationEntityController {
 
 
     @PutMapping(value = "associations/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
     public ResponseEntity<?> updateAssociation(
             @PathVariable("id") UUID id,
             @Valid  @RequestPart("dto") CreateAssociationDto updateAssociationDto,
@@ -106,6 +110,7 @@ public class OrganizationEntityController {
     }
 
     @DeleteMapping("/{uuid}")
+    @Transactional
     public ResponseEntity<Void> deleteOrganization(
             @PathVariable UUID uuid,
             @RequestBody UpdateReason request) {
@@ -147,6 +152,7 @@ public class OrganizationEntityController {
     }
 
     @GetMapping("/{uuid}/deletion-details")
+    @Transactional
     public ResponseEntity<Page<UpdateDetails>> getDeletionDetails(@PathVariable UUID uuid, Pageable pageable) {
         Page<UpdateDetails> deletionDetails = organizationEntityService.getDeletionDetails(uuid, pageable);
         return ResponseEntity.ok(deletionDetails);
@@ -243,6 +249,7 @@ public class OrganizationEntityController {
     }
 
     @GetMapping("/partners/search")
+    @Transactional
     public ResponseEntity<Page<PartnerInfoDto>> searchPartners(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "id", required = false) UUID id,
@@ -254,11 +261,13 @@ public class OrganizationEntityController {
 
 
     @PostMapping(value = "/partners/validate/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
     public ResponseEntity<String> validateOrganizationEntity(@PathVariable("id") UUID id, @RequestPart("document") MultipartFile file) {
         return new ResponseEntity<String>(this.organizationEntityService.validateOrganizationEntity(id, file), HttpStatus.OK);
     }
 
     @GetMapping("/partners/contracts/{id}")
+    @Transactional
     public ResponseEntity<byte[]> getContractDocument(@PathVariable("id") UUID id) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
@@ -268,6 +277,7 @@ public class OrganizationEntityController {
     }
 
     @GetMapping("/cities/search")
+    @Transactional
     public ResponseEntity<Page<CityResponse>> searchCities(
             @RequestParam(name = "city") String cityName,
 @RequestParam(name = "types", required = false) List<EntityType> types,

@@ -65,7 +65,6 @@ public class SubscriptionService {
         subscription.setNumberOfDueDates(contractSubscriptionDto.getNumberOfDueDates());
         OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(subscription.getPartner().id())
                 .orElseThrow(() -> new ResourceNotFoundException("organization not found"));
-        System.out.println(subscription.getPartner());
         subscription.setPartnerI(organizationEntity);
         subscription.setPartner(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType(), organizationEntity.getName()));
         return this.subscriptionRepository.save(subscription);

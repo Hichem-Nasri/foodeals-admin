@@ -31,5 +31,5 @@ public interface SubEntityService extends CrudService<SubEntityResponse, UUID, S
 
     Page<City> searchCitiesBySubEntityAddress(String cityName, UUID organizationId, Pageable pageable);
 
-    Page<SubEntity> searchSubEntitiesByName(UUID id, String name, List<SubEntityType> types, Pageable pageable, boolean includeDeleted);
+    Page<SubEntity> searchSubEntitiesByName(UUID id, String name, List<SubEntityType> types, Pageable pageable, boolean includeDeleted, UUID organizationId);
 }

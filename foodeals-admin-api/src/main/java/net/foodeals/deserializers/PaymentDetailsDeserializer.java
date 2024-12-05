@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.transaction.Transactional;
 import net.foodeals.payment.application.dto.request.paymentDetails.*;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ public class PaymentDetailsDeserializer extends JsonDeserializer<PaymentDetails>
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
     @Override
+    @Transactional
     public PaymentDetails deserialize(JsonParser jsonParser, DeserializationContext context)
             throws IOException, JsonProcessingException {
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
