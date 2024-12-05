@@ -19,6 +19,7 @@ public class SolutionService {
         this.solutionRepository = solutionRepository;
     }
 
+    @Transactional
     public Set<Solution> getSolutionsByNames(List<String> solutionsNames) {
         return this.solutionRepository.findByNameIn(solutionsNames.stream().map(String::toLowerCase).collect(Collectors.toList()));
     }
@@ -27,11 +28,11 @@ public class SolutionService {
     public Solution save(Solution solution) {
         return this.solutionRepository.save(solution);
     }
-
+    @Transactional
     public Solution findByName(String solution) {
         return this.solutionRepository.findByName(solution.toLowerCase());
     }
-
+    @Transactional
     public List<Solution> saveAll(Set<Solution> solutions) {
         return this.solutionRepository.saveAll(solutions);
     }

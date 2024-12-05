@@ -16,6 +16,7 @@ public class ActivityModelMapperConfig {
     private ModelMapper modelMapper;
 
     @PostConstruct
+    @Transactional
     private void postConstruct() {
         this.modelMapper.addConverter(mappingContext -> {
             Activity activity = mappingContext.getSource();

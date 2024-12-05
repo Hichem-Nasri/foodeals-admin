@@ -4,20 +4,22 @@ import net.foodeals.organizationEntity.application.dtos.requests.EntityBankInfor
 import net.foodeals.organizationEntity.domain.entities.BankInformation;
 import net.foodeals.organizationEntity.domain.repositories.BankInformationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BankInformationService {
     private final BankInformationRepository bankInformationRepository;
 
-
     public BankInformationService(BankInformationRepository bankInformationRepository) {
         this.bankInformationRepository = bankInformationRepository;
     }
 
-    public  void delete(BankInformation bankInformation) {
+    @Transactional
+    public void delete(BankInformation bankInformation) {
         this.bankInformationRepository.softDelete(bankInformation.getId());
     }
 
+    @Transactional
     public BankInformation update(BankInformation bankInformation, EntityBankInformationDto entityBankInformationDto) {
         if (entityBankInformationDto.getBeneficiaryName() != null) {
             bankInformation.setBeneficiaryName(entityBankInformationDto.getBeneficiaryName());

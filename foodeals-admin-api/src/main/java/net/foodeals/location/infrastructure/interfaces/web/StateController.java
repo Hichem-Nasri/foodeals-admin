@@ -8,6 +8,7 @@ import net.foodeals.location.application.services.StateService;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.modelmapper.ModelMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class StateController {
     private final ModelMapper mapper;
 
     @GetMapping
+    @Transactional
     public ResponseEntity<List<StateResponse>> getAll(Pageable pageable) {
         final List<StateResponse> responses = service.findAll(pageable)
                 .stream()
@@ -32,30 +34,35 @@ public class StateController {
     }
 
     @GetMapping("/{id}")
+    @Transactional
     public ResponseEntity<StateResponse> getById(@PathVariable("id") UUID id) {
         final StateResponse response = mapper.map(service.findById(id), StateResponse.class);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<StateResponse> create(@RequestBody @Valid StateRequest request) {
         final StateResponse response = mapper.map(service.create(request), StateResponse.class);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<StateResponse> update(@PathVariable UUID id, @RequestBody @Valid StateRequest request) {
         final StateResponse response = mapper.map(service.update(id, request), StateResponse.class);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/cities")
+    @Transactional
     public ResponseEntity<List<CityResponse>> getCities(@PathVariable("id") UUID id) {
         final List<CityResponse> responses = service.getCities(id)
                 .stream()

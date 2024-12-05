@@ -20,6 +20,7 @@ public class ContactsService {
         this.contactRepository = contactRepository;
     }
 
+    @Transactional
     public void delete(Contact contact) {
         this.contactRepository.softDelete(contact.getId());
     }

@@ -99,6 +99,7 @@ public class SolutionContractService {
         return updatedContracts;
     }
 
+    @Transactional
     // solution contracts -> many sub -> single subs  | subscrption clone ->
     public List<SolutionContract> createDeliveryContracts(List<DeliveryPartnerContract> deliveryPartnerContracts, Contract contract) {
         List<SolutionContract> createdContracts = new ArrayList<>();
@@ -131,6 +132,7 @@ public class SolutionContractService {
         return createdContracts;
     }
 
+    @Transactional
     public List<SolutionContract> createManySolutionContracts(List<SolutionsContractDto> solutionsContractsDto, Contract contract, Boolean oneSubscription) {
         Subscription globalSubscription;
         OrganizationEntity organizationEntity = contract.getOrganizationEntity();
@@ -173,6 +175,7 @@ public class SolutionContractService {
         return solutionContracts;
     }
 
+    @Transactional
     public void delete(SolutionContract solutionContract) {
         this.solutionContractRepository.softDelete(solutionContract.getId());
     }

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 class OfferServiceImpl implements OfferService {
 
@@ -41,27 +40,32 @@ class OfferServiceImpl implements OfferService {
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public List<Offer> findAll() {
         return offerRepository.findAll();
     }
 
     @Override
+    @Transactional
     public Page<Offer> findAll(Integer pageNumber, Integer pageSize) {
         return offerRepository.findAll(PageRequest.of(pageNumber, pageSize));
     }
 
     @Override
+    @Transactional
     public Page<Offer> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
+    @Transactional
     public Offer findById(UUID id) {
         return offerRepository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
     }
 
     @Override
+    @Transactional
     public Offer create(OfferRequest request) {
         final Offer offer = modelMapper.map(request, Offer.class);
         final Activity activity = activityService.findById(request.activityId());
@@ -92,6 +96,7 @@ class OfferServiceImpl implements OfferService {
     }
 
     @Override
+    @Transactional
     public Offer update(UUID id, OfferRequest request) {
         final Offer existingOffer = offerRepository.findById(id)
                 .orElseThrow(() -> new OfferNotFoundException(id));
@@ -128,8 +133,8 @@ class OfferServiceImpl implements OfferService {
         return offerRepository.save(existingOffer);
     }
 
-
     @Override
+    @Transactional
     public void delete(UUID id) {
         if (offerRepository.existsById(id))
             offerRepository.deleteById(id);
@@ -138,11 +143,13 @@ class OfferServiceImpl implements OfferService {
     }
 
     @Override
+    @Transactional
     public Long countByPublisherId(UUID id) {
         return offerRepository.countByPublisherInfoId(id);
     }
 
     @Override
+    @Transactional
     public Long countOrdersByPublisherInfoId(UUID publisherId) {
         return offerRepository.countOrdersByPublisherInfoId(publisherId);
     }

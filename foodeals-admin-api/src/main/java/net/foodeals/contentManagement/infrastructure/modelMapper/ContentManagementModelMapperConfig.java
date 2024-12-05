@@ -1,6 +1,7 @@
 package net.foodeals.contentManagement.infrastructure.modelMapper;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import net.foodeals.contentManagement.application.Dto.response.ArticleCategoryDto;
 import net.foodeals.contentManagement.application.Dto.response.ArticleDto;
 import net.foodeals.contentManagement.domain.entities.Article;
@@ -17,6 +18,7 @@ public class ContentManagementModelMapperConfig {
     private ModelMapper mapper;
 
     @PostConstruct
+    @Transactional
     private void postConstruct() {
         mapper.addMappings(new PropertyMap<Article, ArticleDto>() {
             @Override

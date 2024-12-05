@@ -1,6 +1,7 @@
 package net.foodeals.user.infrastructure.interfaces.web;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.common.dto.request.UpdateReason;
@@ -50,6 +51,7 @@ public class UserController {
     private final SubEntityRepository subEntityRepository;
 
     @GetMapping("organizations/search")
+    @Transactional
     public ResponseEntity<Page<SimpleUserDto>> searchUsersOrganizations(
             @RequestParam(required = false, name = "name") String name,
             @RequestParam(required = false, name = "types") List<EntityType> types,
@@ -61,6 +63,7 @@ public class UserController {
     }
 
     @GetMapping("/subentities/search")
+    @Transactional
     public ResponseEntity<Page<SimpleUserDto>> searchUsersSubentities(
             @RequestParam(required = false, name = "name") String name,
             @RequestParam(required = true, name = "organizationId") UUID organizationId,
@@ -72,6 +75,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @Transactional
     public ResponseEntity<Void> deleteUser(
             @PathVariable Integer id,
             @RequestBody UpdateReason request) {
@@ -80,6 +84,7 @@ public class UserController {
     }
 
     @GetMapping("/{uuid}/deletion-details")
+    @Transactional
     public ResponseEntity<Page<UpdateDetails>> getDeletionDetails(@PathVariable Integer uuid, Pageable pageable) {
         Page<UpdateDetails> deletionDetails = service.getDeletionDetails(uuid, pageable);
         return ResponseEntity.ok(deletionDetails);
@@ -87,6 +92,7 @@ public class UserController {
 
 
     @GetMapping("/organizations/{organizationId}")
+    @Transactional
     public ResponseEntity<OrganizationUsersResponse> getUsersByOrganization(
             @PathVariable("organizationId") UUID organizationId,
             @PageableDefault(size = 10) Pageable pageable,
@@ -147,6 +153,7 @@ public class UserController {
     }
 
     @GetMapping("/subentities/{subentityId}")
+    @Transactional
     public ResponseEntity<SubentityUsersResponse> getSubentitiesUsers(
             @PathVariable("subentityId") UUID subentityId,
             @PageableDefault(size = 10) Pageable pageable,
@@ -200,6 +207,7 @@ public class UserController {
     }
 
     @GetMapping("/sells-managers")
+    @Transactional
     public ResponseEntity<Page<SimpleUserDto>> sellsManagers(
             @RequestParam(required = false, name = "name") String name,
             Pageable pageable) {
@@ -210,6 +218,7 @@ public class UserController {
 
 
     @GetMapping
+    @Transactional
     public ResponseEntity<List<UserResponse>> getAll() {
         final List<UserResponse> responses = service.findAll()
                 .stream()
@@ -219,6 +228,7 @@ public class UserController {
     }
 
     @GetMapping("/page/{pageNumber}/{pageSize}")
+    @Transactional
     public ResponseEntity<Page<UserResponse>> getAll(@PathVariable Integer pageNumber, @PathVariable Integer pageSize) {
         final Page<UserResponse> responses = service.findAll(pageNumber, pageSize)
                 .map(user -> mapper.map(user, UserResponse.class));
@@ -226,30 +236,34 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @Transactional
     public ResponseEntity<UserResponse> getById(@PathVariable Integer id) {
         final UserResponse response = mapper.map(service.findById(id), UserResponse.class);
         return ResponseEntity.ok(response);
     }
-
     @GetMapping("/email/{email}")
+    @Transactional
     public ResponseEntity<UserResponse> getByEmail(@PathVariable String email) {
         final UserResponse response = mapper.map(service.findByEmail(email), UserResponse.class);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping
+    @Transactional
     public ResponseEntity<UserResponse> create(@RequestBody @Valid UserRequest request) {
         final UserResponse response = mapper.map(service.create(request), UserResponse.class);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @PatchMapping("/{id}")
+    @Transactional
     public ResponseEntity<UserResponse> update(@PathVariable Integer id, @RequestBody @Valid UserRequest request) {
         final UserResponse response = mapper.map(service.update(id, request), UserResponse.class);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/clients")
+    @Transactional
     public ResponseEntity<Page<ClientDto>> getClientsData(Pageable page) {
         Page<User> clients = this.service.getClientsData(page);
         Page<ClientDto> clientDtos = clients.map(this.service::toClientDto);
@@ -257,6 +271,7 @@ public class UserController {
     }
 
     @GetMapping("/delivery-partners/{id}")
+    @Transactional
     public ResponseEntity<DeliveryUsersResponse> getDeliveryUsers(Pageable pageable, @PathVariable("id") UUID id) {
 
         // Retrieve organization
@@ -277,6 +292,7 @@ public class UserController {
     }
 
     @GetMapping("/associations/{id}")
+    @Transactional
     public ResponseEntity<Page<AssociationsUsersDto>> getAssociationUsers(Pageable pageable, @PathVariable("id") UUID id) {
         Page<User> users = this.service.getOrganizationUsers(pageable, id);
         Page<AssociationsUsersDto> associationsUsersDtoPage = users.map(user -> this.mapper.map(user, AssociationsUsersDto.class));
@@ -284,6 +300,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/profile")
+    @Transactional
     public ResponseEntity<UserProfileDTO> getUserProfile(@PathVariable Integer userId) {
         User user = service.findById(userId);
         return ResponseEntity.ok(this.service.mapUserToUserProfileDTO(user));
@@ -291,6 +308,7 @@ public class UserController {
 
 
     @GetMapping("/cities/organizations/search")
+    @Transactional
     public ResponseEntity<Page<CityResponse>> searchCitiesOrganizations(
             @RequestParam(name = "city") String cityName,
             @RequestParam(name = "organizationId") UUID organizationId,
@@ -300,6 +318,7 @@ public class UserController {
     }
 
     @GetMapping("/regions/organizations/search")
+    @Transactional
     public ResponseEntity<Page<RegionResponse>> searchRegionsOrganizations(
             @RequestParam(name = "region") String regionName,
             @RequestParam(name = "organizationId") UUID organizationId,
@@ -309,6 +328,7 @@ public class UserController {
     }
 
     @GetMapping("/cities/subentities/search")
+    @Transactional
     public ResponseEntity<Page<CityResponse>> SubentityUsersSearchCities(
             @RequestParam(name = "city") String cityName,
             @RequestParam(name = "subentityId") UUID subentityId,
@@ -318,6 +338,7 @@ public class UserController {
     }
 
     @GetMapping("/regions/subentities/search")
+    @Transactional
     public ResponseEntity<Page<RegionResponse>> searchRegionsSubentities(
             @RequestParam(name = "region") String regionName,
             @RequestParam(name = "subentityId") UUID subentityId,

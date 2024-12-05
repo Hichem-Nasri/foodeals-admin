@@ -22,7 +22,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 class StateServiceImpl implements StateService {
 
     private final ModelMapper modelMapper;
@@ -30,26 +29,31 @@ class StateServiceImpl implements StateService {
     private final CountryService countryService;
 
     @Override
+    @Transactional
     public List<State> findAll() {
         return repository.findAll();
     }
 
     @Override
+    @Transactional
     public Page<State> findAll(Integer pageNumber, Integer pageSize) {
         return null;
     }
 
     @Override
+    @Transactional
     public Page<State> findAll(Pageable pageable) {
         return repository.findAll(pageable);
     }
 
     @Override
+    @Transactional
     public State findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new StateNotFoundException(id));
     }
     @Override
+    @Transactional
     public State create(StateRequest request) {
         Country country = countryService.findByName(request.country().toLowerCase());
         State state = State.builder().name(request.name().toLowerCase()).build();
@@ -61,6 +65,7 @@ class StateServiceImpl implements StateService {
     }
 
     @Override
+    @Transactional
     public State update(UUID id, StateRequest request) {
         Country country = countryService.findByName(request.country().toLowerCase());
         State existingState = repository.findById(id)
@@ -77,6 +82,7 @@ class StateServiceImpl implements StateService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         if (!repository.existsById(id))
             throw new StateNotFoundException(id);
@@ -84,16 +90,19 @@ class StateServiceImpl implements StateService {
     }
 
     @Override
+    @Transactional
     public State findByName(String name) {
         return repository.findByName(name.toLowerCase());
     }
 
     @Override
+    @Transactional
     public State save(State state) {
         return this.repository.saveAndFlush(state);
     }
 
     @Override
+    @Transactional
     public List<City> getCities(UUID id) {
         State state = repository.findById(id)
                 .orElseThrow(() -> new StateNotFoundException(id));
@@ -101,11 +110,13 @@ class StateServiceImpl implements StateService {
     }
 
     @Override
+    @Transactional
     public Long count() {
         return repository.count();
     }
 
     @Override
+    @Transactional
     public boolean existsByName(String name) {
         return repository.existsByName(name);
     }

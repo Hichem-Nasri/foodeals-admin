@@ -26,7 +26,6 @@ import java.util.UUID;
  * DeliveryServiceImpl
  */
 @Service
-@Transactional
 @RequiredArgsConstructor
 class DeliveryServiceImpl implements DeliveryService {
 
@@ -36,27 +35,32 @@ class DeliveryServiceImpl implements DeliveryService {
     private final ModelMapper mapper;
 
     @Override
+    @Transactional
     public List<Delivery> findAll() {
         return repository.findAll();
     }
 
     @Override
+    @Transactional
     public Page<Delivery> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
     }
 
     @Override
+    @Transactional
     public Page<Delivery> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
+    @Transactional
     public Delivery findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new DeliveryNotFoundException(id));
     }
 
     @Override
+    @Transactional
     public Delivery create(DeliveryRequest request) {
         final User deliveryBoy = userService.findById(request.deliveryBoyId());
         final Delivery delivery = Delivery.create(deliveryBoy, request.status());
@@ -71,6 +75,7 @@ class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
+    @Transactional
     public Delivery update(UUID id, DeliveryRequest dto) {
         final User deliveryBoy = userService.findById(dto.deliveryBoyId());
         final Delivery delivery = findById(id);
@@ -81,6 +86,7 @@ class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         if (!repository.existsById(id))
             throw new DeliveryNotFoundException(id);
@@ -88,6 +94,7 @@ class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
+    @Transactional
     public Long countDeliveriesByDeliveryPartner(UUID organizationEntityId) {
         return this.repository.countDeliveriesByDeliveryPartner(organizationEntityId);
     }

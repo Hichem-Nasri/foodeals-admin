@@ -1,5 +1,6 @@
 package net.foodeals.delivery.interfaces.web;
 
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.delivery.application.dtos.requests.DeliveryPositionRequest;
@@ -18,6 +19,7 @@ public class AddNewDeliveryPositionToPositionController {
     private final AddNewDeliveryPositionToDelivery addNewDeliveryPositionToDelivery;
 
     @PostMapping("/{deliveryId}/positions")
+    @Transactional
     public ResponseEntity<DeliveryPosition> addNewDeliveryPositionToPosition(@PathVariable UUID deliveryId, @RequestBody @Valid DeliveryPositionRequest request) {
         final DeliveryPosition deliveryPosition = addNewDeliveryPositionToDelivery.execute(request);
         return new ResponseEntity<>(deliveryPosition, HttpStatus.CREATED);

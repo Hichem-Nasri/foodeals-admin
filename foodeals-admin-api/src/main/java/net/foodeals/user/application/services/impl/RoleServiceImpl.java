@@ -1,5 +1,6 @@
 package net.foodeals.user.application.services.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.user.application.dtos.requests.RoleRequest;
 import net.foodeals.user.application.services.RoleService;
@@ -26,33 +27,39 @@ class RoleServiceImpl implements RoleService {
     private final ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public List<Role> findAll() {
         return repository.findAll();
     }
 
     @Override
+    @Transactional
     public Page<Role> findAll(Integer pageNumber, Integer pageSize) {
         return null;
     }
 
     @Override
+    @Transactional
     public Page<Role> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
+    @Transactional
     public Role findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RoleNotFoundException(id));
     }
 
     @Override
+    @Transactional
     public Role findByName(String name) {
         return repository.findByName(name.toUpperCase())
                 .orElseThrow(() -> new RoleNotFoundException(name));
     }
 
     @Override
+    @Transactional
     public Role create(RoleRequest request) {
         List<Authority> authorities = findAllAuthoritiesByIdsUseCase.execute(request.authorityIds());
         Role role = modelMapper.map(request, Role.class);
@@ -61,6 +68,7 @@ class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
     public Role update(UUID id, RoleRequest request) {
         List<Authority> authorities = findAllAuthoritiesByIdsUseCase.execute(request.authorityIds());
         Role role = findById(id);
@@ -70,6 +78,7 @@ class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         if (repository.existsById(id))
             throw new AuthorityNotFoundException(id);

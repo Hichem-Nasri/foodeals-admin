@@ -1,5 +1,6 @@
 package net.foodeals.common.services;
 
+import jakarta.transaction.Transactional;
 import net.foodeals.user.domain.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -30,6 +31,7 @@ public class AccountValidationService {
         this.resourceLoader = resourceLoader;
     }
 
+    @Transactional
     public void validateManagerAccount(User manager, String pass) {
         try {
             String emailTemplate = new String(Files.readAllBytes(Paths.get("resources/email.html")));

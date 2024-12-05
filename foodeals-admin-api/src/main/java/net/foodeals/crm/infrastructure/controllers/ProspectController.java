@@ -49,18 +49,20 @@ public class ProspectController {
         return new ResponseEntity<ProspectResponse>(this.prospectService.create(prospectRequest), HttpStatus.CREATED);
     }
 
+    @Transactional
     @GetMapping("/prospects/{id}")
     public ResponseEntity<ProspectResponse> getById(@PathVariable UUID id) {
         return new ResponseEntity<>(this.prospectService.findById(id), HttpStatus.OK);
     }
 
+    @Transactional
     @PutMapping("/prospects/{id}")
     public ResponseEntity<ProspectResponse> update(@PathVariable UUID id, @RequestBody ProspectRequest prospectRequest) {
         return new ResponseEntity<>(this.prospectService.update(id, prospectRequest), HttpStatus.OK);
     }
 
-    @GetMapping("/prospects/search")
     @Transactional
+    @GetMapping("/prospects/search")
     public ResponseEntity<Page<PartnerInfoDto>> searchProspects(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "types", required = false) List<ProspectType> types,
@@ -72,8 +74,8 @@ public class ProspectController {
         );
     }
 
-    @GetMapping("/prospects")
     @Transactional
+    @GetMapping("/prospects")
     public ResponseEntity<Page<ProspectResponse>> getAll(
             @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
@@ -113,66 +115,78 @@ public class ProspectController {
         return new ResponseEntity<>(this.prospectService.findAllWithFilters(filter, pageable), HttpStatus.OK);
     }
 
+    @Transactional
     @PatchMapping("/prospects/{id}")
     public ResponseEntity<ProspectResponse> update(@PathVariable UUID id, @RequestBody PartialProspectRequest prospectRequest) {
         return new ResponseEntity<>(this.prospectService.partialUpdate(id, prospectRequest), HttpStatus.OK);
     }
 
 
+    @Transactional
     @DeleteMapping("/prospects/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         this.prospectService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
+    @Transactional
     @PostMapping("/prospects/{id}/events/create")
     public ResponseEntity<EventResponse> createEvent(@PathVariable("id") UUID id, @RequestBody EventRequest eventRequest) {
         return new ResponseEntity<>(this.prospectService.createEvent(id, eventRequest), HttpStatus.CREATED);
     }
 
+    @Transactional
     @GetMapping("/prospects/{id}/events")
     public ResponseEntity<Page<EventResponse>> getEvents(@PathVariable("id") UUID id, Pageable pageable) {
         return new ResponseEntity<Page<EventResponse>>(this.prospectService.getEvents(id, pageable), HttpStatus.OK);
     }
 
+    @Transactional
     @GetMapping("/prospects/{prospectId}/events/{eventId}")
     public ResponseEntity<EventResponse> getEventById(@PathVariable("prospectId") UUID prospectId,@PathVariable("eventId") UUID eventId) {
         return new ResponseEntity<EventResponse>(this.prospectService.getEventById(prospectId, eventId), HttpStatus.OK);
     }
 
+    @Transactional
     @PutMapping("/prospects/{prospectId}/events/{eventId}")
     public ResponseEntity<EventResponse> updateEvent(@PathVariable("prospectId") UUID prospectId,@PathVariable("eventId") UUID eventId, @RequestBody EventRequest eventRequest) {
         return new ResponseEntity<EventResponse>(this.prospectService.updateEvent(prospectId, eventId, eventRequest), HttpStatus.OK);
     }
 
+    @Transactional
     @PostMapping("/prospects/status/{id}")
     public ResponseEntity<String> changeStatus(@PathVariable("id") UUID id, @RequestBody ProspectStatusRequest status) {
         System.out.println(status);
         return new ResponseEntity<String>(this.prospectService.changeStatus(id, status), HttpStatus.OK);
     }
 
+    @Transactional
     @PatchMapping("/prospects/{prospectId}/events/{eventId}")
     public ResponseEntity<EventResponse> partialUpdateEvent(@PathVariable("prospectId") UUID prospectId,@PathVariable("eventId") UUID eventId, @RequestBody PartialEventRequest eventRequest) {
         return new ResponseEntity<EventResponse>(this.prospectService.partialUpdateEvent(prospectId, eventId, eventRequest), HttpStatus.OK);
     }
 
+    @Transactional
     @DeleteMapping("/prospects/{prospectId}/events/{eventId}")
     public ResponseEntity<Void> deleteEvent(@PathVariable("prospectId") UUID prospectId,@PathVariable("eventId") UUID eventId) {
         this.prospectService.deleteEvent(prospectId, eventId);
         return ResponseEntity.noContent().build();
     }
 
+    @Transactional
     @GetMapping("/prospects/{uuid}/deletion-details")
     public ResponseEntity<Page<UpdateDetails>> getDeletionDetails(@PathVariable UUID uuid, Pageable pageable) {
         Page<UpdateDetails> deletionDetails = prospectService.getDeletionDetails(uuid, pageable);
         return ResponseEntity.ok(deletionDetails);
     }
 
+    @Transactional
     @GetMapping("/prospects/statistics")
-    public ResponseEntity<ProspectStatisticDto> statistics(@RequestParam(value = "type", required = true) List<ProspectType> type) {
+    public ResponseEntity<ProspectStatisticDto> statistics(@RequestParam(value = "types", required = true) List<ProspectType> type) {
         return new ResponseEntity<ProspectStatisticDto>(this.prospectService.statistics(type), HttpStatus.OK);
     }
 
+    @Transactional
     @GetMapping("prospects/cities/search")
     public ResponseEntity<Page<CityResponse>> searchCities(
             @RequestParam(name = "city") String cityName,
@@ -182,6 +196,7 @@ public class ProspectController {
         return ResponseEntity.ok(prospectService.searchCitiesByProspectAddress(types, cityName, countryName, pageable).map( c ->this.modelMapper.map(c, CityResponse.class)));
     }
 
+    @Transactional
     @GetMapping("prospects/regions/search")
     public ResponseEntity<Page<RegionResponse>> searchRegions(
             @RequestParam(name = "region") String regionName,

@@ -23,7 +23,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 class CityServiceImpl implements CityService {
 
     private final ModelMapper modelMapper;
@@ -31,29 +30,33 @@ class CityServiceImpl implements CityService {
     private final CountryService countryService;
     private final StateService stateService;
 
-
     @Override
+    @Transactional
     public List<City> findAll() {
         return repository.findAll();
     }
 
     @Override
+    @Transactional
     public Page<City> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
     }
 
     @Override
+    @Transactional
     public Page<City> findAll(Pageable pageable) {
         return repository.findAll(pageable);
     }
 
     @Override
+    @Transactional
     public City findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new CityNotFoundException(id));
     }
 
     @Override
+    @Transactional
     public City create(CityRequest request) {
         Country country = this.countryService.findByName(request.country().toLowerCase());
         State state = country.getStates().stream().filter(s -> s.getName().equals(request.state().toLowerCase())).findFirst().get();
@@ -66,6 +69,7 @@ class CityServiceImpl implements CityService {
     }
 
     @Override
+    @Transactional
     public City update(UUID id, CityRequest request) {
         Country country = this.countryService.findByName(request.country().toLowerCase());
         State state = country.getStates().stream().filter(s -> s.getName().equals(request.state().toLowerCase())).findFirst().get();
@@ -83,6 +87,7 @@ class CityServiceImpl implements CityService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         if (repository.existsById(id))
             throw new CityNotFoundException(id);
@@ -91,16 +96,19 @@ class CityServiceImpl implements CityService {
     }
 
     @Override
+    @Transactional
     public City findByName(String name) {
         return this.repository.findByName(name.toLowerCase());
     }
 
     @Override
+    @Transactional
     public City save(City city) {
         return this.repository.saveAndFlush(city);
     }
 
     @Override
+    @Transactional
     public List<Region> getRegions(UUID id) {
         City city = repository.findById(id)
                 .orElseThrow(() -> new CityNotFoundException(id));
@@ -108,11 +116,13 @@ class CityServiceImpl implements CityService {
     }
 
     @Override
+    @Transactional
     public Long count() {
         return this.repository.count();
     }
 
     @Override
+    @Transactional
     public boolean existsByName(String name) {
         return repository.existsByName(name.toLowerCase());
     }

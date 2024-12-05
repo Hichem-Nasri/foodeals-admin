@@ -11,6 +11,7 @@ import net.foodeals.contentManagement.domain.repositories.ArticleCategoryReposit
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,10 +27,12 @@ public class ArticleCategoryService {
         this.articleService = articleService;
     }
 
+    @Transactional
     public List<ArticleCategory> getAllArticleCategories() {
         return this.articleCategoryRepository.findAll();
     }
 
+    @Transactional
     public ArticleCategory getArticleByUuid(String uuid) {
         UUID uuidObj = UUID.fromString(uuid);
         ArticleCategory articleCategory = this.articleCategoryRepository.findById(uuidObj).orElse(null);
@@ -41,6 +44,7 @@ public class ArticleCategoryService {
         return articleCategory;
     }
 
+    @Transactional
     public ArticleCategory createAnArticleCategory(CreateArticleCategoryDto createArticleCategoryDto) {
         ArticleCategory articleCategory = ArticleCategory.builder().name(createArticleCategoryDto.getName()).build();
 
@@ -50,6 +54,7 @@ public class ArticleCategoryService {
         return this.articleCategoryRepository.save(articleCategory);
     }
 
+    @Transactional
     public ArticleCategory updateAnArticleCategoryById(String uuid, UpdateArticleCategoryDto updateArticleCategoryDto) {
         UUID uuidObj = UUID.fromString(uuid);
         ArticleCategory articleCategory = this.articleCategoryRepository.findById(uuidObj).orElse(null);
@@ -66,6 +71,7 @@ public class ArticleCategoryService {
         return this.articleCategoryRepository.save(articleCategory);
     }
 
+    @Transactional
     public ArticleCategory deleteAnArticleCategoryByUuid(String uuid) {
         UUID uuidObj = UUID.fromString(uuid);
         ArticleCategory articleCategory = this.articleCategoryRepository.findById(uuidObj).orElse(null);
@@ -77,6 +83,7 @@ public class ArticleCategoryService {
         return articleCategory;
     }
 
+    @Transactional
     public void addAnArticleToCategory(String uuid, AddArticleToCategoryDto addArticleToCategoryDto) {
         Article article = this.articleService.getArticleByUuid(addArticleToCategoryDto.getArticleUuid());
         if (article == null) {
@@ -96,6 +103,7 @@ public class ArticleCategoryService {
         this.articleCategoryRepository.save(articleCategory);
     }
 
+    @Transactional
     public void deleteAnArticleFromCategory(String categoryId, DeleteArticleFromCategoryDto deleteArticleFromCategoryDto) {
         Article article = this.articleService.getArticleByUuid(deleteArticleFromCategoryDto.getArticleUuid());
         if (article == null) {

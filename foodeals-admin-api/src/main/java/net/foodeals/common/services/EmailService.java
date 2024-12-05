@@ -2,6 +2,7 @@ package net.foodeals.common.services;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -14,7 +15,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-
+    @Transactional
     public void sendEmail(String to, String subject, String htmlText) {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {

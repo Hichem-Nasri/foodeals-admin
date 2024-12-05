@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class ActivityController {
         this.modelMapper = modelMapper;
     }
 
+    @Transactional
     @GetMapping
     public ResponseEntity<Page<ActivityResponseDto>> getAllActivities(
             @RequestParam(required = true) List<String> types,
@@ -38,6 +40,7 @@ public class ActivityController {
         return new ResponseEntity<>(activityResponses, HttpStatus.OK);
     }
 
+    @Transactional
     @GetMapping("/{id}")
     public ResponseEntity<ActivityResponseDto> getActivityById(@PathVariable("id") UUID id) {
         Activity activity = this.activityService.findById(id);
@@ -45,6 +48,7 @@ public class ActivityController {
         return new ResponseEntity<ActivityResponseDto>(activityResponse, HttpStatus.OK);
     }
 
+    @Transactional
     @PostMapping
     public ResponseEntity<ActivityResponseDto> createAnActivity(@RequestBody ActivityRequest activityRequest) {
         Activity activity = this.activityService.create(activityRequest);
@@ -52,6 +56,7 @@ public class ActivityController {
         return new ResponseEntity<ActivityResponseDto>(activityResponse, HttpStatus.CREATED);
     }
 
+    @Transactional
     @PutMapping("/{id}")
     public ResponseEntity<ActivityResponseDto> updateAnActivity(@RequestBody ActivityRequest activityRequest, @PathVariable("id") UUID id) {
         Activity activity = this.activityService.update(id, activityRequest);
@@ -59,10 +64,10 @@ public class ActivityController {
         return new ResponseEntity<ActivityResponseDto>(activityResponse, HttpStatus.OK);
     }
 
+    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteAnActivity(@PathVariable("id") UUID id) {
         this.activityService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
-

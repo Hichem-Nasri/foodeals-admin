@@ -1,6 +1,7 @@
 package net.foodeals.user.infrastructure.modelMapperConfig;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.location.domain.entities.Address;
 import net.foodeals.user.application.dtos.responses.*;
@@ -27,6 +28,7 @@ public class UserModelMapperConfig {
     private final DelegatingApplicationListener delegatingApplicationListener;
 
     @PostConstruct
+    @Transactional
     public void configureModelMapper() {
 
         modelMapper.addConverter(context -> {

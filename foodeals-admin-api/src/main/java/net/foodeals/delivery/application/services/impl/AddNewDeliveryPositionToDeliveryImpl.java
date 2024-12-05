@@ -1,5 +1,6 @@
 package net.foodeals.delivery.application.services.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import net.foodeals.common.annotations.UseCase;
 import net.foodeals.delivery.application.dtos.requests.DeliveryPositionRequest;
@@ -23,6 +24,7 @@ class AddNewDeliveryPositionToDeliveryImpl implements AddNewDeliveryPositionToDe
     private final ModelMapper mapper;
 
     @Override
+    @Transactional
     public DeliveryPosition execute(DeliveryPositionRequest request) {
         final Delivery delivery = deliveryRepository.findById(request.deliveryId())
                 .orElseThrow(() -> new DeliveryNotFoundException(request.deliveryId()));

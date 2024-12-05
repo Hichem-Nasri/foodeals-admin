@@ -42,7 +42,8 @@ public interface ProspectRepository extends BaseRepository<Prospect, UUID> {
             "AND (:#{#filter.leadId} IS NULL OR p.lead.id = :#{#filter.leadId}) " +
             "AND (:#{#filter.email} IS NULL OR ct.email = :#{#filter.email}) " +
             "AND (:#{#filter.phone} IS NULL OR ct.phone = :#{#filter.phone}) " +
-            "AND (:#{#filter.statuses} IS NULL OR p.status IN :#{#filter.statuses})")
+            "AND (:#{#filter.statuses} IS NULL OR p.status IN :#{#filter.statuses})" +
+            "AND (:#{#filter.types} IS NULL OR p.type IN :#{#filter.types}) ")
     Page<Prospect> findAllWithFilters(
             @Param("filter") ProspectFilter filter,
             Pageable pageable

@@ -16,11 +16,11 @@ public class CommissionService {
 
     private final CommissionRepository commissionRepository;
 
-
     public CommissionService(CommissionRepository commissionRepository) {
         this.commissionRepository = commissionRepository;
     }
 
+    @Transactional
     public Commission createCommission(ContractCommissionDto contractCommissionDto) {
         Commission commission = Commission.builder().build();
         if (contractCommissionDto.getWithCard() != null) {
@@ -32,10 +32,12 @@ public class CommissionService {
         return commission;
     }
 
+    @Transactional
     public void delete(Commission commission) {
         this.commissionRepository.delete(commission);
     }
 
+    @Transactional
     public Commission update(Commission commission, ContractCommissionDto contractCommissionDto) {
         if (contractCommissionDto.getWithCard() != null) {
             commission.setCard(contractCommissionDto.getWithCard());
@@ -51,6 +53,7 @@ public class CommissionService {
         return this.commissionRepository.saveAndFlush(commission);
     }
 
+    @Transactional
     public Commission getCommissionByPartnerId(UUID id) {
         return this.commissionRepository.findCommissionByOrganizationId(id);
     }

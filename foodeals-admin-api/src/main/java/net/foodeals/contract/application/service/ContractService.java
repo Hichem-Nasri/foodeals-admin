@@ -91,6 +91,7 @@ public class ContractService {
         return contract;
     }
 
+    @Transactional
     public Contract updateDeliveryContract(Contract contract, CreateAnOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
         List<SolutionContract> solutionsContracts = this.solutionContractService.updateDeliveryContract(updateOrganizationEntityDto.getDeliveryPartnerContract(), contract);
         byte[] document = this.updateDocumentDelivery(updateOrganizationEntityDto);
@@ -98,6 +99,7 @@ public class ContractService {
         return this.contractRepository.save(contract);
     }
 
+    @Transactional
     public byte[] generateContract(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws IOException, DocumentException {
         String templatePath = "resources/contract.html";
        String activities =  createAnOrganizationEntityDto.getActivities()
@@ -216,6 +218,7 @@ public class ContractService {
 //        return "Contract has been deleted";
 //    }
 
+    @Transactional
     public List<Contract> getContractsByStatus(ContractStatus status) {
         return this.contractRepository.findByContractStatus(status);
     }
@@ -328,6 +331,7 @@ public class ContractService {
         return baos.toByteArray();
     }
 
+    @Transactional
     public Contract save(Contract contract) {
         return this.contractRepository.save(contract);
     }
@@ -362,6 +366,7 @@ public class ContractService {
         this.contractRepository.save(contract);
     }
 
+    @Transactional
     public byte[] getContractDocument(UUID id) {
         Contract contract = this.contractRepository.findById(id).orElse(null);
 
@@ -371,6 +376,7 @@ public class ContractService {
         return contract.getDocument();
     }
 
+    @Transactional
     public void validateContract(Contract contract) {
         List<SolutionContract> solutionContracts = contract.getSolutionContracts();
 
@@ -409,6 +415,7 @@ public class ContractService {
         return contract;
     }
 
+    @Transactional
     public Contract createDeliveryPartnerContract(OrganizationEntity organizationEntity, CreateAnOrganizationEntityDto createAnOrganizationEntityDto) throws DocumentException, IOException {
         Contract contract = Contract.builder().name(createAnOrganizationEntityDto.getEntityName())
                 .contractStatus(ContractStatus.IN_PROGRESS)
@@ -422,6 +429,7 @@ public class ContractService {
         return this.contractRepository.save(contract);
     }
 
+    @Transactional
     private byte[] getContractDocumentDelivery(CreateAnOrganizationEntityDto dto) throws IOException, DocumentException {
         String template = new String(Files.readAllBytes(Paths.get("resources/delevery_partner_contract.html")));
 
@@ -462,7 +470,7 @@ public class ContractService {
         renderer.createPDF(baos);
         return baos.toByteArray();
             }
-
+    @Transactional
     private byte[] updateDocumentDelivery(CreateAnOrganizationEntityDto dto) throws IOException, DocumentException {
         String template = new String(Files.readAllBytes(Paths.get("resources/delevery_partner_contract.html")));
 
@@ -504,6 +512,7 @@ public class ContractService {
         return baos.toByteArray();
     }
 
+    @Transactional
     private String getCurrentDate() {
         return LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
@@ -512,5 +521,3 @@ public class ContractService {
 //    private byte[] getContractDocumentDelivery(CreateAnOrganizationEntityDto createAnOrganizationEntityDto) {
 //    }
 }
-
-

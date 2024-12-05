@@ -54,6 +54,7 @@ class UserServiceImpl implements UserService {
     private final AddressService addressService;
     private final EmailService emailService;
 
+    @Transactional
     public UserProfileDTO mapUserToUserProfileDTO(User user) {
         UserProfileDTO dto = new UserProfileDTO();
         dto.setId(user.getId());
@@ -73,7 +74,8 @@ class UserServiceImpl implements UserService {
 
         return dto;
     }
-    
+
+    @Transactional
     public OrganizationInfo mapUserToOrganizationInfo(User user) {
         Contact responsibleContact = null;
         String phone = null;
@@ -151,6 +153,7 @@ class UserServiceImpl implements UserService {
         );
     }
 
+    @Transactional
     public List<WorkingHoursDTO> mapWorkingHoursToDTO(List<WorkingHours> workingHours) {
         return workingHours.stream()
                 .map(wh -> {
@@ -166,6 +169,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Page<Object> getUsersByOrganization(UUID organizationId, UserFilter filter, Pageable pageable) {
         Page<User> userPage = this.repository.findByOrganizationIdWithFilters(organizationId, filter, pageable);
 
@@ -192,6 +196,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Page<UserInfoDto> getUsersBySubEntity(UUID subEntityId, UserFilter filter, Pageable pageable) {
         Page<User> userPage = this.repository.findBySubEntityIdWithFilters(subEntityId, filter, pageable);
 
@@ -214,6 +219,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Page<User> getSellsManagers(String name, Pageable pageable) {
         // final String email = SecurityContextHolder.getContext().getAuthentication().getName();
         // Optional<User> user = this.repository.findByEmail(email);
@@ -226,6 +232,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public List<User> findAll() {
         return repository.findAll();
     }
@@ -238,28 +245,33 @@ class UserServiceImpl implements UserService {
 
 
     @Override
+    @Transactional
     public Page<User> findAll(Integer pageNumber, Integer pageSize) {
         return repository.findAll(PageRequest.of(pageNumber, pageSize));
     }
 
     @Override
+    @Transactional
     public Page<User> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
+    @Transactional
     public User findById(Integer id) {
         return repository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     @Override
+    @Transactional
     public User findByEmail(String email) {
         return repository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(email));
     }
 
     @Override
+    @Transactional
     public User create(UserRequest request) {
         final User user = mapRelationsAndEncodePassword(
                 modelMapper.map(request, User.class),
@@ -269,6 +281,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User update(Integer id, UserRequest request) {
         final User existingUser = findById(id);
         modelMapper.map(request, existingUser);
@@ -281,8 +294,8 @@ class UserServiceImpl implements UserService {
     @Override
     public void delete(Integer integer) {
     }
-
     @Override
+    @Transactional
     public void delete(Integer id, UpdateReason reason) {
 //        User user = findById(id);
 //        user.markDeleted(reason);
@@ -322,6 +335,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User save(User user) {
         return this.repository.save(user);
     }
@@ -341,31 +355,37 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Page<City> findCitiesUsersByEntityTypeAndCityName(UUID id, String cityName, Pageable pageable) {
         return this.repository.findCitiesUsersByOrganizationIdAndCityName(id, cityName, pageable);
     }
 
     @Override
+    @Transactional
     public Page<Region> findRegionsUsersByEntityTypeAndRegionName(UUID id, String regionName, Pageable pageable) {
         return this.repository.findRegionsUsersByOrganizationIdAndRegionName(id, regionName, pageable);
     }
 
     @Override
+    @Transactional
     public Page<Region> findRegionsUsersBySubentityAndRegionName(UUID id, String regionName, Pageable pageable) {
         return this.repository.findRegionsUsersBySubentityIdAndRegionName(id, regionName, pageable);
     }
 
     @Override
+    @Transactional
     public Page<User> filterUsersSubentity(UserSearchSubentityFilters filter, Pageable pageable) {
         return this.repository.findWithFiltersSubentity(filter, pageable);
     }
 
     @Override
+    @Transactional
     public Page<City> findCitiesUsersBySubentityAndCityName(UUID id, String cityName, Pageable pageable) {
         return this.repository.findCitiesUsersBySubentityIdAndCityName(id, cityName, pageable);
     }
 
     @Override
+    @Transactional
     public Page<User> getClientsData(Pageable page) {
         String roleName = "CLIENT";
         return this.repository.findByRoleName(roleName, page);
@@ -379,16 +399,19 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Long countDeliveryUsersByOrganizationId(UUID id) {
         return this.repository.countDeliveryUsersByOrganizationId(id);
     }
 
     @Override
+    @Transactional
     public Page<User> getOrganizationUsers(Pageable pageable, UUID id) {
                 return this.repository.findByOrganizationEntity_Id(id, pageable);
     }
 
     @Override
+    @Transactional
     public User createOrganizationEntityUser(UserRequest userRequest) {
         User user = this.create(userRequest);
 //        String receiver = user.getEmail();
@@ -399,6 +422,7 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public Integer countByRole(Role role) {
         return this.repository.countByRoleAndDeletedAtIsNull(role);
     }

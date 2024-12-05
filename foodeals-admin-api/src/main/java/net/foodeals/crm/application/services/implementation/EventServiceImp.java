@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +23,19 @@ import java.util.UUID;
 
 @Service
 @AllArgsConstructor
-public final class EventServiceImp implements EventService {
+public class EventServiceImp implements EventService {
 
     private final UserService userService;
     private final EventRepository eventRepository;
 
     @Override
+    @Transactional
     public Page<Event> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
+    @Transactional
     public Event partialUpdate(UUID id, PartialEventRequest dto) {
         Event event = this.eventRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id.toString()));
 
@@ -64,21 +67,25 @@ public final class EventServiceImp implements EventService {
 
 
     @Override
+    @Transactional
     public List<Event> findAll() {
         return List.of();
     }
 
     @Override
+    @Transactional
     public Page<Event> findAll(Integer pageNumber, Integer pageSize) {
         return null;
     }
 
     @Override
+    @Transactional
     public Event findById(UUID uuid) {
         return null;
     }
 
     @Override
+    @Transactional
     public Event create(EventRequest dto) {
 
         final String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -101,6 +108,7 @@ public final class EventServiceImp implements EventService {
     }
 
     @Override
+    @Transactional
     public Event update(UUID id, EventRequest dto) {
         Event event = this.eventRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id.toString()));
         event.setDateAndHour(dto.dateAndTime());
@@ -127,6 +135,7 @@ public final class EventServiceImp implements EventService {
     }
 
     @Override
+    @Transactional
     public void delete(UUID id) {
         Event event = this.eventRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id.toString()));
         this.eventRepository.softDelete(event.getId());

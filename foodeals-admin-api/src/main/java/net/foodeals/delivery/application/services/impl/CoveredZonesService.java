@@ -1,5 +1,6 @@
 package net.foodeals.delivery.application.services.impl;
 
+import jakarta.transaction.Transactional;
 import net.foodeals.delivery.domain.entities.CoveredZones;
 import net.foodeals.delivery.domain.repositories.CoveredZonesRepository;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,7 @@ public class CoveredZonesService {
         this.coveredZonesRepository = coveredZonesRepository;
     }
 
-
+    @Transactional
     public CoveredZones save(CoveredZones coveredZones) {
         return this.coveredZonesRepository.save(coveredZones);
     }

@@ -62,6 +62,7 @@ public class PartnerCommissionsUtil {
         }
     }
 
+    @Transactional
     private void createCommissionForNormalPartner(OrganizationEntity partner, Date date) {
         OrganizationEntity freshPartner = entityManager.find(OrganizationEntity.class, partner.getId(), LockModeType.PESSIMISTIC_WRITE);
         PartnerCommissions partnerCommissions = PartnerCommissions.builder()
@@ -76,6 +77,7 @@ public class PartnerCommissionsUtil {
         entityManager.merge(freshPartner);
     }
 
+    @Transactional
     private void createCommissionForPartnerWithSB(OrganizationEntity partner, Date date) {
         OrganizationEntity freshPartner = entityManager.find(OrganizationEntity.class, partner.getId(), LockModeType.PESSIMISTIC_WRITE);
         PartnerCommissions parentCommission = PartnerCommissions.builder()

@@ -1,5 +1,6 @@
 package net.foodeals.config;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -14,6 +15,7 @@ public class BeanUtil implements ApplicationContextAware {
         BeanUtil.applicationContext = applicationContext;
     }
 
+    @Transactional
     public static <T> T getBean(Class<T> beanClass) {
         return applicationContext.getBean(beanClass);
     }

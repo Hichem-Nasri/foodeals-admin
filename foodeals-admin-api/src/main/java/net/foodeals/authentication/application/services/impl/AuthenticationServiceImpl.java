@@ -25,10 +25,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-
 /**
- * AuthenticationServiceImpl
- */
+
+ AuthenticationServiceImpl */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -39,9 +38,9 @@ class AuthenticationServiceImpl implements AuthenticationService {
     private final OrganizationEntityRepository organizationEntityRepository;
     private final UserDetailsService userDetailsService;
 
-
+    @Transactional
     public AuthenticationResponse register(RegisterRequest request) {
-//        OrganizationEntity organizationEntity = this.organizationEntityRepository.findByName("manager test");
+        // OrganizationEntity organizationEntity = this.organizationEntityRepository.findByName("manager test");
         final User user = userService.create(new UserRequest(request.name(), request.email(), request.phone(), request.password(), request.isEmailVerified(), request.roleName(), null));
         return handleRegistration(user);
     }
@@ -52,7 +51,9 @@ class AuthenticationServiceImpl implements AuthenticationService {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.email(),
-                            request.password()));
+                            request.password()
+                    )
+            );
 
             SecurityContext sc = SecurityContextHolder.getContext();
             sc.setAuthentication(authentication);
@@ -70,27 +71,31 @@ class AuthenticationServiceImpl implements AuthenticationService {
                     user.getId(), // User ID
                     token // Token
             );
+
         } catch (Exception e) {
             log.error("Login failed for user: {}", request.email(), e);
             throw e; // Consider throwing a custom exception for better error handling
         }
     }
 
-public boolean verifyToken(String token) {
-    try {
-        String username = jwtService.extractUsername(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        return jwtService.isTokenValid(token, userDetails);
-    } catch (Exception e) {
-        log.error("Token verification failed: {}", e.getMessage());
-        return false;
+    @Transactional
+    public boolean verifyToken(String token) {
+        try {
+            String username = jwtService.extractUsername(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            return jwtService.isTokenValid(token, userDetails);
+        } catch (Exception e) {
+            log.error("Token verification failed: {}", e.getMessage());
+            return false;
+        }
     }
-}
 
+    @Transactional
     private AuthenticationResponse handleRegistration(User user) {
         return getTokens(user);
     }
 
+    @Transactional
     private AuthenticationResponse getTokens(User user) {
         final Map<String, Object> extraClaims = Map.of(
                 "email", user.getEmail(),
