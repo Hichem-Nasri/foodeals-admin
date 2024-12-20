@@ -1,5 +1,6 @@
 package net.foodeals.payment.application.services.utils.implementation;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import net.foodeals.common.valueOjects.Price;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
@@ -33,6 +34,7 @@ public class ChequeProcessor implements PaymentProcessor {
     private final UserService userService;
 
     @Override
+    @Transactional
     public PaymentResponse process(PaymentRequest request, MultipartFile document, PaymentType type) throws BadRequestException {
         if (document.isEmpty()) {
             throw new BadRequestException("bad document");
@@ -52,34 +54,41 @@ public class ChequeProcessor implements PaymentProcessor {
     }
 
     @Override
+    @Transactional
     public void processCommission(PaymentRequest request) {
-        PartnerCommissions partnerCommission = this.repository.findById(request.id()).orElseThrow(() -> new ResourceNotFoundException(" not found "));
-        ChequePaymentMethod chequePaymentMethod = new ChequePaymentMethod();
-        ChequeDetails chequeDetails = (ChequeDetails) request.paymentDetails();
-        chequePaymentMethod.setChequeNumber(chequeDetails.chequeNumber());
-        chequePaymentMethod.setDeadlineDate(chequeDetails.deadlineDate());
-        chequePaymentMethod.setRecuperationDate(chequeDetails.recuperationDate());
-        chequePaymentMethod.setBank(chequeDetails.bankName());
-        chequePaymentMethod.setIssuer(chequeDetails.issuer());
-        chequePaymentMethod.setAmount(new Price(request.amount().amount(), Currency.getInstance(request.amount().currency())));
-        partnerCommission.setPaymentMethod(chequePaymentMethod);
-        partnerCommission.setPaymentDirection(PaymentDirection.FOODEALS_TO_PARTENER);
-        //            chequePaymentMethod.setChequeDocument("")
-        final String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        final User emitter = this.userService.findByEmail(email);
-        partnerCommission.setEmitter(emitter);
-        partnerCommission.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
-        if (partnerCommission.getPartnerInfo().type().equals(PartnerType.PARTNER_SB)) {
-            Set<PartnerCommissions> childs = partnerCommission.getSubEntityCommissions();
-            childs = childs.stream().map(c -> {
-                c.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
-                return c;
-            }).collect(Collectors.toSet());
-            this.repository.saveAll(childs);
+        try {
+            PartnerCommissions partnerCommission = this.repository.findById(request.id()).orElseThrow(() -> new ResourceNotFoundException(" not found "));
+            ChequePaymentMethod chequePaymentMethod = new ChequePaymentMethod();
+            ChequeDetails chequeDetails = (ChequeDetails) request.paymentDetails();
+            chequePaymentMethod.setChequeNumber(chequeDetails.chequeNumber());
+            chequePaymentMethod.setDeadlineDate(chequeDetails.deadlineDate());
+            chequePaymentMethod.setRecuperationDate(chequeDetails.recuperationDate());
+            chequePaymentMethod.setBank(chequeDetails.bankName());
+            chequePaymentMethod.setIssuer(chequeDetails.issuer());
+            chequePaymentMethod.setAmount(new Price(request.amount().amount(), Currency.getInstance(request.amount().currency())));
+            partnerCommission.setPaymentMethod(chequePaymentMethod);
+            partnerCommission.setPaymentDirection(PaymentDirection.FOODEALS_TO_PARTENER);
+            //            chequePaymentMethod.setChequeDocument("")
+            final String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            final User emitter = this.userService.findByEmail(email);
+            partnerCommission.setEmitter(emitter);
+            partnerCommission.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
+            if (partnerCommission.getPartnerInfo().type().equals(PartnerType.PARTNER_SB)) {
+                Set<PartnerCommissions> childs = partnerCommission.getSubEntityCommissions();
+                childs = childs.stream().map(c -> {
+                    c.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
+                    return c;
+                }).collect(Collectors.toSet());
+                this.repository.saveAll(childs);
+            }
+            this.repository.save(partnerCommission);
+        } catch (Exception e) {
+            throw new RuntimeException("can't process commission");
         }
-        this.repository.save(partnerCommission);
     }
+
     @Override
+    @Transactional
     public void processSubscription(PaymentRequest request) {
 
     }

@@ -337,33 +337,42 @@ public class ContractService {
     }
 
     @Transactional
-    public void update(Contract contract, CreateAnOrganizationEntityDto updateOrganizationEntityDto) throws DocumentException, IOException {
-        if (updateOrganizationEntityDto.getMaxNumberOfSubEntities() != null) {
-            contract.setMaxNumberOfSubEntities(updateOrganizationEntityDto.getMaxNumberOfSubEntities());
+    public void update(Contract contract, CreateAnOrganizationEntityDto updateOrganizationEntityDto) throws Exception {
+        try {
+            if (updateOrganizationEntityDto.getMaxNumberOfSubEntities() != null) {
+                contract.setMaxNumberOfSubEntities(updateOrganizationEntityDto.getMaxNumberOfSubEntities());
+            }
+
+            contract.setMaxNumberOfAccounts(updateOrganizationEntityDto.getMaxNumberOfAccounts());
+
+            if (updateOrganizationEntityDto.getMinimumReduction() != null) {
+                contract.setMinimumReduction(updateOrganizationEntityDto.getMinimumReduction());
+            }
+
+            contract.setCommissionPayedBySubEntities(updateOrganizationEntityDto.getCommissionPayedBySubEntities());
+
+            contract.setSubscriptionPayedBySubEntities(updateOrganizationEntityDto.getSubscriptionPayedBySubEntities());
+
+            if (updateOrganizationEntityDto.getManagerId() != null && updateOrganizationEntityDto.getManagerId() != contract.getUserContracts().getUser().getId()) {
+                this.userContractService.updateUserContract(contract.getUserContracts(), updateOrganizationEntityDto);
+            }
+
+            this.solutionContractService.update(contract, updateOrganizationEntityDto);
+            Contract finalContract = contract;
+            this.contractRepository.saveAndFlush(contract);
+        } catch (Exception e) {
+            throw new Exception("Failed to update organization: " + e.getMessage());
         }
-
-        contract.setMaxNumberOfAccounts(updateOrganizationEntityDto.getMaxNumberOfAccounts());
-
-        if (updateOrganizationEntityDto.getMinimumReduction() != null) {
-            contract.setMinimumReduction(updateOrganizationEntityDto.getMinimumReduction());
-        }
-
-        contract.setCommissionPayedBySubEntities(updateOrganizationEntityDto.getCommissionPayedBySubEntities());
-
-        contract.setSubscriptionPayedBySubEntities(updateOrganizationEntityDto.getSubscriptionPayedBySubEntities());
-
-        if (updateOrganizationEntityDto.getManagerId() != null && updateOrganizationEntityDto.getManagerId() != contract.getUserContracts().getUser().getId()) {
-            this.userContractService.updateUserContract(contract.getUserContracts(), updateOrganizationEntityDto);
-        }
-
-        this.solutionContractService.update(contract, updateOrganizationEntityDto);
-        Contract finalContract = contract;
-        this.contractRepository.saveAndFlush(contract);
-        contract = this.contractRepository.findById(contract.getId()).orElseThrow(() -> new ResourceNotFoundException("contract not found " + finalContract.getId()));
-        byte[] document = this.updateDocument(contract);
-        // keep the previous version of the document.
-        contract.setDocument(document);
-        this.contractRepository.save(contract);
+         try {
+             Contract finalContract1 = contract;
+             contract = this.contractRepository.findById(contract.getId()).orElseThrow(() -> new ResourceNotFoundException("contract not found " + finalContract1.getId()));
+             byte[] document = this.updateDocument(contract);
+             // keep the previous version of the document.
+             contract.setDocument(document);
+             this.contractRepository.save(contract);
+         }  catch (Exception e) {
+             throw new Exception("Failed to update organization: " + e.getMessage());
+         }
     }
 
     @Transactional

@@ -53,10 +53,17 @@ public class OrganizationEntityController {
         }
 
     @PostMapping(value = "/partners/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Transactional
-    public ResponseEntity<?> addAnOrganizationEntity(@RequestPart("dto") CreateAnOrganizationEntityDto createAnOrganizationEntityDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) throws DocumentException, IOException {
+    @Transactional(rollbackOn = Exception.class)
+    public ResponseEntity<?> addAnOrganizationEntity(@RequestPart("dto") CreateAnOrganizationEntityDto createAnOrganizationEntityDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) throws Exception {
+        try {
             OrganizationEntity  organizationEntity = this.organizationEntityService.createAnewOrganizationEntity(createAnOrganizationEntityDto, logo, cover);
+            if (organizationEntity == null) {
+                throw new Exception("Failed to create organization entity");
+            }
             return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ? this.modelMapper.mapDeliveryPartners(organizationEntity) : this.modelMapper.mapOrganizationEntity(organizationEntity), HttpStatus.CREATED);
+        } catch (Exception e) {
+            throw new Exception("Failed to create partner: ");
+        }
     }
 
 
@@ -95,11 +102,14 @@ public class OrganizationEntityController {
     }
 
     @PutMapping(value = "/partners/edit/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Transactional
-    public ResponseEntity<?> updateOrganizationEntity(@PathVariable("id") UUID id, @RequestPart("dto") CreateAnOrganizationEntityDto updateOrganizationEntityDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) throws DocumentException, IOException {
-        System.out.println(updateOrganizationEntityDto);
-        OrganizationEntity  organizationEntity = this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto, logo, cover);
-        return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ? this.modelMapper.mapDeliveryPartners(organizationEntity) : this.modelMapper.mapOrganizationEntity(organizationEntity), HttpStatus.OK);
+    @Transactional(rollbackOn = Exception.class)
+    public ResponseEntity<?> updateOrganizationEntity(@PathVariable("id") UUID id, @RequestPart("dto") CreateAnOrganizationEntityDto updateOrganizationEntityDto, @RequestPart(value = "logo", required = false) MultipartFile logo, @RequestPart(value = "cover", required = false) MultipartFile cover) throws Exception {
+        try {
+            OrganizationEntity organizationEntity = this.organizationEntityService.updateOrganizationEntity(id, updateOrganizationEntityDto, logo, cover);
+            return new ResponseEntity<>(organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) ? this.modelMapper.mapDeliveryPartners(organizationEntity) : this.modelMapper.mapOrganizationEntity(organizationEntity), HttpStatus.OK);
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
     }
 
     @GetMapping("/partners/form-data/{id}")
@@ -262,8 +272,12 @@ public class OrganizationEntityController {
 
     @PostMapping(value = "/partners/validate/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @Transactional
-    public ResponseEntity<String> validateOrganizationEntity(@PathVariable("id") UUID id, @RequestPart("document") MultipartFile file) {
-        return new ResponseEntity<String>(this.organizationEntityService.validateOrganizationEntity(id, file), HttpStatus.OK);
+    public ResponseEntity<String> validateOrganizationEntity(@PathVariable("id") UUID id, @RequestPart("document") MultipartFile file) throws Exception {
+        try {
+            return new ResponseEntity<String>(this.organizationEntityService.validateOrganizationEntity(id, file), HttpStatus.OK);
+        } catch (Exception e) {
+            throw new Exception("failed to validate organization entity: ");
+        }
     }
 
     @GetMapping("/partners/contracts/{id}")

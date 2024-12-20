@@ -179,7 +179,20 @@ public class PaymentServiceImpl implements PaymentService {
         this.deadlinesService = deadlinesService;
         this.processors = processorList.stream()
                 .collect(Collectors.toMap(
-                        processor -> processor.getClass().getSimpleName().replace("Processor", "").toLowerCase(),
+                        processor -> {
+                            // Extract the original name without CGLIB proxy suffixes
+                            String fullClassName = processor.getClass().getName();
+                            String simpleName = fullClassName.contains("$$")
+                                    ? fullClassName.substring(0, fullClassName.indexOf("$$"))
+                                    : fullClassName;
+
+                            // Get the simple class name and convert to lowercase
+                            String processorName = simpleName.substring(simpleName.lastIndexOf('.') + 1)
+                                    .toLowerCase()
+                                    .replace("processor", "");
+
+                            return processorName;
+                        },
                         Function.identity()
                 ));
         this.subEntityService = subEntityService;
@@ -259,7 +272,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
     @Override
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public PaymentResponse processPayment(PaymentRequest request, MultipartFile document, PaymentType type) throws BadRequestException {
         PaymentProcessor processor = processors.get(request.paymentMethod().toLowerCase());
         if (processor == null) {
@@ -350,7 +363,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackOn = Exception.class)
     public void receiveSubscription(ReceiveDto receiveDto) {
         Deadlines deadlines = this.deadlinesService.findById(receiveDto.id());
 
@@ -752,14 +765,19 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @Transactional
-    public PaymentResponse receive(ReceiveDto receiveDto, PaymentType type) throws BadRequestException {
-        if (type.equals(PaymentType.COMMISSION)) {
-            this.receiveCommission(receiveDto);
-        } else {
-            this.receiveSubscription(receiveDto);
+    @Transactional(rollbackOn = Exception.class)
+    public PaymentResponse receive(ReceiveDto receiveDto, PaymentType type) throws Exception {
+        try {
+            if (type.equals(PaymentType.COMMISSION)) {
+                this.receiveCommission(receiveDto);
+            } else {
+                this.receiveSubscription(receiveDto);
+            }
+            return new PaymentResponse("payment validated successfully");
+        } catch (Exception e) {
+            throw new Exception("failed to process payment:");
         }
-        return new PaymentResponse("payment validated successfully");
+
     }
 
     @Override

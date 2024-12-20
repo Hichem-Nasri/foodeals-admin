@@ -38,11 +38,15 @@ class AuthenticationServiceImpl implements AuthenticationService {
     private final OrganizationEntityRepository organizationEntityRepository;
     private final UserDetailsService userDetailsService;
 
-    @Transactional
-    public AuthenticationResponse register(RegisterRequest request) {
+    @Transactional(rollbackOn = Exception.class)
+    public AuthenticationResponse register(RegisterRequest request) throws Exception {
         // OrganizationEntity organizationEntity = this.organizationEntityRepository.findByName("manager test");
-        final User user = userService.create(new UserRequest(request.name(), request.email(), request.phone(), request.password(), request.isEmailVerified(), request.roleName(), null));
-        return handleRegistration(user);
+        try {
+            final User user = userService.create(new UserRequest(request.name(), request.email(), request.phone(), request.password(), request.isEmailVerified(), request.roleName(), null));
+            return handleRegistration(user);
+        } catch (Exception e) {
+            throw new Exception("failed to register user: ");
+        }
     }
 
     @Transactional

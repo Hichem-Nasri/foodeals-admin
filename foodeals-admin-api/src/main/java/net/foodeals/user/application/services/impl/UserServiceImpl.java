@@ -31,8 +31,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -302,13 +304,14 @@ class UserServiceImpl implements UserService {
 //        this.repository.save(user);
     }
 
+    @Transactional
     private User mapRelationsAndEncodePassword(User user, UserRequest request) {
         final Role role = roleService.findByName(request.roleName());
         user.setRole(role)
                 .setPassword(passwordEncoder.encode(user.getPassword()));
         user = this.repository.save(user);
         if (request.organizationEntityId() != null) {
-            final OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(request.organizationEntityId()).orElse(null);
+            final OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(request.organizationEntityId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization not found with id " + request.organizationEntityId()));
             if (organizationEntity != null) {
                 user.setOrganizationEntity(organizationEntity);
                 organizationEntity.getUsers().add(user);

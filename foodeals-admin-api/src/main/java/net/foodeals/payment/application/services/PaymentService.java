@@ -47,7 +47,7 @@ public interface PaymentService {
 
     PaymentStatistics getPaymentStatistics(List<PartnerCommissions> commissions);
 
-    PaymentResponse receive(ReceiveDto receiveDto, PaymentType type) throws BadRequestException;
+    PaymentResponse receive(ReceiveDto receiveDto, PaymentType type) throws Exception;
 
     void receiveCommission(ReceiveDto receiveDto) throws BadRequestException;
 

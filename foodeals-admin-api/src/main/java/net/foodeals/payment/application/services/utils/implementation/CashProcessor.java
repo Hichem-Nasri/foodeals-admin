@@ -1,5 +1,6 @@
 package net.foodeals.payment.application.services.utils.implementation;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import net.foodeals.common.valueOjects.Price;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
@@ -33,6 +34,7 @@ public class CashProcessor implements PaymentProcessor {
     private final UserService userService;
 
     @Override
+    @Transactional
     public PaymentResponse process(PaymentRequest request, MultipartFile document, PaymentType type) {
 
         try {
@@ -49,30 +51,36 @@ public class CashProcessor implements PaymentProcessor {
     }
 
     @Override
+    @Transactional
     public void processCommission(PaymentRequest request) {
-        PartnerCommissions partnerCommission = this.repository.findById(request.id()).orElseThrow(() -> new ResourceNotFoundException("commission not found with id " + request.id()));
-        CashPaymentMethod paymentMethod = new CashPaymentMethod();
-        CashDetails cashDetails = (CashDetails) request.paymentDetails();
-        paymentMethod.setAmount(new Price(request.amount().amount(), Currency.getInstance(request.amount().currency())));
-        paymentMethod.setRecuperationDate(cashDetails.date());
-        partnerCommission.setPaymentMethod(paymentMethod);
-        partnerCommission.setPaymentDirection(PaymentDirection.FOODEALS_TO_PARTENER);
-        partnerCommission.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
-        final String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        final User emitter = this.userService.findByEmail(email);
-        partnerCommission.setEmitter(emitter);
-        if (partnerCommission.getPartnerInfo().type().equals(PartnerType.PARTNER_SB)) {
-            Set<PartnerCommissions> childs = partnerCommission.getSubEntityCommissions();
-            childs = childs.stream().map(c -> {
-                c.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
-                return c;
-            }).collect(Collectors.toSet());
-            this.repository.saveAll(childs);
+        try {
+            PartnerCommissions partnerCommission = this.repository.findById(request.id()).orElseThrow(() -> new ResourceNotFoundException("commission not found with id " + request.id()));
+            CashPaymentMethod paymentMethod = new CashPaymentMethod();
+            CashDetails cashDetails = (CashDetails) request.paymentDetails();
+            paymentMethod.setAmount(new Price(request.amount().amount(), Currency.getInstance(request.amount().currency())));
+            paymentMethod.setRecuperationDate(cashDetails.date());
+            partnerCommission.setPaymentMethod(paymentMethod);
+            partnerCommission.setPaymentDirection(PaymentDirection.FOODEALS_TO_PARTENER);
+            partnerCommission.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
+            final String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            final User emitter = this.userService.findByEmail(email);
+            partnerCommission.setEmitter(emitter);
+            if (partnerCommission.getPartnerInfo().type().equals(PartnerType.PARTNER_SB)) {
+                Set<PartnerCommissions> childs = partnerCommission.getSubEntityCommissions();
+                childs = childs.stream().map(c -> {
+                    c.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
+                    return c;
+                }).collect(Collectors.toSet());
+                this.repository.saveAll(childs);
+            }
+            this.repository.save(partnerCommission);
+        } catch (Exception e) {
+            throw new RuntimeException("error : " + e.getMessage());
         }
-        this.repository.save(partnerCommission);
     }
 
     @Override
+    @Transactional
     public void processSubscription(PaymentRequest request) {
 
     }

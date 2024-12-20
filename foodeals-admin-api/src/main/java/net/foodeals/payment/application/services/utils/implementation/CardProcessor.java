@@ -1,5 +1,6 @@
 package net.foodeals.payment.application.services.utils.implementation;
 
+import jakarta.transaction.Transactional;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
 import net.foodeals.payment.application.dto.request.PaymentType;
 import net.foodeals.payment.application.dto.response.PaymentResponse;
@@ -13,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class CardProcessor implements PaymentProcessor {
 
     @Override
+    @Transactional
     public PaymentResponse process(PaymentRequest request, MultipartFile document, PaymentType type) {
 //        CardDetails details = (CardDetails) request.paymentDetails();
 //
@@ -26,10 +28,12 @@ public class CardProcessor implements PaymentProcessor {
     }
 
     @Override
+    @Transactional
     public void processCommission(PaymentRequest request) {
     }
 
     @Override
+    @Transactional
     public void processSubscription(PaymentRequest request) {
     }
 
