@@ -459,7 +459,7 @@ public class OrganizationEntityService {
             }
             organizationEntity.getContract().setContractStatus(ContractStatus.VALIDATED);
             this.organizationEntityRepository.save(organizationEntity);
-//            accountValidationService.validateManagerAccount(manager, pass);
+            accountValidationService.validateManagerAccount(manager, pass);
             return "Contract validated successfully";
         } catch (Exception e) {
             throw new Exception("Failed to validate organization entity. ");
