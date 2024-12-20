@@ -1,5 +1,6 @@
 package net.foodeals.payment.application.services.utils.implementation;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import net.foodeals.common.valueOjects.Price;
 import net.foodeals.payment.application.dto.request.PaymentRequest;
@@ -33,6 +34,7 @@ public class BankTransferProcessor implements PaymentProcessor {
     private final UserService userService;
 
     @Override
+    @Transactional
     public PaymentResponse process(PaymentRequest request, MultipartFile document, PaymentType type) throws BadRequestException {
 
         if (document.isEmpty()) {
@@ -55,28 +57,34 @@ public class BankTransferProcessor implements PaymentProcessor {
     // parent : check for sub entities;
 
     @Override
+    @Transactional
     public void processCommission(PaymentRequest request) {
         PartnerCommissions partnerCommission = this.partnerCommissionsRepository.findById(request.id()).orElseThrow(() -> new ResourceNotFoundException("commission not found with id : " + request.id().toString()));
-        BankTransferPaymentMethod bankTransferPaymentMethod = new BankTransferPaymentMethod();
-        final String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        final User emitter = this.userService.findByEmail(email);
-        bankTransferPaymentMethod.setPayedAt(new Date());
-        partnerCommission.setEmitter(emitter);
-        bankTransferPaymentMethod.setAmount(new Price(request.amount().amount(), Currency.getInstance(request.amount().currency())));
-        partnerCommission.setPaymentMethod(bankTransferPaymentMethod);
-        partnerCommission.setPaymentDirection(PaymentDirection.FOODEALS_TO_PARTENER);
-        partnerCommission.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
-        if (partnerCommission.getPartnerInfo().type().equals(PartnerType.PARTNER_SB)) {
-            Set<PartnerCommissions> childs = partnerCommission.getSubEntityCommissions();
-            childs = childs.stream().map(c -> {
-                c.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
-                return c;
-            }).collect(Collectors.toSet());
-            this.partnerCommissionsRepository.saveAll(childs);
+        try {
+            BankTransferPaymentMethod bankTransferPaymentMethod = new BankTransferPaymentMethod();
+            final String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            final User emitter = this.userService.findByEmail(email);
+            bankTransferPaymentMethod.setPayedAt(new Date());
+            partnerCommission.setEmitter(emitter);
+            bankTransferPaymentMethod.setAmount(new Price(request.amount().amount(), Currency.getInstance(request.amount().currency())));
+            partnerCommission.setPaymentMethod(bankTransferPaymentMethod);
+            partnerCommission.setPaymentDirection(PaymentDirection.FOODEALS_TO_PARTENER);
+            partnerCommission.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
+            if (partnerCommission.getPartnerInfo().type().equals(PartnerType.PARTNER_SB)) {
+                Set<PartnerCommissions> childs = partnerCommission.getSubEntityCommissions();
+                childs = childs.stream().map(c -> {
+                    c.setPaymentStatus(PaymentStatus.VALIDATED_BY_FOODEALS);
+                    return c;
+                }).collect(Collectors.toSet());
+                this.partnerCommissionsRepository.saveAll(childs);
+            }
+            this.partnerCommissionsRepository.save(partnerCommission);
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-        this.partnerCommissionsRepository.save(partnerCommission);
     }
     @Override
+    @Transactional
     public void processSubscription(PaymentRequest request) {
 
     }

@@ -119,83 +119,92 @@ public class OrganizationEntityService {
         this.organizationEntityRepository.softDelete(organizationEntity.getId());
     }
 
-    @Transactional
-    public OrganizationEntity createAnewOrganizationEntity(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, MultipartFile logo, MultipartFile cover) throws DocumentException, IOException {
+    @Transactional(rollbackOn = Exception.class)
+    public OrganizationEntity createAnewOrganizationEntity(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, MultipartFile logo, MultipartFile cover) throws Exception {
         try {
             dtoProcessor.processDto(createAnOrganizationEntityDto);
         } catch(Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "internal server error ");
         }
 
-        AddressRequest addressRequest = new AddressRequest(createAnOrganizationEntityDto.getEntityAddressDto().getCountry(), createAnOrganizationEntityDto.getEntityAddressDto().getAddress(), createAnOrganizationEntityDto.getEntityAddressDto().getState(), createAnOrganizationEntityDto.getEntityAddressDto().getCity(), createAnOrganizationEntityDto.getEntityAddressDto().getRegion(), createAnOrganizationEntityDto.getEntityAddressDto().getIframe());
-        Address address = this.addressService.create(addressRequest);
-        Contact contact = Contact.builder().name(createAnOrganizationEntityDto.getContactDto().getName())
-                .email(createAnOrganizationEntityDto.getContactDto().getEmail())
-                .phone(createAnOrganizationEntityDto.getContactDto().getPhone())
-                .isResponsible(true)
-                .build();
-        Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAnOrganizationEntityDto.getSolutions());
-        Set<Activity> activities = this.activityService.getActivitiesByName(createAnOrganizationEntityDto.getActivities());
-        OrganizationEntity organizationEntity = OrganizationEntity.builder().name(createAnOrganizationEntityDto.getEntityName())
-                .type(createAnOrganizationEntityDto.getEntityType())
-                .solutions(solutions)
-                .activities(activities)
-                .address(address)
-                .build();
-        OrganizationEntity finalOrganizationEntity = organizationEntity;
-        solutions.forEach(solution -> {
-            solution.getOrganizationEntities().add(finalOrganizationEntity);
-            this.solutionService.save(solution);
-        });
-        activities.forEach(activity -> {
-            activity.getOrganizationEntities().add(finalOrganizationEntity);
-            this.activityService.save(activity);
-        });
-        contact.setOrganizationEntity(organizationEntity);
-        List<Contact> contacts = organizationEntity.getContacts();
-        contacts.add(contact);
-        organizationEntity.setContacts(contacts);
-        organizationEntity = this.organizationEntityRepository.save(organizationEntity);
-        switch (organizationEntity.getType()) {
-            case EntityType.PARTNER_WITH_SB:
-            case EntityType.NORMAL_PARTNER:
-                organizationEntity = savePartner(createAnOrganizationEntityDto, organizationEntity);
-                break;
-            case EntityType.DELIVERY_PARTNER :
-                organizationEntity = saveDeliveryPartner(createAnOrganizationEntityDto, organizationEntity);
-                break;
-            default:
+        try {
+            AddressRequest addressRequest = new AddressRequest(createAnOrganizationEntityDto.getEntityAddressDto().getCountry(), createAnOrganizationEntityDto.getEntityAddressDto().getAddress(), createAnOrganizationEntityDto.getEntityAddressDto().getState(), createAnOrganizationEntityDto.getEntityAddressDto().getCity(), createAnOrganizationEntityDto.getEntityAddressDto().getRegion(), createAnOrganizationEntityDto.getEntityAddressDto().getIframe());
+            Address address = this.addressService.create(addressRequest);
+            Contact contact = Contact.builder().name(createAnOrganizationEntityDto.getContactDto().getName())
+                    .email(createAnOrganizationEntityDto.getContactDto().getEmail())
+                    .phone(createAnOrganizationEntityDto.getContactDto().getPhone())
+                    .isResponsible(true)
+                    .build();
+            Set<Solution> solutions = this.solutionService.getSolutionsByNames(createAnOrganizationEntityDto.getSolutions());
+            Set<Activity> activities = this.activityService.getActivitiesByName(createAnOrganizationEntityDto.getActivities());
+            OrganizationEntity organizationEntity = OrganizationEntity.builder().name(createAnOrganizationEntityDto.getEntityName())
+                    .type(createAnOrganizationEntityDto.getEntityType())
+                    .solutions(solutions)
+                    .activities(activities)
+                    .address(address)
+                    .build();
+            OrganizationEntity finalOrganizationEntity = organizationEntity;
+            solutions.forEach(solution -> {
+                solution.getOrganizationEntities().add(finalOrganizationEntity);
+                this.solutionService.save(solution);
+            });
+            activities.forEach(activity -> {
+                activity.getOrganizationEntities().add(finalOrganizationEntity);
+                this.activityService.save(activity);
+            });
+            contact.setOrganizationEntity(organizationEntity);
+            List<Contact> contacts = organizationEntity.getContacts();
+            contacts.add(contact);
+            organizationEntity.setContacts(contacts);
+            organizationEntity = this.organizationEntityRepository.save(organizationEntity);
+            switch (organizationEntity.getType()) {
+                case EntityType.PARTNER_WITH_SB:
+                case EntityType.NORMAL_PARTNER:
+                    organizationEntity = savePartner(createAnOrganizationEntityDto, organizationEntity);
+                    break;
+                case EntityType.DELIVERY_PARTNER:
+                    organizationEntity = saveDeliveryPartner(createAnOrganizationEntityDto, organizationEntity);
+                    break;
+                default:
+            }
+            return organizationEntity;
         }
-        return organizationEntity;
+        catch (Exception e) {
+            throw new Exception("Failed to create organization entity:");
+        }
     }
 
     @Transactional
-    private OrganizationEntity saveDeliveryPartner(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
-        if (createAnOrganizationEntityDto.getCoveredZonesDtos() != null) {
-            List<CoveredZonesDto> coveredZonesDtos = createAnOrganizationEntityDto.getCoveredZonesDtos();
-            coveredZonesDtos.forEach(coveredZonesDto -> {
-                List<String> regionsNames = coveredZonesDto.getRegions();
-                regionsNames.forEach(regionName -> {
-                    CoveredZones coveredZone = CoveredZones.builder().organizationEntity(organizationEntity)
-                            .build();
-                    Country country = this.countryService.findByName(coveredZonesDto.getCountry());
-                    List<City> cities = country.getStates().stream().flatMap(state -> state.getCities().stream()).collect(Collectors.toList());
-                    City city = cities.stream().filter(c -> c.getName().equals(coveredZonesDto.getCity().toLowerCase())).findFirst().get();
-                    Region region = city.getRegions().stream().filter(r -> r.getName().equals(regionName.toLowerCase())).findFirst().get();
-                    coveredZone.setRegion(region);
-                    this.coveredZonesService.save(coveredZone);
-                    organizationEntity.getCoveredZones().add(coveredZone);
+    private OrganizationEntity saveDeliveryPartner(CreateAnOrganizationEntityDto createAnOrganizationEntityDto, OrganizationEntity organizationEntity) throws Exception {
+        try {
+            if (createAnOrganizationEntityDto.getCoveredZonesDtos() != null) {
+                List<CoveredZonesDto> coveredZonesDtos = createAnOrganizationEntityDto.getCoveredZonesDtos();
+                coveredZonesDtos.forEach(coveredZonesDto -> {
+                    List<String> regionsNames = coveredZonesDto.getRegions();
+                    regionsNames.forEach(regionName -> {
+                        CoveredZones coveredZone = CoveredZones.builder().organizationEntity(organizationEntity)
+                                .build();
+                        Country country = this.countryService.findByName(coveredZonesDto.getCountry());
+                        List<City> cities = country.getStates().stream().flatMap(state -> state.getCities().stream()).collect(Collectors.toList());
+                        City city = cities.stream().filter(c -> c.getName().equals(coveredZonesDto.getCity().toLowerCase())).findFirst().get();
+                        Region region = city.getRegions().stream().filter(r -> r.getName().equals(regionName.toLowerCase())).findFirst().get();
+                        coveredZone.setRegion(region);
+                        this.coveredZonesService.save(coveredZone);
+                        organizationEntity.getCoveredZones().add(coveredZone);
+                    });
                 });
-            });
+            }
+            Contract contract = this.contractService.createDeliveryPartnerContract(organizationEntity, createAnOrganizationEntityDto);
+            BankInformation bankInformation = BankInformation.builder().beneficiaryName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBeneficiaryName())
+                    .bankName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBankName())
+                    .rib(createAnOrganizationEntityDto.getEntityBankInformationDto().getRib())
+                    .build();
+            organizationEntity.setBankInformation(bankInformation);
+            organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
+            return this.organizationEntityRepository.save(organizationEntity);
+        } catch(Exception e) {
+            throw new Exception("");
         }
-        Contract contract = this.contractService.createDeliveryPartnerContract(organizationEntity, createAnOrganizationEntityDto);
-        BankInformation bankInformation = BankInformation.builder().beneficiaryName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBeneficiaryName())
-                .bankName(createAnOrganizationEntityDto.getEntityBankInformationDto().getBankName())
-                .rib(createAnOrganizationEntityDto.getEntityBankInformationDto().getRib())
-                .build();
-        organizationEntity.setBankInformation(bankInformation);
-        organizationEntity.setCommercialNumber(createAnOrganizationEntityDto.getCommercialNumber());
-        return this.organizationEntityRepository.save(organizationEntity);
     }
 
     @Transactional
@@ -218,76 +227,80 @@ public class OrganizationEntityService {
     }
 
     @Transactional
-    public OrganizationEntity updateOrganizationEntity(UUID id, CreateAnOrganizationEntityDto updateOrganizationEntityDto, MultipartFile logo, MultipartFile cover) throws DocumentException, IOException {
+    public OrganizationEntity updateOrganizationEntity(UUID id, CreateAnOrganizationEntityDto updateOrganizationEntityDto, MultipartFile logo, MultipartFile cover) throws Exception {
         try {
             dtoProcessor.processDto(updateOrganizationEntityDto);
         } catch(Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "internal server error ");
         }
 
-        OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "organization Entity not found with id " + id.toString()));
+        try {
+            OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "organization Entity not found with id " + id.toString()));
 
-        Contract contract = organizationEntity.getContract();
+            Contract contract = organizationEntity.getContract();
 
-        Contact contact = organizationEntity.getContacts().getFirst();
-        contact = this.contactsService.update(contact, updateOrganizationEntityDto.getContactDto());
+            Contact contact = organizationEntity.getContacts().getFirst();
+            contact = this.contactsService.update(contact, updateOrganizationEntityDto.getContactDto());
 
-        organizationEntity.setName(updateOrganizationEntityDto.getEntityName());
-        Address address = organizationEntity.getAddress();
-        address = this.addressService.updateContractAddress(address, updateOrganizationEntityDto.getEntityAddressDto());
-        Set<Solution> solutions = this.solutionService.getSolutionsByNames(updateOrganizationEntityDto.getSolutions());
-        Set<Solution> partnerSolutions = new HashSet<>(organizationEntity.getSolutions());
-        OrganizationEntity finalOrganizationEntity = organizationEntity;
-        partnerSolutions.stream().map((Solution solution) -> {
-                    if (!updateOrganizationEntityDto.getSolutions().contains(solution.getName())) {
-                        solution.getOrganizationEntities().remove(finalOrganizationEntity);
-                        finalOrganizationEntity.getSolutions().remove(solution);
-                        this.solutionService.save(solution);
-                    }
-                    return solution;
-                }).toList();
-        organizationEntity.setType(updateOrganizationEntityDto.getEntityType());
-        OrganizationEntity finalOrganizationEntity1 = organizationEntity;
-        solutions.stream().map(solution -> {
-            solution.getOrganizationEntities().add(finalOrganizationEntity1);
-            finalOrganizationEntity1.getSolutions().add(solution);
-            this.solutionService.save(solution);
-            return solution;
-        }).toList();
-        List<String> activitiesNames = updateOrganizationEntityDto.getActivities();
-        Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
+            organizationEntity.setName(updateOrganizationEntityDto.getEntityName());
+            Address address = organizationEntity.getAddress();
+            address = this.addressService.updateContractAddress(address, updateOrganizationEntityDto.getEntityAddressDto());
+            Set<Solution> solutions = this.solutionService.getSolutionsByNames(updateOrganizationEntityDto.getSolutions());
+            Set<Solution> partnerSolutions = new HashSet<>(organizationEntity.getSolutions());
+            OrganizationEntity finalOrganizationEntity = organizationEntity;
+            partnerSolutions.stream().map((Solution solution) -> {
+                if (!updateOrganizationEntityDto.getSolutions().contains(solution.getName())) {
+                    solution.getOrganizationEntities().remove(finalOrganizationEntity);
+                    finalOrganizationEntity.getSolutions().remove(solution);
+                    this.solutionService.save(solution);
+                }
+                return solution;
+            }).toList();
+            organizationEntity.setType(updateOrganizationEntityDto.getEntityType());
+            OrganizationEntity finalOrganizationEntity1 = organizationEntity;
+            solutions.stream().map(solution -> {
+                solution.getOrganizationEntities().add(finalOrganizationEntity1);
+                finalOrganizationEntity1.getSolutions().add(solution);
+                this.solutionService.save(solution);
+                return solution;
+            }).toList();
+            List<String> activitiesNames = updateOrganizationEntityDto.getActivities();
+            Set<Activity> activities = this.activityService.getActivitiesByName(activitiesNames);
 
-        Set<Activity> activitiesToRemove = organizationEntity.getActivities()
-                .stream()
-                .filter(activity -> !activitiesNames.contains(activity.getName()))
-                .collect(Collectors.toSet());
+            Set<Activity> activitiesToRemove = organizationEntity.getActivities()
+                    .stream()
+                    .filter(activity -> !activitiesNames.contains(activity.getName()))
+                    .collect(Collectors.toSet());
 
-        Set<Activity> activitiesToAdd = activities.stream()
-                .filter(activity -> !finalOrganizationEntity1.getActivities().contains(activity))
-                .collect(Collectors.toSet());
+            Set<Activity> activitiesToAdd = activities.stream()
+                    .filter(activity -> !finalOrganizationEntity1.getActivities().contains(activity))
+                    .collect(Collectors.toSet());
 
-        activitiesToRemove.forEach(activity -> {
-            activity.getOrganizationEntities().remove(finalOrganizationEntity1);
-            finalOrganizationEntity1.getActivities().remove(activity);
-            this.activityService.save(activity);
-        });
-        activitiesToAdd.forEach(activity -> {
-            activity.getOrganizationEntities().add(finalOrganizationEntity1);
-            finalOrganizationEntity1.getActivities().add(activity);
-            this.activityService.save(activity);
-        });
-        switch (organizationEntity.getType()) {
-            case EntityType.PARTNER_WITH_SB:
-            case EntityType.NORMAL_PARTNER:
-                organizationEntity = updatePartner(updateOrganizationEntityDto, organizationEntity);
-                break;
-            case EntityType.DELIVERY_PARTNER :
-                organizationEntity = updateDeliveryPartner(updateOrganizationEntityDto, organizationEntity);
-                break;
-            default:
+            activitiesToRemove.forEach(activity -> {
+                activity.getOrganizationEntities().remove(finalOrganizationEntity1);
+                finalOrganizationEntity1.getActivities().remove(activity);
+                this.activityService.save(activity);
+            });
+            activitiesToAdd.forEach(activity -> {
+                activity.getOrganizationEntities().add(finalOrganizationEntity1);
+                finalOrganizationEntity1.getActivities().add(activity);
+                this.activityService.save(activity);
+            });
+            switch (organizationEntity.getType()) {
+                case EntityType.PARTNER_WITH_SB:
+                case EntityType.NORMAL_PARTNER:
+                    organizationEntity = updatePartner(updateOrganizationEntityDto, organizationEntity);
+                    break;
+                case EntityType.DELIVERY_PARTNER:
+                    organizationEntity = updateDeliveryPartner(updateOrganizationEntityDto, organizationEntity);
+                    break;
+                default:
+            }
+            return organizationEntity;
+        } catch (Exception e) {
+            throw new Exception("Failed to update organization entity: ");
         }
-        return organizationEntity;
     }
 
     @Transactional
@@ -353,7 +366,7 @@ public class OrganizationEntityService {
         return new PageImpl<>(content, page, deletionReasons.size()).map(d -> new UpdateDetails(d.getType(), d.getDetails(), d.getReason(), Date.from(d.getCreatedAt())));
     }
     @Transactional
-    private OrganizationEntity updatePartner(CreateAnOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws DocumentException, IOException {
+    private OrganizationEntity updatePartner(CreateAnOrganizationEntityDto updateOrganizationEntityDto, OrganizationEntity organizationEntity) throws Exception {
         Set<Features> newFeatures = this.featureService.findFeaturesByNames(updateOrganizationEntityDto.getFeatures());
         Iterator<Features> iterator = organizationEntity.getFeatures().iterator();
         while (iterator.hasNext()) {
@@ -405,48 +418,52 @@ public class OrganizationEntityService {
     }
 
 
-    @Transactional
-    public String validateOrganizationEntity(UUID id, MultipartFile document) {
-        OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
+    @Transactional(rollbackOn = Exception.class)
+    public String validateOrganizationEntity(UUID id, MultipartFile document) throws Exception {
+        try {
+            OrganizationEntity organizationEntity = this.organizationEntityRepository.findById(id).orElse(null);
 
-        if (organizationEntity == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization Entity not found");
-        }
-        Contact managerContact = organizationEntity.getContacts().getFirst();
+            if (organizationEntity == null) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization Entity not found");
+            }
+            Contact managerContact = organizationEntity.getContacts().getFirst();
 
-        Role role  = this.roleService.findByName("MANAGER");
-        String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-        UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), false, "MANAGER", organizationEntity.getId());
-        User manager = this.userService.create(userRequest);
-        if (!organizationEntity.getType().equals(EntityType.FOOD_BANK) && !organizationEntity.getType().equals(EntityType.ASSOCIATION)) {
-            Solution pro_market = this.solutionService.findByName("pro_market");
-            if (organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) || organizationEntity.getSolutions().contains(pro_market)) {
-                Date date = new Date();
-                PartnerCommissions partnerCommissions = PartnerCommissions.builder()
-                        .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType(), organizationEntity.getName()))
-                        .paymentStatus(PaymentStatus.IN_VALID)
-                        .paymentResponsibility(organizationEntity.commissionPayedBySubEntities() ? PaymentResponsibility.PAYED_BY_SUB_ENTITIES : PaymentResponsibility.PAYED_BY_PARTNER)
-                        .date(date)
-                        .build();
-                organizationEntity.getCommissions().add(partnerCommissions);
-            }
-            if (!organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER)) {
-                this.contractService.validateContract(organizationEntity.getContract());
-            }
-            if (organizationEntity.getType().equals(EntityType.PARTNER_WITH_SB)) {
-                // TODO : should be removed after tests.
-                try {
-                    this.createSubentity(organizationEntity);
-                } catch (BadRequestException e) {
-                    System.out.println("Error creating subEntity : ");
-                    e.printStackTrace();
+            Role role = this.roleService.findByName("MANAGER");
+            String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+            UserRequest userRequest = new UserRequest(managerContact.getName(), managerContact.getEmail(), managerContact.getPhone(), RandomStringUtils.random(12), false, "MANAGER", organizationEntity.getId());
+            User manager = this.userService.create(userRequest);
+            if (!organizationEntity.getType().equals(EntityType.FOOD_BANK) && !organizationEntity.getType().equals(EntityType.ASSOCIATION)) {
+                Solution pro_market = this.solutionService.findByName("pro_market");
+                if (organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER) || organizationEntity.getSolutions().contains(pro_market)) {
+                    Date date = new Date();
+                    PartnerCommissions partnerCommissions = PartnerCommissions.builder()
+                            .partnerInfo(new PartnerInfo(organizationEntity.getId(), organizationEntity.getId(), organizationEntity.getPartnerType(), organizationEntity.getName()))
+                            .paymentStatus(PaymentStatus.IN_VALID)
+                            .paymentResponsibility(organizationEntity.commissionPayedBySubEntities() ? PaymentResponsibility.PAYED_BY_SUB_ENTITIES : PaymentResponsibility.PAYED_BY_PARTNER)
+                            .date(date)
+                            .build();
+                    organizationEntity.getCommissions().add(partnerCommissions);
+                }
+                if (!organizationEntity.getType().equals(EntityType.DELIVERY_PARTNER)) {
+                    this.contractService.validateContract(organizationEntity.getContract());
+                }
+                if (organizationEntity.getType().equals(EntityType.PARTNER_WITH_SB)) {
+                    // TODO : should be removed after tests.
+                    try {
+                        this.createSubentity(organizationEntity);
+                    } catch (BadRequestException e) {
+                        System.out.println("Error creating subEntity : ");
+                        e.printStackTrace();
+                    }
                 }
             }
+            organizationEntity.getContract().setContractStatus(ContractStatus.VALIDATED);
+            this.organizationEntityRepository.save(organizationEntity);
+//            accountValidationService.validateManagerAccount(manager, pass);
+            return "Contract validated successfully";
+        } catch (Exception e) {
+            throw new Exception("Failed to validate organization entity. ");
         }
-        organizationEntity.getContract().setContractStatus(ContractStatus.VALIDATED);
-        this.organizationEntityRepository.save(organizationEntity);
-        accountValidationService.validateManagerAccount(manager, pass);
-        return "Contract validated successfully";
     }
 
     @Transactional

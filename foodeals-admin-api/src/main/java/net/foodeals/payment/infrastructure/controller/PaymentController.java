@@ -31,9 +31,14 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping(value = "/process", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> processPayment(@RequestPart("dto") PaymentRequest paymentRequest, @RequestPart(value = "document", required = false) MultipartFile document, @RequestParam(value = "type", required = true) PaymentType type) throws BadRequestException {
-        PaymentResponse result = paymentService.processPayment(paymentRequest,document, type);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<?> processPayment(@RequestPart("dto") PaymentRequest paymentRequest, @RequestPart(value = "document", required = false) MultipartFile document, @RequestParam(value = "type", required = true) PaymentType type) throws Exception {
+        try {
+            PaymentResponse result = paymentService.processPayment(paymentRequest, document, type);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception("failed to process payment:");
+        }
     }
 
     @GetMapping("/commissions/{year}/{month}")
@@ -127,7 +132,12 @@ public class PaymentController {
 
     @PostMapping(value = "/receive")
     public ResponseEntity<PaymentResponse> receive(@RequestBody ReceiveDto receiveDto, @RequestParam(value = "type", required = true) PaymentType type) throws BadRequestException {
-        return new ResponseEntity<PaymentResponse>(this.paymentService.receive(receiveDto, type), HttpStatus.OK);
+        try {
+            PaymentResponse response = this.paymentService.receive(receiveDto, type);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            throw new BadRequestException("failed to process payment");
+        }
     }
 
     @GetMapping("/subscriptions/{year}")

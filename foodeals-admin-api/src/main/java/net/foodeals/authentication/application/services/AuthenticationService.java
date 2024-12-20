@@ -9,7 +9,7 @@ import net.foodeals.authentication.application.dtos.responses.LoginResponse;
  * AuthenticationService
  */
 public interface AuthenticationService {
-    AuthenticationResponse register(RegisterRequest request);
+    AuthenticationResponse register(RegisterRequest request) throws Exception;
 
     LoginResponse login(LoginRequest request);
 

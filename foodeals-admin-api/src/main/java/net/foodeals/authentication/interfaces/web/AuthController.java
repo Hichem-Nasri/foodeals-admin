@@ -23,11 +23,14 @@ public class AuthController {
     private final JwtService jwtService;
 
     @PostMapping("register")
-    @Transactional
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody @Valid RegisterRequest request, HttpServletResponse response) {
-        AuthenticationResponse authResponse = service.register(request);
-        addTokenCookie(response, authResponse.accessToken());
-        return ResponseEntity.ok(authResponse);
+    public ResponseEntity<?> register(@RequestBody @Valid RegisterRequest request, HttpServletResponse response) throws Exception {
+        try {
+            AuthenticationResponse authResponse = service.register(request);
+            addTokenCookie(response, authResponse.accessToken());
+            return ResponseEntity.ok(authResponse);
+        } catch (Exception e) {
+            throw new Exception(e.getMessage());
+        }
     }
 
     @PostMapping("login")
