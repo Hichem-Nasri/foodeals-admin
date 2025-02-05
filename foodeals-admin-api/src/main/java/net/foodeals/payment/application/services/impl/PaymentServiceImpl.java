@@ -423,8 +423,8 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public PaymentFormData getFormData(UUID id, PaymentType type) {
         return switch (type) {
-            case PaymentType.COMMISSION -> this.getCommissionFormData(id);
-            case PaymentType.SUBSCRIPTION -> this.getSubscriptionFormData(id);
+            case COMMISSION -> this.getCommissionFormData(id);
+            case SUBSCRIPTION -> this.getSubscriptionFormData(id);
             default -> null;
         };
     }
@@ -460,8 +460,8 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public MonthlyOperationsDto monthlyOperations(UUID id, int year, int month, Pageable page, PartnerType type) {
         return switch (type) {
-            case PartnerType.PARTNER_SB, PartnerType.NORMAL_PARTNER, PartnerType.SUB_ENTITY -> partner(id, year, month, page);
-            case PartnerType.DELIVERY_PARTNER -> deliveryPartner(id, year, month, page);
+            case PARTNER_SB, NORMAL_PARTNER, SUB_ENTITY -> partner(id, year, month, page);
+            case DELIVERY_PARTNER -> deliveryPartner(id, year, month, page);
             default -> null;
         };
     }
@@ -1052,7 +1052,7 @@ public class PaymentServiceImpl implements PaymentService {
             totalAmount = Price.ZERO(Currency.getInstance("MAD"));
         } else {
             totalAmount = filteredSubscriptions.stream()
-                    .map(s -> s.getDeadlines().getFirst().getAmount())
+                    .map(s -> s.getDeadlines().get(0).getAmount())
                     .reduce(Price.ZERO(Currency.getInstance("MAD")), Price::add);
         }
 

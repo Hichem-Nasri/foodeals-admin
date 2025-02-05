@@ -115,8 +115,8 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     @Override
     public DonationReceiverType getReceiverType() {
         return switch (this.type) {
-            case EntityType.ASSOCIATION -> DonationReceiverType.ASSOCIATION;
-            case EntityType.FOOD_BANK -> DonationReceiverType.FOOD_BANK;
+            case ASSOCIATION -> DonationReceiverType.ASSOCIATION;
+            case FOOD_BANK -> DonationReceiverType.FOOD_BANK;
             default -> null;
         };
     }
@@ -124,18 +124,18 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     @Override
     public DonorType getDonorType() {
         return switch (this.type) {
-            case EntityType.PARTNER_WITH_SB -> DonorType.PARTNER_WITH_SB;
-            case EntityType.NORMAL_PARTNER -> DonorType.NORMAL_PARTNER;
-            case EntityType.FOOD_BANK -> DonorType.FOOD_BANK;
+            case PARTNER_WITH_SB -> DonorType.PARTNER_WITH_SB;
+            case NORMAL_PARTNER -> DonorType.NORMAL_PARTNER;
+            case FOOD_BANK -> DonorType.FOOD_BANK;
             default -> null;
         };
     }
 
     public PartnerType getPartnerType() {
         return switch (type) {
-            case EntityType.PARTNER_WITH_SB -> PartnerType.PARTNER_SB;
-            case EntityType.NORMAL_PARTNER -> PartnerType.NORMAL_PARTNER;
-            case EntityType.DELIVERY_PARTNER -> PartnerType.DELIVERY_PARTNER;
+            case PARTNER_WITH_SB -> PartnerType.PARTNER_SB;
+            case NORMAL_PARTNER -> PartnerType.NORMAL_PARTNER;
+            case DELIVERY_PARTNER -> PartnerType.DELIVERY_PARTNER;
             default -> null;
         };
     }
@@ -143,9 +143,9 @@ public class OrganizationEntity extends AbstractEntity<UUID> implements DonorInf
     @Override
     public PublisherType getPublisherType() {
         return switch (this.type) {
-            case EntityType.PARTNER_WITH_SB -> PublisherType.PARTNER_WITH_SB;
-            case EntityType.NORMAL_PARTNER -> PublisherType.NORMAL_PARTNER;
-            case EntityType.FOOD_BANK -> PublisherType.FOOD_BANK;
+            case PARTNER_WITH_SB -> PublisherType.PARTNER_WITH_SB;
+            case NORMAL_PARTNER -> PublisherType.NORMAL_PARTNER;
+            case FOOD_BANK -> PublisherType.FOOD_BANK;
             default -> null;
         };
     }

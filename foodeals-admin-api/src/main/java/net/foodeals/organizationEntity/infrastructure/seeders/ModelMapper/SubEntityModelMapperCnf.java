@@ -1,32 +1,27 @@
-package net.foodeals.subEntitie.infrastructure.seeders.ModelMapper;
-
-import jakarta.annotation.PostConstruct;
-import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import net.foodeals.contract.domain.entities.enums.ContractStatus;
-import net.foodeals.offer.application.services.DonationService;
-import net.foodeals.offer.application.services.OfferService;
-import net.foodeals.offer.domain.entities.Donation;
-import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
-import net.foodeals.organizationEntity.application.dtos.responses.AssociationsSubEntitiesDto;
-import net.foodeals.organizationEntity.application.dtos.responses.OrganizationEntityDto;
-import net.foodeals.organizationEntity.application.dtos.responses.PartnerSubEntityDto;
-import net.foodeals.organizationEntity.application.dtos.responses.ResponsibleInfoDto;
-import net.foodeals.organizationEntity.domain.entities.Contact;
-import net.foodeals.organizationEntity.domain.entities.OrganizationEntity;
-import net.foodeals.organizationEntity.domain.entities.SubEntity;
-import net.foodeals.organizationEntity.domain.entities.enums.EntityType;
-import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
-import net.foodeals.payment.application.dto.response.PartnerInfoDto;
-import net.foodeals.user.domain.entities.User;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.PropertyMap;
-import org.springframework.context.annotation.Configuration;
+package net.foodeals.organizationEntity.infrastructure.seeders.ModelMapper;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Configuration;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import net.foodeals.offer.application.services.DonationService;
+import net.foodeals.offer.application.services.OfferService;
+import net.foodeals.organizationEntity.application.dtos.requests.ContactDto;
+import net.foodeals.organizationEntity.application.dtos.responses.AssociationsSubEntitiesDto;
+import net.foodeals.organizationEntity.application.dtos.responses.PartnerSubEntityDto;
+import net.foodeals.organizationEntity.application.dtos.responses.ResponsibleInfoDto;
+import net.foodeals.organizationEntity.domain.entities.Contact;
+import net.foodeals.organizationEntity.domain.entities.SubEntity;
+import net.foodeals.organizationEntity.domain.entities.enums.SubEntityType;
+import net.foodeals.payment.application.dto.response.PartnerInfoDto;
+import net.foodeals.user.domain.entities.User;
 
 @Configuration
 @AllArgsConstructor
@@ -57,7 +52,7 @@ public class SubEntityModelMapperCnf {
                 responsibleInfoDto.setPhone(user.getPhone());
                 responsibleInfoDto.setEmail(user.getEmail());
             } else {
-                Contact user = subEntitie.getContacts().getFirst();
+                Contact user = subEntitie.getContacts().get(0);
                 responsibleInfoDto.setName(user.getName());
                 responsibleInfoDto.setAvatarPath("");
                 responsibleInfoDto.setPhone(user.getPhone());

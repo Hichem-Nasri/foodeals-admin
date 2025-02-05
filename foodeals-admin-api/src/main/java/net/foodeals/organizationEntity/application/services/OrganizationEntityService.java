@@ -158,11 +158,11 @@ public class OrganizationEntityService {
             organizationEntity.setContacts(contacts);
             organizationEntity = this.organizationEntityRepository.save(organizationEntity);
             switch (organizationEntity.getType()) {
-                case EntityType.PARTNER_WITH_SB:
-                case EntityType.NORMAL_PARTNER:
+                case PARTNER_WITH_SB:
+                case NORMAL_PARTNER:
                     organizationEntity = savePartner(createAnOrganizationEntityDto, organizationEntity);
                     break;
-                case EntityType.DELIVERY_PARTNER:
+                case DELIVERY_PARTNER:
                     organizationEntity = saveDeliveryPartner(createAnOrganizationEntityDto, organizationEntity);
                     break;
                 default:
@@ -240,7 +240,7 @@ public class OrganizationEntityService {
 
             Contract contract = organizationEntity.getContract();
 
-            Contact contact = organizationEntity.getContacts().getFirst();
+            Contact contact = organizationEntity.getContacts().get(0);
             contact = this.contactsService.update(contact, updateOrganizationEntityDto.getContactDto());
 
             organizationEntity.setName(updateOrganizationEntityDto.getEntityName());
@@ -288,11 +288,11 @@ public class OrganizationEntityService {
                 this.activityService.save(activity);
             });
             switch (organizationEntity.getType()) {
-                case EntityType.PARTNER_WITH_SB:
-                case EntityType.NORMAL_PARTNER:
+                case PARTNER_WITH_SB:
+                case NORMAL_PARTNER:
                     organizationEntity = updatePartner(updateOrganizationEntityDto, organizationEntity);
                     break;
-                case EntityType.DELIVERY_PARTNER:
+                case DELIVERY_PARTNER:
                     organizationEntity = updateDeliveryPartner(updateOrganizationEntityDto, organizationEntity);
                     break;
                 default:
@@ -426,7 +426,7 @@ public class OrganizationEntityService {
             if (organizationEntity == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Organization Entity not found");
             }
-            Contact managerContact = organizationEntity.getContacts().getFirst();
+            Contact managerContact = organizationEntity.getContacts().get(0);
 
             Role role = this.roleService.findByName("MANAGER");
             String pass = RandomStringUtils.random(12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
@@ -819,7 +819,7 @@ public class OrganizationEntityService {
                 this.solutionService.save(solution);
             });
 
-            Contact contact = organizationEntity.getContacts().getFirst();
+            Contact contact = organizationEntity.getContacts().get(0);
             this.contactsService.update(contact, updateAssociationDto.getResponsible());
 
             organizationEntity.setName(updateAssociationDto.getCompanyName());

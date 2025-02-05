@@ -1,4 +1,4 @@
-package net.foodeals.location.application.services.impl;
+package net.foodeals.location.infrastructure.interfaces.web;
 
 import jakarta.validation.Valid;
 import net.foodeals.location.application.dtos.requests.StateRequest;

@@ -274,7 +274,7 @@ public class ContractService {
         placeholders.put("[raison sociale du partenaire]", contract.getOrganizationEntity().getName());
         placeholders.put("[Adresse du partenaire]", contract.getOrganizationEntity().getAddress().getAddress());
         placeholders.put("[numéro du registre de commerce]", contract.getOrganizationEntity().getCommercialNumber());
-        placeholders.put("[nom du gérant/responsable]", contract.getOrganizationEntity().getContacts().getFirst().getName().firstName() + " " + contract.getOrganizationEntity().getContacts().getFirst().getName().lastName());
+        placeholders.put("[nom du gérant/responsable]", contract.getOrganizationEntity().getContacts().get(0).getName().firstName() + " " + contract.getOrganizationEntity().getContacts().get(0).getName().lastName());
         placeholders.put("[type]", activities);
         placeholders.put("[type du partenaire (Vendeur Pro / Acheteur pro)]", features);
         placeholders.put("[nombre de magasins]", contract.getMaxNumberOfSubEntities().toString() + " magasin(s)");
@@ -309,7 +309,7 @@ public class ContractService {
         placeholders.put("[Banque]", contract.getOrganizationEntity().getBankInformation().getBankName());
         placeholders.put("[RIB]", contract.getOrganizationEntity().getBankInformation().getRib());
         placeholders.put("[date]", formattedDate);
-        placeholders.put("[nom du signataire]", contract.getOrganizationEntity().getContacts().getFirst().getName().firstName() + " " + contract.getOrganizationEntity().getContacts().getFirst().getName().lastName());
+        placeholders.put("[nom du signataire]", contract.getOrganizationEntity().getContacts().get(0).getName().firstName() + " " + contract.getOrganizationEntity().getContacts().get(0).getName().lastName());
         placeholders.put("[status]", "Manager");
 
         for (Map.Entry<String, String> entry : placeholders.entrySet()) {
@@ -450,8 +450,8 @@ public class ContractService {
                                 .replace("{{nom_gerant_responsable}}", dto.getContactDto().getName().firstName() + " " + dto.getContactDto().getName().lastName())
                                 .replace("{{raison_sociale_partenaire}}", dto.getEntityName())
                                 .replace("{{solution}}", String.join(" / ", dto.getSolutions()))
-                                .replace("{{cout_livraison}}", dto.getDeliveryPartnerContract().getFirst().amount() + " MAD")
-                                .replace("{{montant_commission}}", dto.getDeliveryPartnerContract().getFirst().commission() + " MAD")
+                                .replace("{{cout_livraison}}", dto.getDeliveryPartnerContract().get(0).amount() + " MAD")
+                                .replace("{{montant_commission}}", dto.getDeliveryPartnerContract().get(0).commission() + " MAD")
                                 .replace("{{nom_beneficiaire}}", dto.getEntityBankInformationDto().getBeneficiaryName())
                                 .replace("{{nom_banque}}", dto.getEntityBankInformationDto().getBankName())
                                 .replace("{{numero_compte}}", dto.getEntityBankInformationDto().getRib())
@@ -491,8 +491,8 @@ public class ContractService {
                 .replace("{{nom_gerant_responsable}}", dto.getContactDto().getName().firstName() + " " + dto.getContactDto().getName().lastName())
                 .replace("{{raison_sociale_partenaire}}", dto.getEntityName())
                 .replace("{{solution}}", String.join(" / ", dto.getSolutions()))
-                .replace("{{cout_livraison}}", dto.getDeliveryPartnerContract().getFirst().amount() + " MAD")
-                .replace("{{montant_commission}}", dto.getDeliveryPartnerContract().getFirst().commission() + " MAD")
+                .replace("{{cout_livraison}}", dto.getDeliveryPartnerContract().get(0).amount() + " MAD")
+                .replace("{{montant_commission}}", dto.getDeliveryPartnerContract().get(0).commission() + " MAD")
                 .replace("{{nom_beneficiaire}}", dto.getEntityBankInformationDto().getBeneficiaryName())
                 .replace("{{nom_banque}}", dto.getEntityBankInformationDto().getBankName())
                 .replace("{{numero_compte}}", dto.getEntityBankInformationDto().getRib())

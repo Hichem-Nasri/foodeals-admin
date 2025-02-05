@@ -98,7 +98,7 @@ public class User extends AbstractEntity<Integer> implements UserDetails {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserContract> userContracts;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private UserStatus status;
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)

@@ -56,7 +56,7 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     @Embedded
     private Coordinates coordinates;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, optional = true, cascade = CascadeType.ALL)
     private OrganizationEntity organizationEntity;
 
     @Builder.Default
@@ -112,8 +112,8 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     @Override
     public PublisherType getPublisherType() {
         return switch (this.type) {
-            case SubEntityType.PARTNER_SB -> PublisherType.PARTNER_SB;
-            case SubEntityType.FOOD_BANK_SB -> PublisherType.FOOD_BANK_SB;
+            case PARTNER_SB -> PublisherType.PARTNER_SB;
+            case FOOD_BANK_SB -> PublisherType.FOOD_BANK_SB;
             default -> null;
         };    }
 
@@ -131,8 +131,8 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     @Override
     public DonationReceiverType getReceiverType() {
         return switch (this.type) {
-            case SubEntityType.FOOD_BANK_ASSOCIATION -> DonationReceiverType.FOOD_BANK_ASSOCIATION;
-            case SubEntityType.FOOD_BANK_SB -> DonationReceiverType.FOOD_BANK_SB;
+            case FOOD_BANK_ASSOCIATION -> DonationReceiverType.FOOD_BANK_ASSOCIATION;
+            case FOOD_BANK_SB -> DonationReceiverType.FOOD_BANK_SB;
             default -> null;
         };
     }
@@ -140,8 +140,8 @@ public class SubEntity extends AbstractEntity<UUID> implements DonorInfo, Receiv
     @Override
     public DonorType getDonorType() {
         return switch (this.type) {
-            case SubEntityType.PARTNER_SB -> DonorType.PARTNER_SB;
-            case SubEntityType.FOOD_BANK_SB -> DonorType.FOOD_BANK_SB;
+            case PARTNER_SB -> DonorType.PARTNER_SB;
+            case FOOD_BANK_SB -> DonorType.FOOD_BANK_SB;
             default -> null;
         };
     }

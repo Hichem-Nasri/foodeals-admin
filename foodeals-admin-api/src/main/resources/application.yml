@@ -16,14 +16,14 @@ spring:
   application:
     name: Foodeals
   datasource:
-    url: jdbc:postgresql://localhost:5432/foodeals
+    url: jdbc:postgresql:foodeals.postgres.database.azure.com:5432/foodeals
     username: postgres
-    password: admin
+    password: P@ssw0rd!Jk7#vQxL
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       dialect: org.hibernate.dialect.PostgreSQLDialect
-      ddl-auto: update
+      ddl-auto: create
     show-sql: false
 
 app:

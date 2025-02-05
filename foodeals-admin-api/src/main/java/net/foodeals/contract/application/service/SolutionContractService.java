@@ -137,7 +137,7 @@ public class SolutionContractService {
         Subscription globalSubscription;
         OrganizationEntity organizationEntity = contract.getOrganizationEntity();
         if (oneSubscription) {
-            globalSubscription = this.subscriptionService.createSubscription(solutionsContractsDto.getFirst().getContractSubscriptionDto());
+            globalSubscription = this.subscriptionService.createSubscription(solutionsContractsDto.get(0).getContractSubscriptionDto());
             organizationEntity.getSubscriptions().add(globalSubscription);
         } else {
             globalSubscription = null;

@@ -30,7 +30,7 @@ public class Delivery extends AbstractEntity<UUID> {
 
     private Integer rating;
 
-    @Enumerated
+    @Enumerated(EnumType.STRING)
     private DeliveryStatus status;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)

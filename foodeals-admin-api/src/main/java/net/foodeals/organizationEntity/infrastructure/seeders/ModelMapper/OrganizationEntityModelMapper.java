@@ -242,7 +242,7 @@ public class OrganizationEntityModelMapper {
                     responsibleInfoDto.setPhone(user.getPhone());
                     responsibleInfoDto.setEmail(user.getEmail());
             } else {
-                Contact user = organizationEntity.getContacts().getFirst();
+                Contact user = organizationEntity.getContacts().get(0);
                 responsibleInfoDto.setName(user.getName());
                 responsibleInfoDto.setAvatarPath("");
                 responsibleInfoDto.setPhone(user.getPhone());
