@@ -22,11 +22,11 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean install
-        working-directory: foodeals-admin-api
+        working-directory: /foodeals-admin-api
 
       - name: Run unit tests
         run: mvn test
-        working-directory: foodeals-admin-api
+        working-directory: /foodeals-admin-api
 
       - name: Run integration tests
         run: mvn verify
