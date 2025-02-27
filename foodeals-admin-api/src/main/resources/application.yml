@@ -2,8 +2,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: "aabou.zakaria909@gmail.com"
-    password: "cyyv vfqb cpru jxmw"
+    username: "akashi6von@gmail.com"
+    password: "lfez ujav jdgd wssc"
     properties:
       mail:
         transport:
@@ -16,9 +16,9 @@ spring:
   application:
     name: Foodeals
   datasource:
-    url: jdbc:postgresql:foodeals.postgres.database.azure.com:5432/foodeals
+    url: jdbc:postgresql://postgres_container:5432/foodeals
     username: postgres
-    password: P@ssw0rd!Jk7#vQxL
+    password: admin
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
