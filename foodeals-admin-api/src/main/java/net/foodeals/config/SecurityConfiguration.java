@@ -34,7 +34,7 @@ import java.util.Locale;
 public class SecurityConfiguration {
 
     private static final String[] WHITE_LIST = {
-            "/api/v1/auth/**",
+            "/api/v1/**",
     };
     private final JwtService jwtService;
     private final UserService userService;
@@ -62,13 +62,15 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
+                "http://147.93.55.75:8080",
+                "http://147.93.55.75:3000",
                 "http://localhost:8000",
                 "https://www.elitecodersacademy.com",
                 "http://www.elitecodersacademy.com",
                 "http://elitecodersacademy.com",
                 "https://elitecodersacademy.com",
                 "http://localhost:4200",
-                "185.97.144.194"));
+                "147.93.55.75"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("*"));
